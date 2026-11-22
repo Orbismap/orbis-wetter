@@ -11,6 +11,7 @@ export function App() {
       <div class="app">
         <div class="app-logo" aria-label="Orbis Wetter">
           <OrbisMark size={22} />
+          <span>Wetter</span>
         </div>
         <Hero place={sample.place} current={sample.current} />
         <Dashboard />
