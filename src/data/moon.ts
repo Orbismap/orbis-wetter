@@ -16,7 +16,7 @@ export interface MoonInfo {
   newMoon: string;
   /** Whichever of the two comes first. */
   next: { name: 'Vollmond' | 'Neumond'; when: string };
-  /** Index of public/moon/moonPhase<N>.webp (0 = new, 14 = full). */
+  /** Index of public/moon/moonPhase<N>.png (0 = new, 14 = full). */
   image: number;
 }
 
@@ -63,4 +63,4 @@ export function moonInfo(at: number = Date.now()): MoonInfo {
 
 /** Public asset path; Vite's base keeps it correct under /wetter/. */
 export const moonImageUrl = (index: number): string =>
-  `${import.meta.env.BASE_URL}moon/moonPhase${Math.max(0, Math.min(27, index))}.webp`;
+  `${import.meta.env.BASE_URL}moon/moonPhase${Math.max(0, Math.min(27, index))}.png`;
