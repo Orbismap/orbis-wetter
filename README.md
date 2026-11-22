@@ -45,11 +45,15 @@ in Zellkoordinaten; die
 Pixelposition wird daraus berechnet. Der `LayoutStore` validiert jede Änderung gegen Rastergrenzen und
 Kollisionen.
 
-**Anordnen:** Der Button an der oberen rechten Ecke des Grids aktiviert den Bearbeitungsmodus. Widgets lassen sich
-per Pointer/Ziehen in Rasterzellen verschieben; das Ziel snapt auf die nächste Zelle. Die Anordnung wird in
-`localStorage` gespeichert (`orbis.wetter.layout.v1`). Skalieren der Widgets kommt später – die `resize`-Aktion im
-Store ist schon vorbereitet. Navbar, Preset-Umschalter und Zurücksetzen gibt es nicht mehr; oben links bleibt nur
-das Logo.
+**Kopfzeile:** Oben links stehen das Wortmarken-Logo (Icon + „Wetter") und das Suchfeld. Die Suche ist bewusst nur
+UI: `features/search/cities.ts` enthält eine feste Städteliste, `CitySearch.tsx` liefert Vorschläge (auch
+umlautunabhängig, z. B. „munchen" → München) mit Tastatursteuerung. Die Auswahl tauscht nur die Ortsinformation im
+`WeatherProvider` – alle Wetterwerte bleiben Beispieldaten, es gibt keinen Geocoding-Aufruf.
+
+**Anordnen:** Der Button an der oberen rechten Ecke des Grids aktiviert den Bearbeitungsmodus, daneben steht
+„Zurücksetzen". Widgets lassen sich per Pointer/Ziehen in Rasterzellen verschieben; das Ziel snapt auf die nächste
+Zelle. Die Anordnung wird in `localStorage` gespeichert (`orbis.wetter.layout.v1`). Skalieren der Widgets kommt
+später – die `resize`-Aktion im Store ist schon vorbereitet. Eine Navbar und einen Preset-Umschalter gibt es nicht.
 
 Das Ziehen ist flüssig animiert: Während der Bewegung schreibt `useDrag.ts` den `translate3d` direkt ins DOM (kein
 Re-Render pro Pointermove). Sobald die Zielzelle erreicht ist, wird **live getauscht** – das andere Widget weicht

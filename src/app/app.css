@@ -3,15 +3,22 @@
   padding-top: var(--s-4);
 }
 
-.app-logo {
+.app-topbar {
   position: fixed;
-  z-index: 30;
+  z-index: 40;
   top: 16px;
   left: 16px;
+  display: flex;
+  align-items: center;
+  gap: var(--s-5);
+}
+
+.app-logo {
   display: flex;
   align-items: center;
   gap: var(--s-2);
   color: var(--text-1);
   font-size: var(--fs-title);
   font-weight: 600;
+  white-space: nowrap;
 }
