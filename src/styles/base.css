@@ -232,6 +232,10 @@ body {
 /* Moon: the image is oversized and absolutely centred behind the text;
    its transparent edges extend beyond the card and are clipped. */
 .widget-frame:has(> .detail.moon) { padding: var(--s-3); }
+.widget-frame:has(> .windmap) { padding: var(--s-3); }
+.widget-frame:has(> .windmap) .windmap { padding: 0; }
+.widget-frame:has(> .windmap) .windmap .card-title { padding: 0; }
+.widget-frame:has(> .windmap) .wx-map { margin: -6px; width: calc(100% + 12px); height: calc(100% + 6px); }
 .detail.moon { position: relative; display: flex; flex-direction: column; align-items: stretch; }
 .detail.moon .card-title { position: relative; z-index: 2; margin-bottom: var(--s-3); }
 .detail.moon .moon-image {
@@ -377,7 +381,7 @@ body {
   flex: 1;
   min-height: 0;
   overflow: hidden;
-  border-radius: 14px;
+  border-radius: 20px;
   background: #1c2739;
   view-transition-name: wx-map;
 }
