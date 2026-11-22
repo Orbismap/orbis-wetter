@@ -1,12 +1,12 @@
 import { useEffect, useRef, useState } from 'preact/hooks';
-import type { JSX } from 'preact';
+import type { JSX, Ref } from 'preact';
 import { searchPlaces, type Place } from '../../data/geocoding';
 import { loadFavorites } from '../../data/favorites';
 import './search.css';
 
 /** Real place search (Open-Meteo Geocoding) with debounce, keyboard control and abortable requests.
  *  `inlineFavorites` hides them from the dropdown when the surrounding list shows them already. */
-export function CitySearch({ onSelect, inlineFavorites = false, shortcut = false }: { onSelect: (place: Place) => void; inlineFavorites?: boolean; shortcut?: boolean }) {
+export function CitySearch({ onSelect, inlineFavorites = false, shortcut = false, inputRef }: { onSelect: (place: Place) => void; inlineFavorites?: boolean; shortcut?: boolean; inputRef?: Ref<HTMLInputElement> }) {
   const [query, setQuery] = useState('');
   const [results, setResults] = useState<Place[]>([]);
   const [open, setOpen] = useState(false);
@@ -15,21 +15,6 @@ export function CitySearch({ onSelect, inlineFavorites = false, shortcut = false
   const [error, setError] = useState(false);
   const [favorites, setFavorites] = useState<Place[]>(() => loadFavorites());
   const root = useRef<HTMLDivElement>(null);
-  const input = useRef<HTMLInputElement>(null);
-
-  // Use the browser's find shortcut for place search instead.
-  useEffect(() => {
-    const onKeyDown = (event: KeyboardEvent) => {
-      if ((event.metaKey || event.ctrlKey) && event.key.toLowerCase() === 'f') {
-        event.preventDefault();
-        input.current?.focus();
-        input.current?.select();
-        setOpen(true);
-      }
-    };
-    document.addEventListener('keydown', onKeyDown);
-    return () => document.removeEventListener('keydown', onKeyDown);
-  }, []);
 
   useEffect(() => {
     const name = query.trim();
@@ -116,7 +101,7 @@ export function CitySearch({ onSelect, inlineFavorites = false, shortcut = false
           <line x1="12.5" y1="12.5" x2="17" y2="17" stroke="currentColor" stroke-width="1.6" stroke-linecap="round" />
         </svg>
         <input
-          ref={input}
+          ref={inputRef}
           class="city-search-input"
           type="text"
           role="combobox"
