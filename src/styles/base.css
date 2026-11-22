@@ -176,12 +176,12 @@ body {
   grid-template-columns: 46px 44px 30px minmax(40px, 1fr) 30px;
   align-items: center;
   gap: var(--s-2);
-  padding: var(--s-2) 0;
+  padding: var(--s-1) 0;
   border-bottom: 1px solid rgba(255, 255, 255, 0.13);
   font-size: var(--fs-small);
 }
 .day:last-child { border-bottom: 0; }
-.day-name { font-weight: 600; }
+.day-name { font-size: 0.8125rem; font-weight: 600; }
 .day-icon-wrap { display: flex; flex-direction: column; align-items: center; gap: 0; }
 .day-chance { color: var(--cold); text-align: center; font-size: 0.625rem; line-height: 1.1; }
 .day-chance.wet { color: #8fd0ff; }
