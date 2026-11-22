@@ -8,8 +8,8 @@ export interface Hour {
   code: number;
   temp: number;
   isDay: boolean;
-  /** e.g. "Sonnenuntergang" replaces the temperature in a highlighted column */
-  special?: string;
+  /** Extra timeline entry between two hours (not a replacement for an hourly column). */
+  event?: 'sunrise' | 'sunset';
 }
 
 export interface Day {

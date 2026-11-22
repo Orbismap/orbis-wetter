@@ -4,7 +4,7 @@ import type { WeatherNow } from '../features/forecast/model';
 import { describe } from '../features/wmo/weather';
 import { loadIconSeries } from './icon';
 import { loadOpenMeteoSeries, loadSupplements } from './openMeteo';
-import type { DailyInfo, PointSeries, SourceInfo, WeatherSupplements } from './types';
+import type { DailyInfo, PointSeries, SourceInfo, SunInfo, WeatherSupplements } from './types';
 
 export interface WeatherLocation {
   name: string;
@@ -64,6 +64,34 @@ function airOf(aqi: number | undefined): WeatherNow['current']['air'] {
 const weekday = new Intl.DateTimeFormat('de-DE', { weekday: 'short', timeZone: 'UTC' });
 const localHour = (ms: number, offset: number): number => new Date(ms + offset * 1000).getUTCHours();
 
+interface SunMoment { kind: 'sunrise' | 'sunset'; time: number; clock: string }
+
+const minutesOf = (clock: string): number | undefined => {
+  const match = /^(\d{1,2}):(\d{2})$/.exec(clock);
+  if (!match) return undefined;
+  const hours = Number(match[1]);
+  const minutes = Number(match[2]);
+  return hours <= 23 && minutes <= 59 ? hours * 60 + minutes : undefined;
+};
+
+/** Sunrise/sunset moments inside the timeline window, derived from the local-noon dates of the daily block. */
+function sunMoments(sun: SunInfo[] | undefined, daily: DailyInfo[], from: number, to: number): SunMoment[] {
+  const moments: SunMoment[] = [];
+  (sun ?? []).forEach((entry, day) => {
+    const date = daily[day]?.date;
+    if (date === undefined) return;
+    const localMidnight = date - 12 * 3_600_000;
+    for (const kind of ['sunrise', 'sunset'] as const) {
+      const clock = entry[kind];
+      const minutes = minutesOf(clock);
+      if (minutes === undefined) continue;
+      const time = localMidnight + minutes * 60_000;
+      if (time >= from && time <= to) moments.push({ kind, time, clock });
+    }
+  });
+  return moments.sort((a, b) => a.time - b.time);
+}
+
 /** Build the complete view model from one point series plus whatever supplements are available. */
 export function buildWeather(
   series: PointSeries,
@@ -98,20 +126,36 @@ export function buildWeather(
   const averageHigh = next.length ? round(next.reduce((sum, d) => sum + d.max, 0) / next.length) : sample.current.averages.averageHigh;
 
   const hours = [] as WeatherNow['hourly'];
-  const sunsetHour = sun?.sunset ? Number(sun.sunset.slice(0, 2)) : undefined;
   // A full day ahead – the strip scrolls horizontally, so it no longer needs to be truncated to nine slots.
-  for (let i = index; i < Math.min(size, index + 24); i++) {
-    const local = localHour(series.times[i]!, series.offsetSeconds);
-    const sunset = sunsetHour === local
-      ? sun!.sunset
-      : undefined;
+  const last = Math.min(size, index + 24);
+  const moments = sunMoments(
+    supplements.sun, daily, series.times[index]! - 30 * 60_000, series.times[last - 1]! + 30 * 60_000,
+  );
+  let momentIndex = 0;
+  for (let i = index; i < last; i++) {
+    const time = series.times[i]!;
+    // Sunrise/sunset are additional entries inserted before the next hourly column.
+    while (momentIndex < moments.length && moments[momentIndex]!.time <= time) {
+      const moment = moments[momentIndex++]!;
+      hours.push({
+        label: moment.clock, time: moment.clock, code: 0, temp: 0,
+        isDay: moment.kind === 'sunrise', event: moment.kind,
+      });
+    }
+    const local = localHour(time, series.offsetSeconds);
     hours.push({
       label: i === index ? 'Jetzt' : `${local} Uhr`,
       time: `${String(local).padStart(2, '0')}:00`,
       code: at(series.weatherCode, i) ?? codeOf(at(series.cloud, i) ?? cloud, at(series.precip, i) ?? 0, at(series.temp, i) ?? temp),
       temp: round(at(series.temp, i) ?? temp),
-      isDay: (at(series.isDay, i) ?? (isDaylight(location.lng, location.lat, series.times[i]!) ? 1 : 0)) !== 0,
-      ...(sunset ? { special: 'Sonnenuntergang', time: sunset } : {}),
+      isDay: (at(series.isDay, i) ?? (isDaylight(location.lng, location.lat, time) ? 1 : 0)) !== 0,
+    });
+  }
+  while (momentIndex < moments.length) {
+    const moment = moments[momentIndex++]!;
+    hours.push({
+      label: moment.clock, time: moment.clock, code: 0, temp: 0,
+      isDay: moment.kind === 'sunrise', event: moment.kind,
     });
   }
 

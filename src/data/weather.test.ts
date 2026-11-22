@@ -56,6 +56,22 @@ describe('weather view model', () => {
     expect(weather.daily[0]!.label).toBe('Heute');
   });
 
+  it('adds sunrise and sunset as extra timeline entries with minutes', () => {
+    const now = new Date();
+    const localNoon = Date.UTC(now.getUTCFullYear(), now.getUTCMonth(), now.getUTCDate(), 12) - 3_600_000;
+    const withSun: WeatherSupplements = {
+      daily: Array.from({ length: 2 }, (_, i) => ({ date: localNoon + i * 86_400_000, min: 0, max: 5 })),
+      sun: [
+        { sunrise: '07:55', sunset: '16:06', uv: 1 },
+        { sunrise: '07:56', sunset: '16:05', uv: 1 },
+      ],
+    };
+    const events = buildWeather(series(), withSun, location).hourly.filter((hour) => hour.event);
+    expect(events.length).toBeGreaterThan(0);
+    expect(events.every((hour) => /^\d{2}:\d{2}$/.test(hour.time))).toBe(true);
+    expect(new Set(events.map((hour) => hour.event))).toEqual(new Set(['sunrise', 'sunset']));
+  });
+
   it('falls back to deriving days from the series when Open-Meteo is unavailable', () => {
     const weather = buildWeather(series(), {}, location);
     expect(weather.daily.length).toBeGreaterThan(0);

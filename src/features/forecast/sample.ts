@@ -42,7 +42,7 @@ export const sample: WeatherNow = {
     { label: 'Jetzt', time: '15:00', code: 3, temp: 4, isDay: true },
     { label: '15 Uhr', time: '15:00', code: 3, temp: 4, isDay: true },
     { label: '16 Uhr', time: '16:00', code: 3, temp: 4, isDay: true },
-    { label: '16:06', time: '16:06', code: 0, temp: 4, isDay: true, special: 'Sonnenuntergang' },
+    { label: '16:06', time: '16:06', code: 0, temp: 4, isDay: true, event: 'sunset' },
     { label: '17 Uhr', time: '17:00', code: 3, temp: 4, isDay: false },
     { label: '18 Uhr', time: '18:00', code: 3, temp: 3, isDay: false },
     { label: '19 Uhr', time: '19:00', code: 0, temp: 3, isDay: false },
