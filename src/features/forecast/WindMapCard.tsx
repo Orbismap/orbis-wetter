@@ -151,7 +151,7 @@ export function WindMapCard({
   return (
     <section class="windmap" aria-label={`${MODE_TITLE[mode]}karte`}>
       <div class="card-title">
-        <span class="title-icon">⌁</span> {MODE_TITLE[mode]}
+        <span class="title-text">{MODE_TITLE[mode]}</span>
         <div class="layer-controls">
           {layerNote && <span class="layer-note">{layerNote}</span>}
           <MapLayerPicker mode={mode} onChange={setMode} href={href} />

@@ -6,7 +6,7 @@ export function DailyForecast({ days }: { days: Day[] }) {
   const scale = tempScale(days);
   return (
     <section class="daily" aria-label="10-Tage-Vorhersage">
-      <div class="card-title"><span class="title-icon">▦</span> 10-Tage-Vorhersage</div>
+      <div class="card-title"><span class="title-text">10-Tage-Vorhersage</span></div>
       <ul class="day-list">
         {days.map((d, i) => (
           <li class="day" key={`${d.label}-${i}`}>

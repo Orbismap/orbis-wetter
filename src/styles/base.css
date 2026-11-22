@@ -69,7 +69,6 @@ body {
   text-transform: uppercase;
   color: var(--text-2);
 }
-.title-icon { font-size: 1rem; line-height: 1; opacity: 0.9; letter-spacing: 0; }
 .title-text { min-width: 0; overflow: hidden; text-overflow: ellipsis; white-space: nowrap; overflow-wrap: anywhere; }
 
 /* Detail widgets are buttons filling their widget frame; the frame supplies the glass chrome. */

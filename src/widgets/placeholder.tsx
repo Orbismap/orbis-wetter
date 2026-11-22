@@ -7,7 +7,7 @@ import type { WidgetRenderProps } from './types';
 export function PlaceholderContent({ placement, title, size, editing }: WidgetRenderProps) {
   return (
     <div class="placeholder">
-      <div class="card-title"><span class="title-icon">▦</span>{title}</div>
+      <div class="card-title"><span class="title-text">{title}</span></div>
       <div class="placeholder-title">{title}</div>
       <div class="placeholder-meta">
         <span class="badge">{size.w} × {size.h}</span>
