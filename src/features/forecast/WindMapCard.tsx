@@ -108,6 +108,14 @@ export function WindMapCard({
 
   useEffect(() => {
     markers.current?.hereMarker.setLngLat([here.lng, here.lat]);
+    const map = mapRef.current;
+    if (map) {
+      map.flyTo({
+        center: [here.lng, here.lat],
+        zoom: Math.max(map.getZoom(), 6),
+        duration: 900,
+      });
+    }
     const controller = new AbortController();
     const points = [...CITIES.map(([, lng, lat]) => ({ lat, lng })), here];
     loadCityConditions(points, { signal: controller.signal })
