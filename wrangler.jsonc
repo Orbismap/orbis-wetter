@@ -7,8 +7,9 @@
     "directory": "./dist",
     "not_found_handling": "404-page"
   },
-  // More specific than the maps.maltee.dev custom-domain route of orbis-map, so it wins for /wetter/*.
-  "routes": [{ "pattern": "maps.maltee.dev/wetter/*" }],
+  // Path route (a custom domain can only cover a whole hostname). More specific than the
+  // maps.maltee.dev custom domain of orbis-map, so it wins for /wetter/*.
+  "routes": [{ "pattern": "maps.maltee.dev/wetter/*", "zone_name": "maltee.dev" }],
   "workers_dev": false,
   "preview_urls": false
 }
