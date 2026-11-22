@@ -100,7 +100,7 @@ export function PressureGauge({ value }: { value: number }) {
 /** Sun path on a 0–24 h axis: night on both sides, a smooth arc peaking at noon. */
 export function SunCurve({ sunrise, sunset, clock }: { sunrise: string; sunset: string; clock: number }) {
   const horizon = 38;
-  const amplitude = 13;
+  const amplitude = 17;
   const minutes = (value: string) => {
     const [hours = 0, mins = 0] = value.split(':').map(Number);
     return hours * 60 + mins;
@@ -122,7 +122,7 @@ export function SunCurve({ sunrise, sunset, clock }: { sunrise: string; sunset: 
   return (
     <svg class="sun-curve" viewBox="0 0 160 64" aria-label={`Sonnenaufgang ${sunrise}, Sonnenuntergang ${sunset}`}>
       <defs>
-        <linearGradient id="wx-sun-path" gradientUnits="userSpaceOnUse" x1="0" y1="25" x2="0" y2="51">
+        <linearGradient id="wx-sun-path" gradientUnits="userSpaceOnUse" x1="0" y1="21" x2="0" y2="55">
           <stop offset="0" stop-color="rgba(255,255,255,0.8)" />
           <stop offset="0.49" stop-color="rgba(255,255,255,0.8)" />
           <stop offset="0.51" stop-color="rgba(255,255,255,0.28)" />

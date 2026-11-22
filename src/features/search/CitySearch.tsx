@@ -1,6 +1,7 @@
 import { useEffect, useRef, useState } from 'preact/hooks';
 import type { JSX } from 'preact';
 import { searchPlaces, type Place } from '../../data/geocoding';
+import { loadFavorites } from '../../data/favorites';
 import './search.css';
 
 /** Real place search (Open-Meteo Geocoding) with debounce, keyboard control and abortable requests. */
@@ -11,6 +12,7 @@ export function CitySearch({ onSelect }: { onSelect: (place: Place) => void }) {
   const [active, setActive] = useState(0);
   const [loading, setLoading] = useState(false);
   const [error, setError] = useState(false);
+  const [favorites, setFavorites] = useState<Place[]>(() => loadFavorites());
   const root = useRef<HTMLDivElement>(null);
   const input = useRef<HTMLInputElement>(null);
 
@@ -103,6 +105,7 @@ export function CitySearch({ onSelect }: { onSelect: (place: Place) => void }) {
   };
 
   const showResults = open && query.trim().length >= 2;
+  const showFavorites = open && query.trim().length < 2 && favorites.length > 0;
 
   return (
     <div class="city-search" ref={root}>
@@ -117,12 +120,15 @@ export function CitySearch({ onSelect }: { onSelect: (place: Place) => void }) {
           type="text"
           role="combobox"
           aria-label="Ort suchen"
-          aria-expanded={showResults}
+          aria-expanded={showResults || showFavorites}
           aria-autocomplete="list"
           aria-controls="city-search-results"
           placeholder="Ort suchen…"
           value={query}
-          onFocus={() => setOpen(true)}
+          onFocus={() => {
+            setFavorites(loadFavorites());
+            setOpen(true);
+          }}
           onInput={(event) => {
             setQuery(event.currentTarget.value);
             setActive(0);
@@ -147,12 +153,21 @@ export function CitySearch({ onSelect }: { onSelect: (place: Place) => void }) {
         )}
       </div>
 
-      {showResults && (
+      {(showResults || showFavorites) && (
         <ul class="city-search-results" id="city-search-results" role="listbox">
-          {loading && <li class="city-search-empty">Suche läuft …</li>}
-          {!loading && error && <li class="city-search-empty">Orte konnten nicht geladen werden</li>}
-          {!loading && !error && results.length === 0 && <li class="city-search-empty">Kein Ort gefunden</li>}
-          {!loading && results.map((place, index) => (
+          {showFavorites && <li class="city-search-group" role="presentation">Favoriten</li>}
+          {showFavorites && favorites.map((place) => (
+            <li key={`fav-${place.lat}-${place.lng}`}>
+              <button type="button" role="option" aria-selected={false} onClick={() => choose(place)}>
+                <span class="city-search-name">{place.name}</span>
+                <span class="city-search-region">{place.region}</span>
+              </button>
+            </li>
+          ))}
+          {showResults && loading && <li class="city-search-empty">Suche läuft …</li>}
+          {showResults && !loading && error && <li class="city-search-empty">Orte konnten nicht geladen werden</li>}
+          {showResults && !loading && !error && results.length === 0 && <li class="city-search-empty">Kein Ort gefunden</li>}
+          {showResults && !loading && results.map((place, index) => (
             <li key={`${place.name}-${place.lat}-${place.lng}`}>
               <button
                 type="button"
