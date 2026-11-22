@@ -51,6 +51,15 @@ export function describe(code: number | null | undefined): string {
   return CODES[code ?? -1]?.[0] ?? 'Unbekannt';
 }
 
+/** WMO codes that mean precipitation is falling right now (drizzle, rain, snow, showers, thunder). */
+export function isPrecipitating(code: number | null | undefined): boolean {
+  if (code == null) return false;
+  return (code >= 51 && code <= 67)
+    || (code >= 71 && code <= 77)
+    || (code >= 80 && code <= 86)
+    || code >= 95;
+}
+
 // ---------------------------------------------------------------------------
 // Inline SVG icons (64×64), coloured, day/night aware.
 

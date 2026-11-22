@@ -1,27 +1,29 @@
 import { useWeather } from '../features/forecast/context';
-import { WindMapCard } from '../features/forecast/WindMapCard';
+import { MapCard } from '../features/forecast/MapCard';
 import type { WidgetDefinition } from './types';
 
-function WindMapWidget() {
+function MapWidget() {
   const { place, current } = useWeather();
   return (
-    <WindMapCard
+    <MapCard
       windSpeed={current.windSpeed}
       placeName={place.name}
       lat={place.lat}
       lng={place.lng}
       temp={current.temp}
       precip={Number.parseFloat(current.precipitation) || 0}
+      code={current.code}
     />
   );
 }
 
-export const windMapWidget: WidgetDefinition = {
+export const mapWidget: WidgetDefinition = {
+  // Kept as "windmap" so saved layouts (orbis.wetter.layout.v1) keep resolving.
   id: 'windmap',
-  title: 'Windkarte',
+  title: 'Wetterkarte',
   variants: [
     { name: '2x2', w: 2, h: 2 },
     { name: '3x3', w: 3, h: 3 },
   ],
-  Component: WindMapWidget,
+  Component: MapWidget,
 };

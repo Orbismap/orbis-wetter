@@ -1,5 +1,5 @@
 import { describe, expect, it } from 'vitest';
-import { conditionSymbol, MAP_MODES, markerColor, markerValue } from './mapLayers';
+import { conditionSymbol, MAP_MODES, markerColor, markerValue, suggestedMapMode } from './mapLayers';
 
 const sample = { temp: 4, precip: 0, wind: 14, code: 3 };
 
@@ -28,5 +28,17 @@ describe('map layers', () => {
     expect(conditionSymbol(2)).toBe('☁');
     expect(conditionSymbol(71)).toBe('❄');
     expect(conditionSymbol(95)).toBe('⚡');
+  });
+
+  it('suggests the layer that matches the current conditions', () => {
+    expect(suggestedMapMode(sample)).toBe('precip');
+    expect(suggestedMapMode({ ...sample, code: 61 })).toBe('radar'); // rain
+    expect(suggestedMapMode({ ...sample, code: 71 })).toBe('radar'); // snow
+    expect(suggestedMapMode({ ...sample, code: 3, precip: 4 })).toBe('precip'); // rain earlier today, dry now
+    expect(suggestedMapMode({ ...sample, temp: -3 })).toBe('temp');
+    expect(suggestedMapMode({ ...sample, temp: 34 })).toBe('temp');
+    expect(suggestedMapMode({ ...sample, wind: 48 })).toBe('wind');
+    // Rain takes priority over cold/wind.
+    expect(suggestedMapMode({ temp: -4, precip: 1, wind: 50, code: 63 })).toBe('radar');
   });
 });

@@ -1,0 +1,96 @@
+/* Scrollable content of the left HUD. Values mirror orbis-karten's .hudm-search/.hud-sect/.hud-row. */
+.place-list {
+  display: flex;
+  flex-direction: column;
+  flex: 1;
+  min-height: 0;
+}
+
+.place-list .city-search { width: auto; margin: 6px 12px 8px; }
+
+.place-list .city-search-field {
+  height: 32px;
+  padding: 0 10px;
+  border: 0;
+  border-radius: 999px;
+  background: var(--g-fill);
+  -webkit-backdrop-filter: none;
+  backdrop-filter: none;
+  color: var(--text-3);
+  font-size: 14px;
+}
+
+.place-list .city-search-field:hover { background: var(--g-fill-hover); color: var(--text-2); }
+.place-list .city-search-field:focus-within {
+  background: var(--g-fill);
+  color: var(--text-1);
+  box-shadow: 0 0 0 2.5px color-mix(in srgb, var(--limb) 70%, transparent);
+}
+
+.place-list .city-search-input { font-size: 14px; }
+.place-list .city-search-kbd {
+  flex: none;
+  color: var(--text-3);
+  font: inherit;
+  font-size: 11px;
+}
+
+.place-list-scroll {
+  flex: 1;
+  min-height: 0;
+  overflow-y: auto;
+  padding: 0 8px 12px;
+}
+
+.place-list-sect {
+  padding: 14px 10px 4px;
+  margin: 0;
+  color: var(--text-3);
+  font-size: 11px;
+  font-weight: 600;
+  letter-spacing: 0.01em;
+}
+.place-list-sect-first { padding-top: 6px; }
+
+.place-list-rows { list-style: none; padding: 0; margin: 0; }
+
+.place-list-row {
+  display: flex;
+  align-items: center;
+  gap: 10px;
+  width: 100%;
+  padding: 2px 10px;
+  border: 0;
+  border-radius: 8px;
+  background: transparent;
+  color: var(--text-1);
+  font: inherit;
+  font-size: 14px;
+  text-align: left;
+  cursor: pointer;
+}
+
+button.place-list-row:hover { background: var(--g-fill-hover); }
+.place-list-row[aria-current='true'] { background: var(--g-fill-active); }
+
+.place-list-badge {
+  flex: none;
+  width: 28px;
+  height: 26px;
+  display: grid;
+  place-items: center;
+  color: var(--text-1);
+}
+
+.place-list-row-text {
+  flex: 1;
+  min-width: 0;
+  font-weight: 500;
+  overflow: hidden;
+  text-overflow: ellipsis;
+  white-space: nowrap;
+}
+
+.place-list-row-text small { color: var(--text-3); font-weight: 400; font-size: 12px; }
+
+.place-list-empty { margin: 4px 10px; color: var(--text-3); font-size: 12px; line-height: 1.4; }

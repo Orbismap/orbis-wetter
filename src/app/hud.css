@@ -1,0 +1,128 @@
+/* Left HUD, mirrored 1:1 from orbis-karten's src/app/hud.css. Both states stay in the DOM so
+   the main panel slides out while the mini capsule slides down – no fade. */
+.wx-hud {
+  position: fixed;
+  z-index: 40;
+  top: var(--hud-edge);
+  left: var(--hud-edge);
+  bottom: var(--hud-edge);
+  display: flex;
+  gap: var(--hud-gap);
+  pointer-events: none;
+}
+
+.wx-hud > * { pointer-events: auto; }
+
+.wx-hud-main {
+  position: relative;
+  flex: none;
+  width: var(--hud-main-w);
+  display: flex;
+  flex-direction: column;
+  min-height: 0;
+  transition: margin-left 260ms var(--ease), opacity 200ms var(--ease), transform 260ms var(--ease);
+}
+
+/* Only horizontal movement: the panel keeps its height and never comes from above. */
+.wx-hud[data-main='closed'] .wx-hud-main {
+  margin-left: calc(-1 * (var(--hud-main-w) + var(--hud-gap)));
+  opacity: 0;
+  transform: translateX(-12px);
+  pointer-events: none;
+}
+
+.wx-hudm {
+  display: flex;
+  flex-direction: column;
+  flex: 1;
+  min-height: 0;
+  border: 1px solid var(--g-rim);
+  border-radius: var(--r-panel);
+  background: var(--g-panel);
+  -webkit-backdrop-filter: blur(30px) saturate(1.6);
+  backdrop-filter: blur(30px) saturate(1.6);
+  box-shadow: var(--g-shadow);
+  color: var(--text-1);
+}
+
+.wx-hudm-head {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  padding: 12px 12px 6px 14px;
+}
+
+.wx-hudm-head h1 {
+  display: flex;
+  align-items: center;
+  gap: 0;
+  margin: 0;
+  font-size: 17px;
+  font-weight: 700;
+  letter-spacing: -0.01em;
+}
+
+.wx-hudm-head .orbis-mark { flex: none; }
+
+.wx-hud-rbtn {
+  display: grid;
+  place-items: center;
+  flex: none;
+  width: 28px;
+  height: 28px;
+  padding: 0;
+  border: 0;
+  border-radius: 50%;
+  background: var(--g-fill);
+  color: var(--text-2);
+  cursor: pointer;
+}
+
+.wx-hud-rbtn:hover { background: var(--g-fill-hover); color: var(--text-1); }
+
+/* ---- mini capsule ---- */
+.wx-hud-mini {
+  position: absolute;
+  top: calc(-1 * (var(--hud-mini-h) + var(--hud-gap)));
+  left: 0;
+  width: max-content;
+  /* Snap away when the menu opens; only the return slides down. */
+  transition: none;
+  height: var(--hud-mini-h);
+  display: flex;
+  align-items: center;
+  gap: 10px;
+  padding: 0 6px 0 10px;
+  border: 1px solid var(--g-rim);
+  border-radius: 999px;
+  background: var(--g-panel);
+  -webkit-backdrop-filter: blur(30px) saturate(1.6);
+  backdrop-filter: blur(30px) saturate(1.6);
+  box-shadow: var(--g-shadow);
+  animation: wx-hud-in 240ms var(--ease);
+}
+
+.wx-hud-mini h1 {
+  display: flex;
+  align-items: center;
+  gap: 0;
+  margin: 0;
+  font-size: 15px;
+  font-weight: 700;
+  letter-spacing: -0.01em;
+  white-space: nowrap;
+}
+
+.wx-hud-mini .orbis-mark { flex: none; }
+
+@keyframes wx-hud-in { from { opacity: 0; transform: translateX(-10px); } }
+
+/* The capsule slides down when the menu closes – independent of the panel's horizontal slide. */
+.wx-hud[data-main='closed'] .wx-hud-mini {
+  top: 0;
+  transition: top 260ms var(--ease);
+}
+
+/* The fullscreen map hides the open panel; the capsule sits at the top edge above it. */
+body:has(.wx-map--fullscreen) .wx-hud-mini { top: 0; }
+body:has(.wx-map--fullscreen) .wx-hud-main { display: none; }

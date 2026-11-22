@@ -12,13 +12,13 @@ import { sunWidget } from './sun';
 import { uvWidget } from './uv';
 import { visibilityWidget } from './visibility';
 import { warningWidget } from './warning';
-import { windMapWidget } from './windMap';
+import { mapWidget } from './map';
 import { windWidget } from './wind';
 import type { WidgetDefinition } from './types';
 
 const widgets: WidgetDefinition[] = [
   hourlyWidget,
-  windMapWidget,
+  mapWidget,
   dailyWidget,
   airQualityWidget,
   windWidget,

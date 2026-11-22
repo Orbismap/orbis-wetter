@@ -3,6 +3,13 @@ import type { Place } from './geocoding';
 
 const KEY = 'orbis-wetter:favorites';
 
+/** Listeners are notified after a write so the search field and the favorites list stay in sync. */
+const listeners = new Set<() => void>();
+export function subscribeFavorites(listener: () => void): () => void {
+  listeners.add(listener);
+  return () => { listeners.delete(listener); };
+}
+
 export function loadFavorites(): Place[] {
   try {
     const raw = localStorage.getItem(KEY);
@@ -24,6 +31,7 @@ export function saveFavorites(places: Place[]): void {
   } catch {
     // Private mode / blocked storage: favourites stay in memory for this session.
   }
+  listeners.forEach((listener) => listener());
 }
 
 const samePlace = (a: Place, b: Place): boolean =>
