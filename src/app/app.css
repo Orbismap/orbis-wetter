@@ -53,3 +53,30 @@
   color: #111;
   background: #fff;
 }
+
+.edit-hint {
+  font-size: var(--fs-axis);
+  color: var(--limb);
+}
+
+.edit-toggle,
+.edit-reset {
+  font: inherit;
+  font-size: var(--fs-axis);
+  color: var(--text-1);
+  background: var(--g-fill);
+  border: 1px solid var(--g-rim);
+  border-radius: var(--r-input);
+  padding: 6px 12px;
+  cursor: pointer;
+}
+
+.edit-toggle.active {
+  color: var(--ink-0);
+  background: var(--limb);
+  border-color: var(--limb);
+}
+
+.edit-reset:hover {
+  background: var(--g-fill-hover);
+}

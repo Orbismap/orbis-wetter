@@ -5,7 +5,7 @@ import { Compass, GradientScale, PressureGauge, SunCurve, TempRange } from './vi
 /** All detail cards are buttons already: clicking them will open more detail in a later step. */
 function DetailCard({ title, icon, className = '', children }: { title: string; icon: string; className?: string; children: ComponentChildren }) {
   return (
-    <button type="button" class={`card detail ${className}`} title="Details folgen in einer späteren Stufe">
+    <button type="button" class={`detail ${className}`} title="Details folgen in einer späteren Stufe">
       <div class="card-title"><span class="title-icon">{icon}</span>{title}</div>
       {children}
     </button>

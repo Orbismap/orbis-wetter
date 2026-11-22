@@ -64,7 +64,7 @@ export function WindMapCard({ windSpeed, placeName }: { windSpeed: number; place
   }, [windSpeed, placeName]);
 
   return (
-    <section class="card windmap" aria-label="Windkarte">
+    <section class="windmap" aria-label="Windkarte">
       <div class="card-title">
         <span class="title-icon">⌁</span> Windkarte
         {/* A real link: cross-document view transitions only fire for user-initiated navigation. */}

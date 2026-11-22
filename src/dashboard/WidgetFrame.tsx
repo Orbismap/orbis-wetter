@@ -1,10 +1,14 @@
 import type { CSSProperties } from 'preact';
 import { getWidget } from '../widgets/registry';
+import { useEditing } from './editStore';
 import { placementRect, sizeLabel } from './geometry';
 import type { CellMetrics, Placement } from './types';
+import { useDrag } from './useDrag';
 
 /** Renders one placed widget at its computed pixel position inside the grid. */
 export function WidgetFrame({ placement, metrics }: { placement: Placement; metrics: CellMetrics }) {
+  const editing = useEditing();
+  const { dragging, dragProps } = useDrag(placement, metrics, editing);
   const definition = getWidget(placement.widget);
   const rect = placementRect(placement, metrics);
   const style = {
@@ -24,14 +28,15 @@ export function WidgetFrame({ placement, metrics }: { placement: Placement; metr
 
   return (
     <section
-      class="card widget-frame"
+      class={`card widget-frame${editing ? ' editing' : ''}${dragging ? ' dragging' : ''}`}
       style={style}
+      {...dragProps}
       data-widget={placement.widget}
       data-size={sizeLabel(placement.w, placement.h)}
       aria-label={title}
     >
       {Component ? (
-        <Component placement={placement} title={title} size={size} editing={false} />
+        <Component placement={placement} title={title} size={size} editing={editing} />
       ) : (
         <div class="placeholder">
           <div class="placeholder-title">Unbekanntes Widget</div>

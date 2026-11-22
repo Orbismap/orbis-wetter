@@ -14,10 +14,10 @@ pnpm typecheck
 
 ## Stand
 
-Die **Architektur-Grundlage** steht: ein festes Widget-Raster mit registrierten Widgets und verwaltbarem Layout.
-Alle 15 Widgets zeigen aktuell Platzhalter – die echten Widgets (Stundenleiste, 10-Tage-Vorhersage, Windkarte,
-Detailkarten …) werden als Nächstes in dieses System überführt. Die bisherigen Komponenten liegen noch unter
-`src/features/forecast/` und dienen als Vorlage.
+Feste 6×5-Widget-Raster mit **15 echten Widgets** (Stundenleiste, 10-Tage-Vorhersage, Windkarte,
+Detailkarten …), die über einen `WeatherProvider` mit Beispieldaten versorgt werden. Im Bearbeitungsmodus lassen
+sich die Widgets per Ziehen neu anordnen; die Anordnung bleibt lokal gespeichert. Skalieren, echte Wetterdaten und
+Mobil-Layout sind noch offen.
 
 ## Architektur
 
@@ -42,8 +42,12 @@ Das Desktop-Raster ist **6 Spalten × 5 Zeilen** auf festen **950 px** Breite; d
 Fenster, sondern wird zentriert (bei schmaleren Fenstern wird gescrollt). Weitere Rastergrößen sind Presets – der
 Preset-Auswahl im Kopf testet `desktop` und `wide`. Jede Placement speichert `x, y, w, h` in Zellkoordinaten; die
 Pixelposition wird daraus berechnet. Der `LayoutStore` validiert jede Änderung gegen Rastergrenzen und
-Kollisionen – damit ist die Basis für den späteren Bearbeitungsmodus (Ziehen/Skalieren) gelegt, auch wenn die UI
-dafür noch fehlt.
+Kollisionen.
+
+**Anordnen:** Der Schalter im Kopf aktiviert den Bearbeitungsmodus. Widgets lassen sich per Pointer/Ziehen in
+Rasterzellen verschieben; das Ziel snapt auf die nächste Zelle, ein belegtes Ziel tauscht die beiden Widgets.
+Die Anordnung wird in `localStorage` gespeichert (`orbis.wetter.layout.v1`), „Zurücksetzen" stellt das Standardraster
+wieder her. Skalieren der Widgets kommt später – die `resize`-Aktion im Store ist schon vorbereitet.
 
 **Neues Widget hinzufügen:** Datei unter `src/widgets/` anlegen, die eine `WidgetDefinition` exportiert (Titel,
 unterstützte `variants`, `Component`), in `src/widgets/register.ts` registrieren und eine `Placement` in

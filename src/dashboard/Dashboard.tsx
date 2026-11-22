@@ -1,4 +1,5 @@
 import type { CSSProperties } from 'preact';
+import { useEditing } from './editStore';
 import { cellMetrics } from './geometry';
 import { getPreset } from './presets';
 import { useLayout } from './store';
@@ -8,6 +9,7 @@ import './dashboard.css';
 /** The grid surface. Widgets are absolutely positioned from cell coordinates. */
 export function Dashboard() {
   const layout = useLayout();
+  const editing = useEditing();
   const preset = getPreset(layout.preset);
   const metrics = cellMetrics(preset);
   const style = {
@@ -21,7 +23,7 @@ export function Dashboard() {
 
   return (
     <div class="dashboard-wrap">
-      <div class="dashboard" style={style}>
+      <div class={`dashboard${editing ? ' editing' : ''}`} style={style}>
         {layout.placements.map((placement) => (
           <WidgetFrame key={placement.id} placement={placement} metrics={metrics} />
         ))}

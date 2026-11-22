@@ -1,51 +1,40 @@
-import { defaultLayouts } from '../dashboard/defaultLayout';
-import { PlaceholderContent } from './placeholder';
 import { registerWidget } from './registry';
-import type { WidgetVariant } from './types';
+import { airQualityWidget } from './airQuality';
+import { averagesWidget } from './averages';
+import { dailyWidget } from './daily';
+import { feelsLikeWidget } from './feelsLike';
+import { hourlyWidget } from './hourly';
+import { humidityWidget } from './humidity';
+import { moonWidget } from './moon';
+import { precipitationWidget } from './precipitation';
+import { pressureWidget } from './pressure';
+import { sunWidget } from './sun';
+import { uvWidget } from './uv';
+import { visibilityWidget } from './visibility';
+import { warningWidget } from './warning';
+import { windMapWidget } from './windMap';
+import { windWidget } from './wind';
+import type { WidgetDefinition } from './types';
 
-/** Sizes a placeholder declares. Real widgets declare only the sizes they actually support. */
-const commonVariants: WidgetVariant[] = [
-  { name: '1x1', w: 1, h: 1 },
-  { name: '1x2', w: 1, h: 2 },
-  { name: '2x1', w: 2, h: 1 },
-  { name: '2x2', w: 2, h: 2 },
-  { name: '2x3', w: 2, h: 3 },
-  { name: '3x1', w: 3, h: 1 },
-  { name: '3x2', w: 3, h: 2 },
-  { name: '3x4', w: 3, h: 4 },
-  { name: '4x1', w: 4, h: 1 },
-  { name: '6x1', w: 6, h: 1 },
+const widgets: WidgetDefinition[] = [
+  hourlyWidget,
+  windMapWidget,
+  dailyWidget,
+  airQualityWidget,
+  windWidget,
+  warningWidget,
+  uvWidget,
+  sunWidget,
+  feelsLikeWidget,
+  precipitationWidget,
+  moonWidget,
+  humidityWidget,
+  visibilityWidget,
+  pressureWidget,
+  averagesWidget,
 ];
 
-const titles: Record<string, string> = {
-  hourly: 'Nächste Stunden',
-  windmap: 'Windkarte',
-  daily: '10-Tage-Vorhersage',
-  air: 'Luftqualität',
-  wind: 'Wind',
-  warning: 'Unwetterwarnung',
-  uv: 'UV-Index',
-  sun: 'Sonnenuntergang',
-  feels: 'Gefühlte Temperatur',
-  precip: 'Niederschlag',
-  moon: 'Zunehmender Mond',
-  humidity: 'Feuchtigkeit',
-  visibility: 'Sichtweite',
-  pressure: 'Luftdruck',
-  averages: 'Durchschnittswerte',
-};
-
-/** Register all widget definitions. Currently every widget is a placeholder. */
+/** Register every widget definition. New widgets only need to be added to `widgets` above. */
 export function registerWidgets(): void {
-  const ids = new Set(
-    Object.values(defaultLayouts).flatMap((layout) => layout.placements.map((p) => p.widget)),
-  );
-  for (const id of ids) {
-    registerWidget({
-      id,
-      title: titles[id] ?? id,
-      variants: commonVariants,
-      Component: PlaceholderContent,
-    });
-  }
+  widgets.forEach(registerWidget);
 }

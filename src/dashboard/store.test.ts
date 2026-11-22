@@ -25,6 +25,14 @@ describe('LayoutStore', () => {
     expect(s.getState().placements[0]).toMatchObject({ x: 0, y: 0 });
   });
 
+  it('swaps two widget positions', () => {
+    const s = store([placement('a', 0, 0), placement('b', 1, 1)]);
+    expect(s.swap('a', 'b')).toBe(true);
+    expect(s.getState().placements[0]).toMatchObject({ x: 1, y: 1 });
+    expect(s.getState().placements[1]).toMatchObject({ x: 0, y: 0 });
+    expect(s.swap('a', 'missing')).toBe(false);
+  });
+
   it('resizes a widget with clamping and collision checks', () => {
     const s = store([placement('a', 2, 2)]);
     expect(s.resize('a', 5, 5)).toBe(true);

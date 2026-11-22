@@ -23,6 +23,38 @@
   overflow: hidden;
 }
 
+/* Widget content fills the frame; the frame owns padding, border and background. */
+.dashboard .widget-frame > * {
+  flex: 1;
+  width: 100%;
+  height: 100%;
+  min-width: 0;
+  min-height: 0;
+}
+
+/* ---------- edit mode: drag to move (resize comes later) ---------- */
+.dashboard.editing {
+  background-image:
+    linear-gradient(to right, rgba(114, 200, 240, 0.18) 1px, transparent 1px),
+    linear-gradient(to bottom, rgba(114, 200, 240, 0.18) 1px, transparent 1px);
+}
+
+.dashboard.editing .widget-frame {
+  cursor: grab;
+  user-select: none;
+}
+
+.dashboard.editing .widget-frame > * {
+  pointer-events: none; /* widget buttons must not swallow the drag */
+}
+
+.dashboard.editing .widget-frame.dragging {
+  cursor: grabbing;
+  z-index: 10;
+  opacity: 0.88;
+  box-shadow: 0 14px 44px rgba(0, 0, 0, 0.38);
+}
+
 /* ---------- placeholder content (temporary) ---------- */
 .placeholder {
   display: flex;

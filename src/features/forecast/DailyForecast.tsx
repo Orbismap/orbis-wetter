@@ -4,7 +4,7 @@ import { TempRange } from './visuals';
 
 export function DailyForecast({ days }: { days: Day[] }) {
   return (
-    <section class="card daily" aria-label="10-Tage-Vorhersage">
+    <section class="daily" aria-label="10-Tage-Vorhersage">
       <div class="card-title"><span class="title-icon">▦</span> 10-Tage-Vorhersage</div>
       <ul class="day-list">
         {days.map((d, i) => (

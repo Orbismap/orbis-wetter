@@ -70,8 +70,22 @@ body {
 }
 .title-icon { font-size: 1rem; line-height: 1; opacity: 0.9; letter-spacing: 0; }
 
-.detail { font: inherit; cursor: pointer; transition: background 160ms ease, transform 160ms ease; }
-.detail:hover { background: var(--glass-hover); transform: translateY(-1px); }
+/* Detail widgets are buttons filling their widget frame; the frame supplies the glass chrome. */
+.detail {
+  display: flex;
+  flex-direction: column;
+  width: 100%;
+  height: 100%;
+  min-width: 0;
+  padding: 0;
+  border: 0;
+  border-radius: 0;
+  background: transparent;
+  color: inherit;
+  font: inherit;
+  text-align: left;
+  cursor: pointer;
+}
 .detail:focus-visible { outline: 2px solid var(--warm); outline-offset: 2px; }
 .big { font-size: 2rem; font-weight: 500; line-height: 1.1; letter-spacing: -0.03em; }
 .sub { color: var(--text-2); font-size: var(--fs-small); margin-top: 2px; }

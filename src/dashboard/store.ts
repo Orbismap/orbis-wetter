@@ -1,6 +1,7 @@
 import { useSyncExternalStore } from 'preact/compat';
 import { defaultLayout } from './defaultLayout';
 import { clampToGrid, firstFreeSlot, fits, overlaps } from './geometry';
+import { loadLayout, saveLayout } from './persistence';
 import { getPreset } from './presets';
 import type { LayoutState, Placement, Rect } from './types';
 
@@ -18,7 +19,7 @@ export class LayoutStore {
   private listeners = new Set<Listener>();
 
   constructor(initial: LayoutState) {
-    this.state = initial;
+    this.state = loadLayout() ?? initial;
   }
 
   getState = (): LayoutState => this.state;
@@ -30,6 +31,7 @@ export class LayoutStore {
 
   private commit(next: LayoutState): void {
     this.state = next;
+    saveLayout(next);
     this.listeners.forEach((listener) => listener());
   }
 
@@ -50,6 +52,23 @@ export class LayoutStore {
     if (!fits(preset, target)) return false;
     if (this.state.placements.some((other) => other.id !== id && overlaps(target, other))) return false;
     this.commit({ ...this.state, placements: this.state.placements.map((p) => (p.id === id ? target : p)) });
+    return true;
+  };
+
+  /** Exchange the positions of two widgets (used when dragging onto an occupied cell). */
+  swap = (firstId: string, secondId: string): boolean => {
+    if (firstId === secondId) return false;
+    const first = this.state.placements.find((p) => p.id === firstId);
+    const second = this.state.placements.find((p) => p.id === secondId);
+    if (!first || !second) return false;
+    this.commit({
+      ...this.state,
+      placements: this.state.placements.map((p) => {
+        if (p.id === firstId) return { ...p, x: second.x, y: second.y };
+        if (p.id === secondId) return { ...p, x: first.x, y: first.y };
+        return p;
+      }),
+    });
     return true;
   };
 
