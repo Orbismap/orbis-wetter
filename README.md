@@ -22,7 +22,8 @@ lässt sich horizontal scrollen (Trackpad, Touch, Mausrad und Shift+Mausrad); di
 **Sonnenauf- und -untergang** erscheinen mit voller Uhrzeit (HH:MM) und eigenem Icon als zusätzliche Einträge zwischen
 den Stunden – sie ersetzen keine Stundenspalte. Das Mondwidget ist das erste mit zwei Größen (1×1 und 2×1): Die
 28 Phasenbilder liegen in `public/moon/`, die aktuelle Phase wird aus dem synodischen Zyklus berechnet
-(`data/moon.ts`) und zeigt zudem Vollmond und Neumond als relative Termine. Skalieren und Mobil-Layout sind noch offen.
+(`data/moon.ts`) und zeigt davon nur den **nächstliegenden** Termin (Vollmond oder Neumond). Skalieren und
+Mobil-Layout sind noch offen.
 
 ## Architektur
 
