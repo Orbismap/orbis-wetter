@@ -1,5 +1,7 @@
 import type { CSSProperties } from 'preact';
+import { useLayoutEffect } from 'preact/hooks';
 import { useEditing } from './editStore';
+import { playFlip } from './flip';
 import { cellMetrics } from './geometry';
 import { getPreset } from './presets';
 import { useLayout } from './store';
@@ -10,6 +12,7 @@ import './dashboard.css';
 export function Dashboard() {
   const layout = useLayout();
   const editing = useEditing();
+  useLayoutEffect(playFlip);
   const preset = getPreset(layout.preset);
   const metrics = cellMetrics(preset);
   const style = {

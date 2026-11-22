@@ -32,6 +32,7 @@ export function WidgetFrame({ placement, metrics }: { placement: Placement; metr
       style={style}
       {...dragProps}
       data-widget={placement.widget}
+      data-placement-id={placement.id}
       data-size={sizeLabel(placement.w, placement.h)}
       aria-label={title}
     >

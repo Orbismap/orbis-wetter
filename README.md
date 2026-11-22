@@ -49,6 +49,11 @@ Rasterzellen verschieben; das Ziel snapt auf die nächste Zelle, ein belegtes Zi
 Die Anordnung wird in `localStorage` gespeichert (`orbis.wetter.layout.v1`), „Zurücksetzen" stellt das Standardraster
 wieder her. Skalieren der Widgets kommt später – die `resize`-Aktion im Store ist schon vorbereitet.
 
+Das Ziehen ist flüssig animiert: Während der Bewegung schreibt `useDrag.ts` den `translate3d` direkt ins DOM (kein
+Re-Render pro Pointermove). Beim Ablegen misst `flip.ts` die alten Positionen und spielt eine **FLIP**-Animation über
+die Web Animations API ab – sowohl für das gezogene Widget als auch für alle anderen, die ihre Position ändern.
+Nur `transform` wird animiert (GPU-composited), `prefers-reduced-motion` wird respektiert.
+
 **Neues Widget hinzufügen:** Datei unter `src/widgets/` anlegen, die eine `WidgetDefinition` exportiert (Titel,
 unterstützte `variants`, `Component`), in `src/widgets/register.ts` registrieren und eine `Placement` in
 `src/dashboard/defaultLayout.ts` setzen. Die Grid-Engine muss nicht verändert werden.

@@ -53,6 +53,7 @@
   z-index: 10;
   opacity: 0.88;
   box-shadow: 0 14px 44px rgba(0, 0, 0, 0.38);
+  will-change: transform;
 }
 
 /* ---------- placeholder content (temporary) ---------- */
