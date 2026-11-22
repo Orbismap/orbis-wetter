@@ -1,4 +1,4 @@
-import { useEffect, useMemo, useRef, useState } from 'preact/hooks';
+import { useCallback, useEffect, useMemo, useRef, useState } from 'preact/hooks';
 import { Map as MlMap, Marker } from 'maplibre-gl';
 import { loadCityConditions, type CityCondition } from '../../data/openMeteo';
 import { buildKartenUrl } from '../handoff/url';
@@ -20,6 +20,8 @@ const CITIES: [string, number, number][] = [
 ];
 
 const FALLBACK: [number, number] = [11.47, 53.75]; // Bad Kleinen
+const ORIGIN_ZOOM = 6;
+const IDLE_MS = 5_000;
 
 interface MarkerRefs {
   cities: HTMLElement[];
@@ -43,8 +45,22 @@ export function WindMapCard({
   const [mode, setMode] = useState<WxMapMode>('wind');
   const [layerNote, setLayerNote] = useState('');
   const [conditions, setConditions] = useState<CityCondition[]>([]);
-  const [view, setView] = useState({ lat: 53.7, lng: 11.4, zoom: 6 });
+  const [view, setView] = useState({ lat: 53.7, lng: 11.4, zoom: ORIGIN_ZOOM });
   const here = useMemo(() => ({ lat: lat ?? FALLBACK[1], lng: lng ?? FALLBACK[0] }), [lat, lng]);
+  const hereRef = useRef(here);
+  hereRef.current = here;
+  const idleTimer = useRef<ReturnType<typeof setTimeout> | null>(null);
+
+  /** After a few seconds without map interaction, fly back to the searched place. */
+  const scheduleReturn = useCallback(() => {
+    if (idleTimer.current) clearTimeout(idleTimer.current);
+    idleTimer.current = setTimeout(() => {
+      const map = mapRef.current;
+      if (!map) return;
+      const target = hereRef.current;
+      map.flyTo({ center: [target.lng, target.lat], zoom: ORIGIN_ZOOM, duration: 900 });
+    }, IDLE_MS);
+  }, []);
 
   const href = useMemo(() => buildKartenUrl({
     lat: view.lat, lng: view.lng, zoom: view.zoom, mode,
@@ -56,7 +72,7 @@ export function WindMapCard({
       container: host.current!,
       style: wxStyle,
       center: [11.4, 53.7],
-      zoom: 6,
+      zoom: ORIGIN_ZOOM,
       attributionControl: { compact: true },
       dragRotate: false,
       pitchWithRotate: false,
@@ -94,7 +110,17 @@ export function WindMapCard({
     const ro = new ResizeObserver(() => map.resize());
     ro.observe(host.current!);
 
+    // Any real input on the map restarts the idle countdown. Programmatic flyTo doesn't touch these listeners,
+    // so the return animation cannot keep itself alive.
+    const surface = host.current!;
+    const onInteract = () => scheduleReturn();
+    const events = ['pointerdown', 'wheel', 'touchstart', 'keydown'];
+    events.forEach((type) => surface.addEventListener(type, onInteract));
+    scheduleReturn();
+
     return () => {
+      if (idleTimer.current) clearTimeout(idleTimer.current);
+      events.forEach((type) => surface.removeEventListener(type, onInteract));
       ro.disconnect();
       map.off('move', sync);
       cityMarkers.forEach((marker) => marker.remove());
@@ -104,17 +130,14 @@ export function WindMapCard({
       markers.current = null;
     };
     // Map lifecycle is independent of the selected layer; marker text is updated below.
-  }, []);
+  }, [scheduleReturn]);
 
   useEffect(() => {
     markers.current?.hereMarker.setLngLat([here.lng, here.lat]);
     const map = mapRef.current;
     if (map) {
-      map.flyTo({
-        center: [here.lng, here.lat],
-        zoom: Math.max(map.getZoom(), 6),
-        duration: 900,
-      });
+      map.flyTo({ center: [here.lng, here.lat], zoom: ORIGIN_ZOOM, duration: 900 });
+      scheduleReturn();
     }
     const controller = new AbortController();
     const points = [...CITIES.map(([, lng, lat]) => ({ lat, lng })), here];
@@ -122,7 +145,7 @@ export function WindMapCard({
       .then(setConditions)
       .catch(() => { /* markers keep their labels without live values */ });
     return () => controller.abort();
-  }, [here]);
+  }, [here, scheduleReturn]);
 
   useEffect(() => {
     const controller = new AbortController();

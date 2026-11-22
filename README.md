@@ -118,7 +118,10 @@ Canvas-Bild und legt es als `raster`-Layer unter den Ortsbeschriftungen auf die 
 Betrag, Farbskalen liegen in `fieldLayers.ts`. Radar kommt – wie bei orbis – aus den keylosen RainViewer-Kacheln.
 Die Stadtmarker zeigen ergänzend Live-Werte aus einer Open-Meteo-Multi-Location-Abfrage
 (`data/openMeteo.ts::loadCityConditions`, 10 min Cache). Der Vollbild-Link ist ins Menü gewandert und übernimmt die
-gewählte Ebene als `l=`-Parameter.
+gewählte Ebene als `l=`-Parameter. Bei einem Ortswechsel fliegt die Karte zum neuen Ort; nach **5 s ohne
+Interaktion** fliegt sie automatisch auf die Ursprungsposition (gewählter Ort, Zoom 6) zurück. Der Timer hört nur
+auf echte Eingaben auf der Kartenfläche (`pointerdown`, `wheel`, `touchstart`, `keydown`), nicht auf die eigenen
+Kamerabewegungen.
 
 ## Übergang zur Karte
 
