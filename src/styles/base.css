@@ -1,0 +1,125 @@
+/* Cross-document view transition to orbis-karten. Both documents must opt in; only the map surface morphs. */
+@media (prefers-reduced-motion: no-preference) {
+  @view-transition {
+    navigation: auto;
+  }
+}
+
+* { box-sizing: border-box; }
+
+body {
+  margin: 0;
+  min-height: 100vh;
+  background: var(--ink-0);
+  color: var(--text-1);
+  font-family: var(--font-ui);
+  font-size: var(--fs-ui);
+  line-height: var(--lh-ui);
+  -webkit-font-smoothing: antialiased;
+}
+
+.app {
+  max-width: 880px;
+  margin: 0 auto;
+  padding: var(--s-4) var(--s-3) var(--s-6);
+}
+
+.topbar {
+  display: flex;
+  align-items: center;
+  gap: var(--s-3);
+  min-height: var(--hit-touch);
+  margin-bottom: var(--s-5);
+}
+
+.brand { display: flex; align-items: center; gap: var(--s-2); }
+.brand strong { font-size: 1rem; font-weight: 600; letter-spacing: -0.01em; }
+.brand span { color: var(--text-3); font-size: var(--fs-small); }
+
+.topbar .spacer { flex: 1; }
+
+.btn {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  gap: var(--s-2);
+  min-height: var(--hit-mouse);
+  padding: 0 var(--s-3);
+  border: 1px solid var(--g-rim);
+  border-radius: var(--r-input);
+  background: var(--g-fill);
+  color: var(--text-1);
+  font: inherit;
+  font-size: var(--fs-small);
+  text-decoration: none;
+  cursor: pointer;
+}
+.btn:hover { background: var(--g-fill-hover); }
+.btn:focus-visible { outline: var(--focus); outline-offset: var(--focus-offset); }
+
+.search-placeholder {
+  display: flex;
+  align-items: center;
+  min-height: var(--hit-touch);
+  padding: 0 var(--s-4);
+  border: 1px solid var(--g-rim);
+  border-radius: var(--r-round);
+  background: var(--g-fill);
+  color: var(--text-3);
+  font-size: var(--fs-small);
+}
+
+h1, h2 { margin: 0; font-weight: 600; }
+h1 { font-size: 1.5rem; letter-spacing: -0.02em; }
+h2 { font-size: var(--fs-title); }
+
+.card {
+  border: 1px solid var(--g-rim);
+  border-radius: var(--r-panel);
+  background: var(--g-panel);
+  -webkit-backdrop-filter: var(--g-blur-panel);
+  backdrop-filter: var(--g-blur-panel);
+  box-shadow: var(--g-shadow);
+  padding: var(--s-4);
+}
+
+.hero { margin-bottom: var(--s-3); }
+.hero .place { margin-top: var(--s-2); }
+
+.tiles {
+  display: grid;
+  grid-template-columns: repeat(auto-fit, minmax(150px, 1fr));
+  gap: var(--s-2);
+  margin-bottom: var(--s-3);
+}
+
+.tile { padding: var(--s-3); }
+.tile b { display: block; font-size: var(--fs-value); font-weight: 600; line-height: 1.1; }
+.tile small { color: var(--text-3); }
+.tile span { color: var(--text-2); font-size: var(--fs-small); }
+
+.card-head {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: var(--s-3);
+  margin-bottom: var(--s-3);
+}
+
+/* The shared element: must match the name used by orbis-karten exactly. */
+.wx-map {
+  height: 320px;
+  overflow: hidden;
+  border-radius: var(--r-input);
+  background: var(--ink-1);
+  view-transition-name: wx-map;
+}
+
+.map-note { margin: var(--s-3) 0 0; }
+.muted { color: var(--text-3); }
+.small { font-size: var(--fs-small); }
+
+@media (max-width: 600px) {
+  .wx-map { height: 240px; }
+  .app { padding-inline: var(--s-2); }
+}

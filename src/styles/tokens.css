@@ -1,0 +1,81 @@
+/* Design tokens, copied from orbis-map. Dark is the default; light follows prefers-color-scheme. */
+@layer tokens {
+  :root {
+    color-scheme: dark;
+
+    --ink-0: #0a0f18;
+    --ink-1: #101724;
+    --ink-2: #182132;
+    --ink-3: #243044;
+    --line: #2a3649;
+
+    --text-1: #f2f5f9;
+    --text-2: #d0d8e5;
+    --text-3: #c0cad9;
+
+    --limb: #72c8f0;
+    --limb-quiet: rgba(114, 200, 240, 0.16);
+    --now: #f2b45a;
+    --alert: #ff6b5e;
+    --ok: #58d0a0;
+
+    --g-panel: rgba(22, 26, 34, 0.72);
+    --g-fill: rgba(255, 255, 255, 0.06);
+    --g-fill-hover: rgba(255, 255, 255, 0.09);
+    --g-rim: rgba(255, 255, 255, 0.09);
+    --g-shadow: 0 8px 24px rgba(0, 0, 0, 0.22);
+    --g-blur-panel: blur(30px) saturate(1.6);
+
+    --font-ui: -apple-system, BlinkMacSystemFont, 'SF Pro Text', 'SF Pro Display', system-ui, 'Segoe UI', Roboto, sans-serif;
+    --fs-axis: 0.6875rem;
+    --fs-small: 0.75rem;
+    --fs-ui: 0.8125rem;
+    --fs-title: 0.9375rem;
+    --fs-value: 1.5rem;
+    --lh-ui: 1.35;
+    --lh-text: 1.5;
+
+    --s-1: 4px;
+    --s-2: 8px;
+    --s-3: 12px;
+    --s-4: 16px;
+    --s-5: 24px;
+    --s-6: 32px;
+
+    --r-input: 10px;
+    --r-panel: 22px;
+    --r-round: 999px;
+
+    --hit-mouse: 28px;
+    --hit-touch: 44px;
+
+    --ease: cubic-bezier(0.2, 0.8, 0.2, 1);
+
+    --focus: 2px solid var(--limb);
+    --focus-offset: 2px;
+  }
+
+  @media (prefers-color-scheme: light) {
+    :root {
+      color-scheme: light;
+      --ink-0: #ffffff;
+      --ink-1: #f4f6f9;
+      --ink-2: #e9edf2;
+      --ink-3: #dde3ec;
+      --line: #cdd5e0;
+      --text-1: #0f1826;
+      --text-2: #2a3448;
+      --text-3: #38445a;
+      --limb: #0a5f94;
+      --limb-quiet: rgba(11, 111, 168, 0.1);
+      --now: #8f5300;
+      --alert: #c6382c;
+      --ok: #1b8a5e;
+      --g-panel: rgba(255, 255, 255, 0.72);
+      --g-fill: rgba(0, 0, 0, 0.04);
+      --g-fill-hover: rgba(0, 0, 0, 0.07);
+      --g-rim: rgba(0, 0, 0, 0.07);
+      --g-shadow: 0 8px 24px rgba(0, 0, 0, 0.1);
+    }
+  }
+}

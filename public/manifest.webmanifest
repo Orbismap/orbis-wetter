@@ -1,0 +1,11 @@
+{
+  "name": "Orbis Wetter",
+  "short_name": "Wetter",
+  "description": "Wetter vor der Haustür, nahtlos verbunden mit orbis-karten",
+  "start_url": "/wetter/",
+  "scope": "/wetter/",
+  "display": "standalone",
+  "background_color": "#0a0f18",
+  "theme_color": "#0a0f18",
+  "icons": [{ "src": "/wetter/favicon.svg", "sizes": "any", "type": "image/svg+xml", "purpose": "any" }]
+}

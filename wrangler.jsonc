@@ -1,0 +1,14 @@
+{
+  "$schema": "node_modules/wrangler/config-schema.json",
+  "name": "orbis-wetter",
+  "compatibility_date": "2026-11-01",
+  // Static site: Vite builds to dist/, Cloudflare serves it under /wetter/ on the same origin as the map.
+  "assets": {
+    "directory": "./dist",
+    "not_found_handling": "404-page"
+  },
+  // More specific than the maps.maltee.dev custom-domain route of orbis-map, so it wins for /wetter/*.
+  "routes": [{ "pattern": "maps.maltee.dev/wetter/*" }],
+  "workers_dev": false,
+  "preview_urls": false
+}
