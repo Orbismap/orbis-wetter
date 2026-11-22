@@ -62,9 +62,11 @@ sind (z. B. aus älteren Versionen).
 **Gruppen-Tausch:** `hoverSwap()` berechnet jede Vorschau aus dem Ursprung des Zugs. Das gezogene Widget tauscht
 sowohl mit einem einzelnen Widget als auch mit einer **Gruppe**, die seine alte Fläche exakt ausfüllt – ein 1×2
 mit zwei 1×1, das 2×3-Widget mit seinen fünf kleineren Nachbarn. `packIntoCells()` sucht die Anordnung per
-Exact-Cover; passt die Fläche nicht, wird der Zug abgelehnt. Hovert man ein neues Ziel, springt die zuvor
-getauschte Gruppe wieder auf ihren Ursprung zurück – es ist immer nur **eine** Tauschbeziehung aktiv. Rotation
-oder Kettenverschiebungen gibt es bewusst nicht.
+Exact-Cover; passt die Fläche nicht, greift der **dynamische Korridor**: Alle Widgets zwischen Ursprung und
+Ziel rutschen um genau die Größe des gezogenen Widgets in die Gegenrichtung – vertikal wie horizontal. So
+lässt sich auch ein 2×1-Widget mit einem 2×2 tauschen oder eine 4×1-Zeile ans untere Ende ziehen, während der
+gesamte Stapel nachrückt. Hovert man ein neues Ziel, springt die zuvor getauschte Gruppe wieder auf ihren
+Ursprung zurück – es ist immer nur **eine** Tauschbeziehung aktiv.
 
 **Sichtbare Tauschzellen:** Während des Ziehens zeigt `dragPreview.ts` zwei Overlays über dem Raster: die
 **Ursprungszelle** mit fester Outline (farbig, `border-radius` wie die Karten) und die **Zielzelle** gestrichelt.

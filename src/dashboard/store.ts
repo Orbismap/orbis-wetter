@@ -99,8 +99,40 @@ export class LayoutStore {
   };
 
   /**
-   * Preview the dragged widget at a target cell, always derived from the gesture origin. It swaps with
-   * a single widget or a whole group – the widgets in the target must exactly fill the old footprint.
+   * Dynamic fallback when the target group cannot fill the dragged widget's old footprint: every
+   * widget in the corridor between origin and target moves one widget-size step against the drag
+   * direction. Works identically for horizontal and vertical drags.
+   */
+  private shiftCorridor(
+    placements: Placement[], dragged: Placement, x: number, y: number,
+  ): Placement[] | null {
+    const dx = x - dragged.x;
+    const dy = y - dragged.y;
+    const horizontal = Math.abs(dx) >= Math.abs(dy);
+    const size = horizontal ? dragged.w : dragged.h;
+    const step = horizontal ? Math.sign(dx) : Math.sign(dy);
+    if (step === 0) return null;
+    const shift = -step * size;
+    const originStart = horizontal ? dragged.x : dragged.y;
+    const targetStart = horizontal ? x : y;
+    const lo = Math.min(originStart, targetStart);
+    const hi = Math.max(originStart + size, targetStart + size) - 1;
+
+    return placements.map((p) => {
+      if (p.id === dragged.id) return { ...p, x, y };
+      const crossOverlap = horizontal
+        ? p.y < dragged.y + dragged.h && p.y + p.h > dragged.y
+        : p.x < dragged.x + dragged.w && p.x + p.w > dragged.x;
+      const start = horizontal ? p.x : p.y;
+      const span = horizontal ? p.w : p.h;
+      if (!crossOverlap || start + span - 1 < lo || start > hi) return p;
+      return horizontal ? { ...p, x: p.x + shift } : { ...p, y: p.y + shift };
+    });
+  }
+
+  /**
+   * Preview the dragged widget at a target cell, always derived from the gesture origin. A group that
+   * exactly fills the old footprint is packed into it; otherwise the corridor is shifted dynamically.
    * Hovering a new target reverts the previous preview, so only one swap is active at a time.
    */
   hoverSwap = (draggedId: string, x: number, y: number): boolean => {
@@ -114,18 +146,20 @@ export class LayoutStore {
 
     const placements = [...origin.values()];
     const group = placements.filter((p) => p.id !== draggedId && overlaps(target, p));
-    let next: Placement[];
-    if (group.length === 0) {
-      next = placements.map((p) => (p.id === draggedId ? { ...p, x, y } : p));
-    } else {
-      const spots = packIntoCells(group, rectCells(dragged));
-      if (!spots) return false;
+    let next: Placement[] | null;
+    const spots = group.length > 0 ? packIntoCells(group, rectCells(dragged)) : null;
+    if (spots) {
       next = placements.map((p) => {
         if (p.id === draggedId) return { ...p, x, y };
         const spot = spots.get(p.id);
         return spot ? { ...p, ...spot } : p;
       });
+    } else if (group.length === 0) {
+      next = placements.map((p) => (p.id === draggedId ? { ...p, x, y } : p));
+    } else {
+      next = this.shiftCorridor(placements, dragged, x, y);
     }
+    if (!next) return false;
     if (next.some((p) => !fits(preset, p)) || collisions(next).length > 0) return false;
     this.commit({ ...this.state, placements: next });
     return true;

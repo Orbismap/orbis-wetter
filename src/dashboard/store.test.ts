@@ -107,6 +107,48 @@ describe('LayoutStore', () => {
     expect(all.every((p, i) => all.slice(i + 1).every((q) => !overlap(p, q)))).toBe(true);
   });
 
+  it('shifts a large widget when a small one is dragged onto it (vertical)', () => {
+    // 1 1 / 1 1 / 2 2  ->  2 2 / 1 1 / 1 1
+    const s = new LayoutStore({
+      preset: 'testgrid',
+      placements: [placement('one', 0, 0, 2, 2), placement('two', 0, 2, 2, 1)],
+    });
+    s.beginGesture();
+    expect(s.hoverSwap('two', 0, 0)).toBe(true);
+    const cells = Object.fromEntries(s.getState().placements.map((p) => [p.id, [p.x, p.y]]));
+    expect(cells).toEqual({ one: [0, 1], two: [0, 0] });
+  });
+
+  it('shifts a whole stack vertically when a row is dragged to the far end', () => {
+    const s = new LayoutStore({
+      preset: 'testgrid44',
+      placements: [
+        placement('one', 0, 0, 4, 1),
+        placement('two', 0, 1, 2, 3),
+        placement('three', 2, 1, 2, 2),
+        placement('four', 2, 3),
+        placement('five', 3, 3),
+      ],
+    });
+    s.beginGesture();
+    expect(s.hoverSwap('one', 0, 3)).toBe(true);
+    const cells = Object.fromEntries(s.getState().placements.map((p) => [p.id, [p.x, p.y]]));
+    expect(cells).toEqual({
+      one: [0, 3], two: [0, 0], three: [2, 0], four: [2, 2], five: [3, 2],
+    });
+  });
+
+  it('shifts horizontally as well', () => {
+    const s = new LayoutStore({
+      preset: 'testgrid44',
+      placements: [placement('one', 0, 0, 1, 2), placement('two', 1, 0, 3, 2)],
+    });
+    s.beginGesture();
+    expect(s.hoverSwap('one', 3, 0)).toBe(true);
+    const cells = Object.fromEntries(s.getState().placements.map((p) => [p.id, [p.x, p.y]]));
+    expect(cells).toEqual({ one: [3, 0], two: [0, 0] });
+  });
+
   it('does not swap when the group cannot fill the old footprint', () => {
     const s = new LayoutStore({
       preset: 'testgrid4',
