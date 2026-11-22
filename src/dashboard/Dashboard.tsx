@@ -1,7 +1,7 @@
 import type { CSSProperties } from 'preact';
 import { useLayoutEffect } from 'preact/hooks';
 import { useDragPreview } from './dragPreview';
-import { useEditing } from './editStore';
+import { editStore, useEditing } from './editStore';
 import { playFlip } from './flip';
 import { cellMetrics, placementRect } from './geometry';
 import { getPreset } from './presets';
@@ -41,16 +41,21 @@ export function Dashboard() {
 
   return (
     <div class="dashboard-wrap">
-      <div class={`dashboard${editing ? ' editing' : ''}`} style={style}>
-        {layout.placements.map((placement) => (
-          <WidgetFrame key={placement.id} placement={placement} metrics={metrics} />
-        ))}
-        {preview.origin && (
-          <div class="swap-outline swap-origin" style={outlineStyle(preview.origin, metrics)} aria-hidden="true" />
-        )}
-        {preview.target && (
-          <div class="swap-outline swap-target" style={outlineStyle(preview.target, metrics)} aria-hidden="true" />
-        )}
+      <div class="dashboard-shell">
+        <div class={`dashboard${editing ? ' editing' : ''}`} style={style}>
+          {layout.placements.map((placement) => (
+            <WidgetFrame key={placement.id} placement={placement} metrics={metrics} />
+          ))}
+          {preview.origin && (
+            <div class="swap-outline swap-origin" style={outlineStyle(preview.origin, metrics)} aria-hidden="true" />
+          )}
+          {preview.target && (
+            <div class="swap-outline swap-target" style={outlineStyle(preview.target, metrics)} aria-hidden="true" />
+          )}
+        </div>
+        <button type="button" class={`edit-toggle${editing ? ' active' : ''}`} onClick={editStore.toggle}>
+          {editing ? 'Fertig' : 'Anordnen'}
+        </button>
       </div>
     </div>
   );

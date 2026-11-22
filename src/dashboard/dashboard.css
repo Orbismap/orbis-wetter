@@ -1,4 +1,31 @@
 /* ---------- grid surface ---------- */
+.dashboard-shell {
+  position: relative;
+  width: max-content;
+  margin: 0 auto;
+}
+
+.edit-toggle {
+  position: absolute;
+  z-index: 30;
+  top: -40px;
+  right: 0;
+  font: inherit;
+  font-size: var(--fs-axis);
+  color: var(--text-1);
+  background: var(--g-fill);
+  border: 1px solid var(--g-rim);
+  border-radius: var(--r-input);
+  padding: 6px 12px;
+  cursor: pointer;
+}
+
+.edit-toggle.active {
+  color: var(--ink-0);
+  background: var(--limb);
+  border-color: var(--limb);
+}
+
 .dashboard-wrap {
   width: 100%;
   padding: 0 var(--s-5) var(--s-6);

@@ -39,15 +39,17 @@ src/
 ```
 
 Das Desktop-Raster ist **6 Spalten × 5 Zeilen** auf festen **950 px** Breite; der Canvas skaliert nicht mit dem
-Fenster, sondern wird zentriert (bei schmaleren Fenstern wird gescrollt). Weitere Rastergrößen sind Presets – der
-Preset-Auswahl im Kopf testet `desktop` und `wide`. Jede Placement speichert `x, y, w, h` in Zellkoordinaten; die
+Fenster, sondern wird zentriert (bei schmaleren Fenstern wird gescrollt). Weitere Rastergrößen sind Presets in
+`presets.ts` (`desktop`, `wide`) – die UI hat bewusst keinen Preset-Umschalter. Jede Placement speichert `x, y, w, h`
+in Zellkoordinaten; die
 Pixelposition wird daraus berechnet. Der `LayoutStore` validiert jede Änderung gegen Rastergrenzen und
 Kollisionen.
 
-**Anordnen:** Der Schalter im Kopf aktiviert den Bearbeitungsmodus. Widgets lassen sich per Pointer/Ziehen in
-Rasterzellen verschieben; das Ziel snapt auf die nächste Zelle, ein belegtes Ziel tauscht die beiden Widgets.
-Die Anordnung wird in `localStorage` gespeichert (`orbis.wetter.layout.v1`), „Zurücksetzen" stellt das Standardraster
-wieder her. Skalieren der Widgets kommt später – die `resize`-Aktion im Store ist schon vorbereitet.
+**Anordnen:** Der Button an der oberen rechten Ecke des Grids aktiviert den Bearbeitungsmodus. Widgets lassen sich
+per Pointer/Ziehen in Rasterzellen verschieben; das Ziel snapt auf die nächste Zelle. Die Anordnung wird in
+`localStorage` gespeichert (`orbis.wetter.layout.v1`). Skalieren der Widgets kommt später – die `resize`-Aktion im
+Store ist schon vorbereitet. Navbar, Preset-Umschalter und Zurücksetzen gibt es nicht mehr; oben links bleibt nur
+das Logo.
 
 Das Ziehen ist flüssig animiert: Während der Bewegung schreibt `useDrag.ts` den `translate3d` direkt ins DOM (kein
 Re-Render pro Pointermove). Sobald die Zielzelle erreicht ist, wird **live getauscht** – das andere Widget weicht

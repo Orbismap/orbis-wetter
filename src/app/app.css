@@ -3,80 +3,18 @@
   padding-top: var(--s-4);
 }
 
-.app-header {
-  display: flex;
-  align-items: center;
-  justify-content: space-between;
-  gap: var(--s-4);
-  padding: 0 var(--s-5) var(--s-4);
-}
-
-.brand {
-  display: flex;
-  align-items: center;
-  gap: var(--s-2);
-  font-size: var(--fs-title);
-  font-weight: 600;
-}
-
-.header-right {
-  display: flex;
-  align-items: center;
-  gap: var(--s-4);
-}
-
-.header-hint {
-  font-size: var(--fs-axis);
-  color: var(--text-3);
-}
-
-.preset-picker {
-  display: flex;
-  align-items: center;
-  gap: var(--s-2);
-  font-size: var(--fs-axis);
-  color: var(--text-2);
-}
-
-.preset-picker select {
-  appearance: none;
-  font: inherit;
-  color: var(--text-1);
-  background: var(--g-fill);
-  border: 1px solid var(--g-rim);
-  border-radius: var(--r-input);
-  padding: 6px 10px;
-  cursor: pointer;
-}
-
-.preset-picker option {
-  color: #111;
-  background: #fff;
-}
-
-.edit-hint {
-  font-size: var(--fs-axis);
-  color: var(--limb);
-}
-
-.edit-toggle,
-.edit-reset {
-  font: inherit;
-  font-size: var(--fs-axis);
-  color: var(--text-1);
-  background: var(--g-fill);
-  border: 1px solid var(--g-rim);
-  border-radius: var(--r-input);
-  padding: 6px 12px;
-  cursor: pointer;
-}
-
-.edit-toggle.active {
-  color: var(--ink-0);
-  background: var(--limb);
-  border-color: var(--limb);
-}
-
-.edit-reset:hover {
-  background: var(--g-fill-hover);
+.app-logo {
+  position: fixed;
+  z-index: 30;
+  top: 16px;
+  left: 16px;
+  display: grid;
+  place-items: center;
+  width: 44px;
+  height: 44px;
+  border: 1px solid var(--glass-line);
+  border-radius: var(--r-round);
+  background: var(--glass);
+  -webkit-backdrop-filter: blur(20px);
+  backdrop-filter: blur(20px);
 }
