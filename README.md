@@ -55,20 +55,14 @@ bereits während des Ziehens aus und wird per **FLIP** über die Web Animations 
 das sanfte Einrasten des gezogenen Widgets beim Loslassen. Nur `transform` wird animiert (GPU-composited),
 `prefers-reduced-motion` wird respektiert.
 
-Überlappungen sind ausgeschlossen: `move`, `swap` und `swapRegion` im Store validieren Rastergrenzen **und**
-Kollisionen mit allen anderen Widgets. Beim Laden verwirft `persistence.ts` gespeicherte Anordnungen, die nicht
-mehr gültig sind (z. B. aus älteren Versionen).
+Überlappungen sind ausgeschlossen: `move` und `hoverSwap` im Store validieren Rastergrenzen **und** Kollisionen
+mit allen anderen Widgets. Beim Laden verwirft `persistence.ts` gespeicherte Anordnungen, die nicht mehr gültig
+sind (z. B. aus älteren Versionen).
 
-**Regel für breite Widgets:** Zieht man ein Widget in ein Ziel, in dem mehrere andere liegen, tauscht `swapRegion`
-die gesamte Region: Alle betroffenen Widgets rücken gemeinsam in die alte Fläche des gezogenen Widgets. Bei
-`1 1 / 2 3` wandert das 2×1-Widget nach unten, während 2 und 3 zusammen nach oben rücken. `packIntoCells()`
-berechnet die neue Anordnung per Exact-Cover-Suche; passt die Fläche nicht, wird der Zug abgelehnt.
-
-**Rotation beim Weiterziehen:** Wurde ein Widget durch eine vorherige Bewegung dieses Zugs nach oben verdrängt,
-wandert es beim nächsten Schritt mit – es bleibt also nicht „hängen". Aus `2 2 / 1 1 / 3 4` wird beim Ziehen von 1
-auf 3/4 so `3 4 / 2 2 / 1 1`: alle drei Gruppen rutschen je eine Position in Ziehrichtung. Dafür prüft
-`swapRegion` die Region **eine Zelle hinter** dem gezogenen Widget und rotiert Vorgänger → alte Fläche →
-Zielbereich. Pro Aktion ändert sich dadurch nur die direkte Nachbarschaft.
+**Nur direkte Tausche:** `hoverSwap()` berechnet jede Vorschau aus dem Ursprung des Zugs. Es ist also immer
+höchstens **ein** 1:1-Tausch aktiv: Hovert man ein neues Widget, springt das zuvor getauschte wieder auf seinen
+alten Platz zurück. Regionen-Tausch und Rotation gibt es bewusst nicht mehr – pro Aktion verändert sich nur die
+direkte Nachbarschaft.
 
 **Ursprung pro Zug:** `beginGesture()` merkt sich beim Ziehen die Position **aller** Widgets – auch der gezogenen.
 Verlässt der Pointer das Grid (oder wird der Zug abgebrochen), setzt `restoreOrigin()` die komplette Anordnung auf

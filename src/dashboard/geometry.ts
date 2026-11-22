@@ -73,53 +73,6 @@ export function clampToGrid(preset: GridPreset, p: Rect): Rect {
   };
 }
 
-/** All grid cells covered by a rectangle. */
-export function rectCells(rect: Rect): Array<{ x: number; y: number }> {
-  const cells: Array<{ x: number; y: number }> = [];
-  for (let y = rect.y; y < rect.y + rect.h; y++) {
-    for (let x = rect.x; x < rect.x + rect.w; x++) cells.push({ x, y });
-  }
-  return cells;
-}
-
-/**
- * Pack rectangles into a set of cells (exact cover). Used when a wide widget swaps with several
- * small ones: all displaced widgets must fit into the dragged widget's old footprint together.
- */
-export function packIntoCells<T extends Rect & { id: string }>(
-  rectangles: T[], cells: Array<{ x: number; y: number }>, fillAll = true,
-): Map<string, { x: number; y: number }> | null {
-  const remaining = new Set(cells.map((cell) => `${cell.x},${cell.y}`));
-  const result = new Map<string, { x: number; y: number }>();
-  // Place the largest widgets first – keeps the search small for the usual dashboard sizes.
-  const ordered = [...rectangles].sort((a, b) => b.w * b.h - a.w * a.h);
-
-  const place = (index: number): boolean => {
-    if (index === ordered.length) return !fillAll || remaining.size === 0;
-    const rect = ordered[index]!;
-    for (const cell of cells) {
-      const keys: string[] = [];
-      let fitsHere = true;
-      for (let dy = 0; dy < rect.h && fitsHere; dy++) {
-        for (let dx = 0; dx < rect.w; dx++) {
-          const key = `${cell.x + dx},${cell.y + dy}`;
-          if (!remaining.has(key)) { fitsHere = false; break; }
-          keys.push(key);
-        }
-      }
-      if (!fitsHere) continue;
-      keys.forEach((key) => remaining.delete(key));
-      result.set(rect.id, { x: cell.x, y: cell.y });
-      if (place(index + 1)) return true;
-      keys.forEach((key) => remaining.add(key));
-      result.delete(rect.id);
-    }
-    return false;
-  };
-
-  return place(0) ? result : null;
-}
-
 /** Human-readable size label used in the placeholder widgets and later in the editor. */
 export function sizeLabel(w: number, h: number): string {
   return `${w}×${h}`;

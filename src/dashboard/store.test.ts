@@ -57,48 +57,33 @@ describe('LayoutStore', () => {
     expect(third.swap('a', 'b')).toBe(false);
   });
 
-  it('swaps a wide widget with all widgets in the target region at once', () => {
-    // Layout:  wide wide  /  a b
+  it('previews only a direct swap and sends the previously hovered widget home', () => {
+    const s = new LayoutStore({
+      preset: 'testgrid4',
+      placements: [placement('drag', 0, 0), placement('a', 1, 0), placement('b', 2, 0)],
+    });
+    const cells = () => Object.fromEntries(s.getState().placements.map((p) => [p.id, [p.x, p.y]]));
+    s.beginGesture();
+
+    expect(s.hoverSwap('drag', 1, 0)).toBe(true);
+    expect(cells()).toEqual({ drag: [1, 0], a: [0, 0], b: [2, 0] });
+
+    // Hovering b reverts the swap with a – only one widget is ever displaced.
+    expect(s.hoverSwap('drag', 2, 0)).toBe(true);
+    expect(cells()).toEqual({ drag: [2, 0], a: [1, 0], b: [0, 0] });
+
+    s.restoreOrigin();
+    expect(cells()).toEqual({ drag: [0, 0], a: [1, 0], b: [2, 0] });
+  });
+
+  it('does not swap with a widget of an incompatible size', () => {
     const s = new LayoutStore({
       preset: 'testgrid4',
       placements: [placement('wide', 0, 0, 2, 1), placement('a', 0, 1), placement('b', 1, 1)],
     });
-    expect(s.swapRegion('wide', 0, 1)).toBe(true);
-    expect(s.getState().placements).toEqual([
-      { id: 'wide', widget: 'w', x: 0, y: 1, w: 2, h: 1 },
-      { id: 'a', widget: 'w', x: 0, y: 0, w: 1, h: 1 },
-      { id: 'b', widget: 'w', x: 1, y: 0, w: 1, h: 1 },
-    ]);
-  });
-
-  it('rotates the upstream widget along with a continuing drag', () => {
-    const s = new LayoutStore({
-      preset: 'testgrid4',
-      placements: [
-        placement('one', 0, 0, 2, 1),
-        placement('two', 0, 1, 2, 1),
-        placement('three', 0, 2),
-        placement('four', 1, 2),
-      ],
-    });
-    const cells = () => Object.fromEntries(
-      s.getState().placements.map((p) => [p.id, [p.x, p.y]]),
-    );
-
-    expect(s.swapRegion('one', 0, 1)).toBe(true);
-    expect(cells()).toEqual({ one: [0, 1], two: [0, 0], three: [0, 2], four: [1, 2] });
-
-    // Dragging on into 3/4 pulls `two` down one step instead of leaving it stranded at the top.
-    expect(s.swapRegion('one', 0, 2)).toBe(true);
-    expect(cells()).toEqual({ one: [0, 2], two: [0, 1], three: [0, 0], four: [1, 0] });
-  });
-
-  it('refuses a region swap when the displaced widgets do not fit the old footprint', () => {
-    const s = new LayoutStore({
-      preset: 'testgrid4',
-      placements: [placement('one', 0, 0), placement('big', 1, 1, 2, 2)],
-    });
-    expect(s.swapRegion('one', 1, 1)).toBe(false);
+    s.beginGesture();
+    expect(s.hoverSwap('wide', 0, 1)).toBe(false);
+    expect(s.getState().placements[0]).toMatchObject({ x: 0, y: 0 });
   });
 
   it('resizes a widget with clamping and collision checks', () => {

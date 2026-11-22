@@ -12,9 +12,9 @@ interface DragStart {
   /** Cell where the drag began – the fixed anchor for the pointer delta. */
   cellX: number;
   cellY: number;
-  /** Current logical cell; changes as the widget swaps with others during the drag. */
-  x: number;
-  y: number;
+  /** Cell currently applied as the hover preview (equals the origin cell initially). */
+  appliedX: number;
+  appliedY: number;
   element: HTMLElement;
   /** Canvas bounds at drag start – leaving them cancels the whole gesture. */
   bounds: DOMRect | null;
@@ -24,8 +24,8 @@ interface DragStart {
 const clamp = (value: number, max: number) => Math.max(0, Math.min(max, value));
 
 /**
- * Pointer-driven snapping with live displacement. The store snapshots every widget's position at
- * drag start; dragging outside the canvas (or cancelling) restores that snapshot for all widgets.
+ * Pointer-driven snapping with live, direct swaps. Every preview is derived from the gesture origin,
+ * so only the widget under the current cell is displaced – the previously hovered one goes home.
  */
 export function useDrag(placement: Placement, metrics: CellMetrics, enabled: boolean) {
   const start = useRef<DragStart | null>(null);
@@ -50,22 +50,18 @@ export function useDrag(placement: Placement, metrics: CellMetrics, enabled: boo
     if (!outside) {
       const targetX = clamp(Math.round(visualX / metrics.stepX), metrics.cols - placement.w);
       const targetY = clamp(Math.round(visualY / metrics.stepY), metrics.rows - placement.h);
-      if (targetX !== origin.x || targetY !== origin.y) {
-        // swapRegion handles empty cells as well as several displaced widgets at once.
-        if (layoutStore.swapRegion(placement.id, targetX, targetY)) {
-          origin.x = targetX;
-          origin.y = targetY;
-          // Keep the DOM base in sync now; Preact writes the same values on the next render.
-          origin.element.style.left = `${targetX * metrics.stepX}px`;
-          origin.element.style.top = `${targetY * metrics.stepY}px`;
-        }
+      if (targetX !== origin.appliedX || targetY !== origin.appliedY) {
+        const applied = layoutStore.hoverSwap(placement.id, targetX, targetY);
+        origin.appliedX = applied ? targetX : origin.cellX;
+        origin.appliedY = applied ? targetY : origin.cellY;
+        origin.element.style.left = `${origin.appliedX * metrics.stepX}px`;
+        origin.element.style.top = `${origin.appliedY * metrics.stepY}px`;
       }
     }
 
-    // Transform is relative to the *current* base cell, so the widget stays under the pointer
-    // even after its cell changed through a live swap.
-    const dx = visualX - origin.x * metrics.stepX;
-    const dy = visualY - origin.y * metrics.stepY;
+    // Transform is relative to the currently applied base cell.
+    const dx = visualX - origin.appliedX * metrics.stepX;
+    const dy = visualY - origin.appliedY * metrics.stepY;
     origin.element.style.transform = `translate3d(${dx}px, ${dy}px, 0)`;
   };
 
@@ -79,8 +75,8 @@ export function useDrag(placement: Placement, metrics: CellMetrics, enabled: boo
       py: event.clientY,
       cellX: placement.x,
       cellY: placement.y,
-      x: placement.x,
-      y: placement.y,
+      appliedX: placement.x,
+      appliedY: placement.y,
       element,
       bounds: document.querySelector<HTMLElement>('.dashboard')?.getBoundingClientRect() ?? null,
       outside: false,
@@ -104,7 +100,6 @@ export function useDrag(placement: Placement, metrics: CellMetrics, enabled: boo
     origin.element.classList.remove('outside');
 
     if (origin.outside) {
-      // Everything goes back to where it was when the gesture began.
       layoutStore.restoreOrigin();
     } else {
       playFlip();

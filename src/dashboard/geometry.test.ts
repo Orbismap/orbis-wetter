@@ -1,8 +1,7 @@
 import { describe, expect, it } from 'vitest';
 import { defaultLayout } from './defaultLayout';
 import {
-  cellMetrics, clampToGrid, collisions, fits, firstFreeSlot, overlaps, packIntoCells,
-  placementRect, rectCells, sizeLabel,
+  cellMetrics, clampToGrid, collisions, fits, firstFreeSlot, overlaps, placementRect, sizeLabel,
 } from './geometry';
 import { getPreset } from './presets';
 
@@ -68,19 +67,6 @@ describe('clampToGrid', () => {
     expect(clampToGrid(desktop, { x: -2, y: 9, w: 9, h: 9 })).toEqual({ x: 0, y: 0, w: 6, h: 5 });
     expect(clampToGrid(desktop, { x: 5, y: 4, w: 3, h: 3 })).toEqual({ x: 3, y: 2, w: 3, h: 3 });
   });
-});
-
-it('packs several small widgets into a wide widget footprint', () => {
-  const cells = rectCells({ x: 0, y: 0, w: 2, h: 1 });
-  expect(cells).toEqual([{ x: 0, y: 0 }, { x: 1, y: 0 }]);
-  const packed = packIntoCells(
-    [{ id: 'a', x: 0, y: 1, w: 1, h: 1 }, { id: 'b', x: 1, y: 1, w: 1, h: 1 }],
-    cells,
-  );
-  expect(packed?.get('a')).toEqual({ x: 0, y: 0 });
-  expect(packed?.get('b')).toEqual({ x: 1, y: 0 });
-
-  expect(packIntoCells([{ id: 'big', x: 0, y: 1, w: 2, h: 2 }], cells)).toBeNull();
 });
 
 it('formats a size label', () => {
