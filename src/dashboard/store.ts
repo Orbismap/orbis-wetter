@@ -1,6 +1,6 @@
 import { useSyncExternalStore } from 'preact/compat';
 import { defaultLayout } from './defaultLayout';
-import { clampToGrid, collisions, firstFreeSlot, fits, overlaps } from './geometry';
+import { clampToGrid, collisions, firstFreeSlot, fits, overlaps, packIntoCells, rectCells } from './geometry';
 import { loadLayout, saveLayout } from './persistence';
 import { getPreset } from './presets';
 import type { LayoutState, Placement, Rect } from './types';
@@ -99,8 +99,9 @@ export class LayoutStore {
   };
 
   /**
-   * Preview the dragged widget at a target cell. Always derived from the gesture origin, so exactly
-   * one direct swap is active at a time: hovering a new widget sends the previously hovered one home.
+   * Preview the dragged widget at a target cell, always derived from the gesture origin. It swaps with
+   * a single widget or a whole group – the widgets in the target must exactly fill the old footprint.
+   * Hovering a new target reverts the previous preview, so only one swap is active at a time.
    */
   hoverSwap = (draggedId: string, x: number, y: number): boolean => {
     const origin = this.gestureOrigin;
@@ -112,12 +113,19 @@ export class LayoutStore {
     if (!fits(preset, target)) return false;
 
     const placements = [...origin.values()];
-    const occupant = placements.find((p) => p.id !== draggedId && overlaps(target, p));
-    const next = placements.map((p) => {
-      if (p.id === draggedId) return { ...p, x, y };
-      if (occupant && p.id === occupant.id) return { ...p, x: dragged.x, y: dragged.y };
-      return p;
-    });
+    const group = placements.filter((p) => p.id !== draggedId && overlaps(target, p));
+    let next: Placement[];
+    if (group.length === 0) {
+      next = placements.map((p) => (p.id === draggedId ? { ...p, x, y } : p));
+    } else {
+      const spots = packIntoCells(group, rectCells(dragged));
+      if (!spots) return false;
+      next = placements.map((p) => {
+        if (p.id === draggedId) return { ...p, x, y };
+        const spot = spots.get(p.id);
+        return spot ? { ...p, ...spot } : p;
+      });
+    }
     if (next.some((p) => !fits(preset, p)) || collisions(next).length > 0) return false;
     this.commit({ ...this.state, placements: next });
     return true;

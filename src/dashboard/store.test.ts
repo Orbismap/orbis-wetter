@@ -5,6 +5,7 @@ import type { LayoutState, Placement } from './types';
 
 registerPreset({ id: 'testgrid', label: 'Test', cols: 3, rows: 3, width: 300, gap: 0, aspect: 1 });
 registerPreset({ id: 'testgrid4', label: 'Test 4', cols: 4, rows: 3, width: 400, gap: 0, aspect: 1 });
+registerPreset({ id: 'testgrid44', label: 'Test 4x4', cols: 4, rows: 4, width: 400, gap: 0, aspect: 1 });
 
 const placement = (id: string, x: number, y: number, w = 1, h = 1): Placement => ({ id, widget: 'w', x, y, w, h });
 const state = (placements: Placement[]): LayoutState => ({ preset: 'testgrid', placements });
@@ -76,13 +77,43 @@ describe('LayoutStore', () => {
     expect(cells()).toEqual({ drag: [0, 0], a: [1, 0], b: [2, 0] });
   });
 
-  it('does not swap with a widget of an incompatible size', () => {
+  it('swaps a tall widget with two stacked 1x1 widgets', () => {
     const s = new LayoutStore({
       preset: 'testgrid4',
-      placements: [placement('wide', 0, 0, 2, 1), placement('a', 0, 1), placement('b', 1, 1)],
+      placements: [placement('tall', 0, 0, 1, 2), placement('a', 1, 0), placement('b', 1, 1)],
     });
     s.beginGesture();
-    expect(s.hoverSwap('wide', 0, 1)).toBe(false);
+    expect(s.hoverSwap('tall', 1, 0)).toBe(true);
+    const cells = Object.fromEntries(s.getState().placements.map((p) => [p.id, [p.x, p.y]]));
+    expect(cells).toEqual({ tall: [1, 0], a: [0, 0], b: [0, 1] });
+  });
+
+  it('swaps a 2x3 widget with a group of five smaller widgets', () => {
+    const s = new LayoutStore({
+      preset: 'testgrid44',
+      placements: [
+        placement('big', 0, 0, 2, 3),
+        placement('wide', 2, 0, 2, 1),
+        placement('a', 2, 1), placement('b', 3, 1),
+        placement('c', 2, 2), placement('d', 3, 2),
+      ],
+    });
+    s.beginGesture();
+    expect(s.hoverSwap('big', 2, 0)).toBe(true);
+    expect(s.getState().placements.find((p) => p.id === 'big')).toMatchObject({ x: 2, y: 0 });
+    const overlap = (a: { x: number; y: number; w: number; h: number }, b: { x: number; y: number; w: number; h: number }) =>
+      a.x < b.x + b.w && a.x + a.w > b.x && a.y < b.y + b.h && a.y + a.h > b.y;
+    const all = s.getState().placements;
+    expect(all.every((p, i) => all.slice(i + 1).every((q) => !overlap(p, q)))).toBe(true);
+  });
+
+  it('does not swap when the group cannot fill the old footprint', () => {
+    const s = new LayoutStore({
+      preset: 'testgrid4',
+      placements: [placement('wide', 0, 0, 2, 1), placement('big', 1, 1, 2, 2)],
+    });
+    s.beginGesture();
+    expect(s.hoverSwap('wide', 1, 1)).toBe(false);
     expect(s.getState().placements[0]).toMatchObject({ x: 0, y: 0 });
   });
 

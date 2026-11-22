@@ -59,10 +59,12 @@ das sanfte Einrasten des gezogenen Widgets beim Loslassen. Nur `transform` wird 
 mit allen anderen Widgets. Beim Laden verwirft `persistence.ts` gespeicherte Anordnungen, die nicht mehr gültig
 sind (z. B. aus älteren Versionen).
 
-**Nur direkte Tausche:** `hoverSwap()` berechnet jede Vorschau aus dem Ursprung des Zugs. Es ist also immer
-höchstens **ein** 1:1-Tausch aktiv: Hovert man ein neues Widget, springt das zuvor getauschte wieder auf seinen
-alten Platz zurück. Regionen-Tausch und Rotation gibt es bewusst nicht mehr – pro Aktion verändert sich nur die
-direkte Nachbarschaft.
+**Gruppen-Tausch:** `hoverSwap()` berechnet jede Vorschau aus dem Ursprung des Zugs. Das gezogene Widget tauscht
+sowohl mit einem einzelnen Widget als auch mit einer **Gruppe**, die seine alte Fläche exakt ausfüllt – ein 1×2
+mit zwei 1×1, das 2×3-Widget mit seinen fünf kleineren Nachbarn. `packIntoCells()` sucht die Anordnung per
+Exact-Cover; passt die Fläche nicht, wird der Zug abgelehnt. Hovert man ein neues Ziel, springt die zuvor
+getauschte Gruppe wieder auf ihren Ursprung zurück – es ist immer nur **eine** Tauschbeziehung aktiv. Rotation
+oder Kettenverschiebungen gibt es bewusst nicht.
 
 **Ursprung pro Zug:** `beginGesture()` merkt sich beim Ziehen die Position **aller** Widgets – auch der gezogenen.
 Verlässt der Pointer das Grid (oder wird der Zug abgebrochen), setzt `restoreOrigin()` die komplette Anordnung auf
