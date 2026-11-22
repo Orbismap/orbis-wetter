@@ -8,7 +8,7 @@
 .edit-toggle {
   position: absolute;
   z-index: 30;
-  top: 8px;
+  top: -40px;
   right: 0;
   font: inherit;
   font-size: var(--fs-axis);
@@ -28,9 +28,8 @@
 
 .dashboard-wrap {
   width: 100%;
-  /* Room for the edit button above the canvas – overflow: auto also clips the block direction. */
-  padding: 48px var(--s-5) var(--s-6);
-  overflow-x: auto; /* small windows scroll instead of reshaping the fixed canvas */
+  padding: 0 var(--s-5) var(--s-6);
+  /* No overflow container here: it would clip the button above the canvas. Small windows scroll the page. */
 }
 
 .dashboard {
