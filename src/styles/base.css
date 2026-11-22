@@ -229,37 +229,23 @@ body {
 .sun-curve .sun-path { fill: none; stroke: url(#wx-sun-path); stroke-width: 3; stroke-linecap: round; stroke-linejoin: round; }
 .sun-curve .sun-dot { fill: #101724; stroke: #fff; stroke-width: 2; }
 
-/* Moon: the phase image dominates the small cell; title and date sit over it. */
+/* Moon: standard card layout like every other widget. */
 .widget-frame:has(> .detail.moon) { padding: 4px; }
-.detail.moon { position: relative; align-items: stretch; justify-content: flex-start; }
-.detail.moon .card-title { margin-bottom: 2px; }
-.detail.moon .card-title, .detail.moon .moon-dates { position: relative; z-index: 2; }
-/* Small variant: grid centres the image in the cell; text is pinned to top and bottom. */
-.detail.moon:not(.moon-wide) { display: grid; place-content: center; place-items: center; }
-.detail.moon:not(.moon-wide) .card-title { position: absolute; top: 2px; left: 0; right: 0; }
-.detail.moon:not(.moon-wide) .moon-dates { position: absolute; bottom: 2px; left: 0; right: 0; }
-.moon-image {
+.detail.moon { display: flex; flex-direction: column; align-items: stretch; }
+.detail.moon .moon-image {
   display: block;
-  width: 100%;
-  max-width: 100px;
+  width: 120px;
+  height: 120px;
+  max-width: none;
   aspect-ratio: 1;
   object-fit: contain;
   align-self: center;
   margin: auto 0;
   pointer-events: none;
 }
-/* Small variant: image fills the cell behind the text. */
-.detail.moon:not(.moon-wide) .moon-image {
-  position: static;
-  width: 148px;
-  height: 148px;
-  max-width: none;
-  margin: 0;
-}
 .moon-dates {
   display: flex;
   justify-content: center;
-  margin-top: auto;
   font-size: 0.625rem;
   line-height: 1.1;
   color: var(--text-2);
@@ -267,10 +253,10 @@ body {
 .moon-dates > div { white-space: nowrap; }
 
 /* Wide variant: image on the left, phase details on the right. */
-.moon-wide-body { display: flex; align-items: center; gap: var(--s-3); flex: 1; min-height: 0; position: relative; z-index: 2; }
-.moon-wide .moon-image { width: 112px; height: auto; max-width: 112px; flex: none; margin: 0; position: static; transform: none; }
+.moon-wide-body { display: flex; align-items: center; gap: var(--s-3); flex: 1; min-height: 0; }
+.moon-wide .moon-image { width: 96px; height: 96px; max-width: none; flex: none; margin: 0; }
 .moon-wide .moon-info { flex: 1; min-width: 0; }
-.moon-wide .moon-dates { justify-content: flex-start; margin-top: 4px; color: var(--text-2); text-shadow: none; }
+.moon-wide .moon-dates { justify-content: flex-start; margin-top: 4px; color: var(--text-2); }
 
 .warning .big { font-size: 1.25rem; }
 .warning .note { color: var(--text-1); }
