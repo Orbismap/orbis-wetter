@@ -58,6 +58,28 @@ describe('LayoutStore', () => {
     ]);
   });
 
+  it('rotates the upstream widget along with a continuing drag', () => {
+    const s = new LayoutStore({
+      preset: 'testgrid4',
+      placements: [
+        placement('one', 0, 0, 2, 1),
+        placement('two', 0, 1, 2, 1),
+        placement('three', 0, 2),
+        placement('four', 1, 2),
+      ],
+    });
+    const cells = () => Object.fromEntries(
+      s.getState().placements.map((p) => [p.id, [p.x, p.y]]),
+    );
+
+    expect(s.swapRegion('one', 0, 1)).toBe(true);
+    expect(cells()).toEqual({ one: [0, 1], two: [0, 0], three: [0, 2], four: [1, 2] });
+
+    // Dragging on into 3/4 pulls `two` down one step instead of leaving it stranded at the top.
+    expect(s.swapRegion('one', 0, 2)).toBe(true);
+    expect(cells()).toEqual({ one: [0, 2], two: [0, 1], three: [0, 0], four: [1, 0] });
+  });
+
   it('refuses a region swap when the displaced widgets do not fit the old footprint', () => {
     const s = new LayoutStore({
       preset: 'testgrid4',

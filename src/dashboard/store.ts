@@ -89,6 +89,37 @@ export class LayoutStore {
     const occupants = this.state.placements.filter((p) => p.id !== draggedId && overlaps(target, p));
     if (occupants.length === 0) return this.move(draggedId, x, y);
 
+    // Rotation: widgets one step behind the dragged widget were displaced by an earlier move in
+    // this gesture. Let them follow into its old cells and move the target occupants into theirs.
+    const dx = x - dragged.x;
+    const dy = y - dragged.y;
+    const ux = Math.abs(dx) >= Math.abs(dy) ? Math.sign(dx) : 0;
+    const uy = ux === 0 ? Math.sign(dy) : 0;
+    if (ux !== 0 || uy !== 0) {
+      const upstream = { x: dragged.x - ux, y: dragged.y - uy, w: dragged.w, h: dragged.h };
+      if (fits(preset, upstream)) {
+        const predecessors = this.state.placements.filter((p) => p.id !== draggedId && overlaps(p, upstream));
+        const shared = predecessors.some((p) => occupants.some((o) => o.id === p.id));
+        if (predecessors.length && !shared) {
+          const predecessorSpots = packIntoCells(predecessors, rectCells(dragged), false);
+          const occupantSpots = packIntoCells(occupants, rectCells(upstream), false);
+          if (predecessorSpots && occupantSpots) {
+            const spots = new Map([...predecessorSpots, ...occupantSpots]);
+            const next = this.state.placements.map((p) => {
+              if (p.id === draggedId) return { ...p, x, y };
+              const spot = spots.get(p.id);
+              return spot ? { ...p, ...spot } : p;
+            });
+            if (next.every((p) => fits(preset, p)) && collisions(next).length === 0) {
+              this.commit({ ...this.state, placements: next });
+              return true;
+            }
+          }
+        }
+      }
+    }
+
+    // No upstream widget to rotate with – pack the target occupants into the old footprint.
     const packed = packIntoCells(occupants, rectCells(dragged));
     if (!packed) return false;
 

@@ -64,6 +64,12 @@ die gesamte Region: Alle betroffenen Widgets rücken gemeinsam in die alte Fläc
 `1 1 / 2 3` wandert das 2×1-Widget nach unten, während 2 und 3 zusammen nach oben rücken. `packIntoCells()`
 berechnet die neue Anordnung per Exact-Cover-Suche; passt die Fläche nicht, wird der Zug abgelehnt.
 
+**Rotation beim Weiterziehen:** Wurde ein Widget durch eine vorherige Bewegung dieses Zugs nach oben verdrängt,
+wandert es beim nächsten Schritt mit – es bleibt also nicht „hängen". Aus `2 2 / 1 1 / 3 4` wird beim Ziehen von 1
+auf 3/4 so `3 4 / 2 2 / 1 1`: alle drei Gruppen rutschen je eine Position in Ziehrichtung. Dafür prüft
+`swapRegion` die Region **eine Zelle hinter** dem gezogenen Widget und rotiert Vorgänger → alte Fläche →
+Zielbereich. Pro Aktion ändert sich dadurch nur die direkte Nachbarschaft.
+
 **Neues Widget hinzufügen:** Datei unter `src/widgets/` anlegen, die eine `WidgetDefinition` exportiert (Titel,
 unterstützte `variants`, `Component`), in `src/widgets/register.ts` registrieren und eine `Placement` in
 `src/dashboard/defaultLayout.ts` setzen. Die Grid-Engine muss nicht verändert werden.

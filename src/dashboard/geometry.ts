@@ -87,7 +87,7 @@ export function rectCells(rect: Rect): Array<{ x: number; y: number }> {
  * small ones: all displaced widgets must fit into the dragged widget's old footprint together.
  */
 export function packIntoCells<T extends Rect & { id: string }>(
-  rectangles: T[], cells: Array<{ x: number; y: number }>,
+  rectangles: T[], cells: Array<{ x: number; y: number }>, fillAll = true,
 ): Map<string, { x: number; y: number }> | null {
   const remaining = new Set(cells.map((cell) => `${cell.x},${cell.y}`));
   const result = new Map<string, { x: number; y: number }>();
@@ -95,7 +95,7 @@ export function packIntoCells<T extends Rect & { id: string }>(
   const ordered = [...rectangles].sort((a, b) => b.w * b.h - a.w * a.h);
 
   const place = (index: number): boolean => {
-    if (index === ordered.length) return remaining.size === 0;
+    if (index === ordered.length) return !fillAll || remaining.size === 0;
     const rect = ordered[index]!;
     for (const cell of cells) {
       const keys: string[] = [];
