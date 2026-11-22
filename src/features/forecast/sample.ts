@@ -6,6 +6,7 @@ export const sample: WeatherNow = {
   place: { name: 'Bad Kleinen', eyebrow: 'Mein Standort' },
   current: {
     temp: 4,
+    code: 3,
     feelsLike: 0,
     high: 5,
     low: 0,

@@ -1,5 +1,6 @@
 /** Pure helpers for the compact map's layer switcher. */
 import type { WxMapMode } from '../handoff/modes';
+import { isPrecipitating } from '../wmo/weather';
 
 export interface MarkerCondition {
   temp: number;
@@ -15,6 +16,18 @@ export const MODE_TITLE: Record<WxMapMode, string> = {
   temp: 'Temperatur',
   wind: 'Wind',
 };
+
+/**
+ * Pick the layer that best fits the current conditions:
+ * falling precipitation → radar, frost/heat → temperature, strong wind → wind,
+ * otherwise the precipitation field (meaningful even on a dry day).
+ */
+export function suggestedMapMode(condition: MarkerCondition): WxMapMode {
+  if (isPrecipitating(condition.code)) return 'radar';
+  if (condition.temp <= 0 || condition.temp >= 30) return 'temp';
+  if (condition.wind >= 30) return 'wind';
+  return 'precip';
+}
 const SYMBOLS: [number, string][] = [
   [95, '⚡'], [80, '☂'], [71, '❄'], [61, '☂'], [51, '☂'], [45, '≋'], [2, '☁'], [0, '☀'],
 ];

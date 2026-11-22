@@ -9,6 +9,17 @@ export default defineConfig({
   base: '/wetter/',
   plugins: [preact()],
   resolve: { alias: { '@': src } },
+  // orbis-karten builds /wx-render/v1.js; in dev it lives on the sibling dev server.
+  server: {
+    proxy: {
+      '/wx-render': {
+        target: 'http://localhost:5173',
+        // Vite appends ?import to module requests; the karten dev server refuses to serve
+        // public/ files that way. Strip it so the raw ES module is forwarded.
+        rewrite: (path) => path.replace(/\?import$/, ''),
+      },
+    },
+  },
   build: {
     outDir: 'dist/wetter',
     target: 'es2022',

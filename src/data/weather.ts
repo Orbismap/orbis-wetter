@@ -186,6 +186,7 @@ export function buildWeather(
     place: { name: location.name, eyebrow: location.eyebrow, lat: location.lat, lng: location.lng },
     current: {
       temp: round(temp),
+      code,
       feelsLike,
       high,
       low,

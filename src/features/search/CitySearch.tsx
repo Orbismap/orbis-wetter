@@ -4,8 +4,9 @@ import { searchPlaces, type Place } from '../../data/geocoding';
 import { loadFavorites } from '../../data/favorites';
 import './search.css';
 
-/** Real place search (Open-Meteo Geocoding) with debounce, keyboard control and abortable requests. */
-export function CitySearch({ onSelect }: { onSelect: (place: Place) => void }) {
+/** Real place search (Open-Meteo Geocoding) with debounce, keyboard control and abortable requests.
+ *  `inlineFavorites` hides them from the dropdown when the surrounding list shows them already. */
+export function CitySearch({ onSelect, inlineFavorites = false, shortcut = false }: { onSelect: (place: Place) => void; inlineFavorites?: boolean; shortcut?: boolean }) {
   const [query, setQuery] = useState('');
   const [results, setResults] = useState<Place[]>([]);
   const [open, setOpen] = useState(false);
@@ -105,7 +106,7 @@ export function CitySearch({ onSelect }: { onSelect: (place: Place) => void }) {
   };
 
   const showResults = open && query.trim().length >= 2;
-  const showFavorites = open && query.trim().length < 2 && favorites.length > 0;
+  const showFavorites = open && !inlineFavorites && query.trim().length < 2 && favorites.length > 0;
 
   return (
     <div class="city-search" ref={root}>
@@ -136,6 +137,7 @@ export function CitySearch({ onSelect }: { onSelect: (place: Place) => void }) {
           }}
           onKeyDown={onKeyDown}
         />
+        {!query && shortcut && <kbd class="city-search-kbd" aria-hidden="true">⌘F</kbd>}
         {query && (
           <button
             type="button"

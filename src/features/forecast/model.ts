@@ -25,6 +25,8 @@ export interface WeatherNow {
   place: { name: string; eyebrow: string; lat?: number; lng?: number };
   current: {
     temp: number;
+    /** Current WMO weather code – drives the condition-aware default map layer. */
+    code: number;
     feelsLike: number;
     high: number;
     low: number;

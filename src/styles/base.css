@@ -12,6 +12,22 @@
   --glass-line: rgba(255, 255, 255, 0.22);
   --warm: #ffd27a;
   --cold: #7cc4ff;
+
+  /* Tokens mirrored from orbis-karten so both apps' chrome is pixel-identical. */
+  --limb: #72c8f0;
+  --now: #f2b45a;
+  --g-panel: rgba(22, 26, 34, 0.72);
+  --g-fill: rgba(255, 255, 255, 0.06);
+  --g-fill-hover: rgba(255, 255, 255, 0.09);
+  --g-fill-active: rgba(255, 255, 255, 0.12);
+  --g-rim: rgba(255, 255, 255, 0.09);
+  --g-shadow: 0 8px 24px rgba(0, 0, 0, 0.22);
+  --r-panel: 22px;
+  --ease: cubic-bezier(0.2, 0.8, 0.2, 1);
+  --hud-edge: 8px;
+  --hud-mini-h: 40px;
+  --hud-gap: 8px;
+  --hud-main-w: 222px;
 }
 
 * { box-sizing: border-box; }
@@ -232,10 +248,22 @@ body {
 /* Moon: the image is oversized and absolutely centred behind the text;
    its transparent edges extend beyond the card and are clipped. */
 .widget-frame:has(> .detail.moon) { padding: var(--s-3); }
-.widget-frame:has(> .windmap) { padding: var(--s-3); }
-.widget-frame:has(> .windmap) .windmap { padding: 0; }
-.widget-frame:has(> .windmap) .windmap .card-title { padding: 0; }
-.widget-frame:has(> .windmap) .wx-map { margin: -6px; width: calc(100% + 12px); height: calc(100% + 6px); }
+.widget-frame:has(> .mapcard) { padding: var(--s-3); }
+/* The card's size containment, glass backdrop-filter and overflow all interfere with a
+   position:fixed descendant: containment and backdrop-filter make the card the containing
+   block (so top/left:0 land at the card, not the viewport), overflow clips it, and the
+   resulting stacking context traps its z-index. Drop all of them while the map is expanded. */
+.widget-frame:has(> .mapcard):has(.wx-map--fullscreen) {
+  container-type: normal;
+  overflow: visible;
+  -webkit-backdrop-filter: none;
+  backdrop-filter: none;
+}
+/* The whole HUD must clear the fullscreen map (z-index 99999) – a child cannot escape its context. */
+body:has(.wx-map--fullscreen) .wx-hud { z-index: 100000; }
+.widget-frame:has(> .mapcard) .mapcard { padding: 0; }
+.widget-frame:has(> .mapcard) .mapcard .card-title { padding: 0; }
+.widget-frame:has(> .mapcard) .wx-map { margin: -6px; width: calc(100% + 12px); height: calc(100% + 6px); }
 .detail.moon { position: relative; display: flex; flex-direction: column; align-items: stretch; }
 .detail.moon .card-title { position: relative; z-index: 2; margin-bottom: var(--s-3); }
 .detail.moon .moon-image {
@@ -301,12 +329,12 @@ body {
 }
 
 /* ---------- wind map ---------- */
-.windmap { display: flex; flex-direction: column; }
-.windmap .card-title { justify-content: flex-start; }
+.mapcard { display: flex; flex-direction: column; }
+.mapcard .card-title { justify-content: flex-start; }
 /* Layer picker sits at the right end of the card title. */
 .layer-controls { margin-left: auto; display: flex; align-items: center; gap: var(--s-2); }
 .layer-note { font-size: var(--fs-axis); color: var(--text-3); white-space: nowrap; letter-spacing: 0; text-transform: none; }
-.layer-picker { position: relative; }
+.layer-picker { position: relative; display: flex; align-items: center; gap: var(--s-2); }
 .layer-toggle {
   display: grid;
   place-items: center;
@@ -320,6 +348,19 @@ body {
   cursor: pointer;
 }
 .layer-toggle:hover, .layer-toggle[aria-expanded='true'] { background: var(--glass-hover); }
+.layer-handoff-icon {
+  display: grid;
+  place-items: center;
+  width: 28px;
+  height: 28px;
+  padding: 0;
+  border: 1px solid var(--glass-line);
+  border-radius: 8px;
+  background: var(--glass);
+  color: var(--text-1);
+  cursor: pointer;
+}
+.layer-handoff-icon:hover { background: var(--glass-hover); }
 .layer-menu {
   position: absolute;
   z-index: 5;
@@ -384,6 +425,23 @@ body {
   border-radius: 20px;
   background: #1c2739;
   view-transition-name: wx-map;
+}
+
+/* Fullscreen state (before handoff to orbis-karten). Geometry is set inline by
+   MapCard's rAF animation, so this class only carries stacking/overflow. */
+.wx-map--fullscreen {
+  position: fixed;
+  z-index: 99999 !important;
+  overflow: visible;
+}
+
+/* Handoff view transition: smooth map scaling */
+@media (prefers-reduced-motion: no-preference) {
+  ::view-transition-old(wx-map),
+  ::view-transition-new(wx-map) {
+    animation-duration: 0.5s;
+    animation-timing-function: cubic-bezier(0.22, 1, 0.36, 1);
+  }
 }
 .city-marker { display: flex; align-items: center; gap: 4px; color: #fff; font-size: 11px; text-shadow: 0 1px 3px #000; white-space: nowrap; pointer-events: none; }
 .city-marker::before { content: ''; width: 6px; height: 6px; border-radius: 50%; background: var(--marker-color, #fff); box-shadow: 0 0 0 1px rgba(0, 0, 0, 0.5); }
