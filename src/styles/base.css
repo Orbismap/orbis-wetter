@@ -229,20 +229,22 @@ body {
 .sun-curve .sun-path { fill: none; stroke: url(#wx-sun-path); stroke-width: 3; stroke-linecap: round; stroke-linejoin: round; }
 .sun-curve .sun-dot { fill: #101724; stroke: #fff; stroke-width: 2; }
 
-/* Moon: title, a large phase image and the two upcoming dates. */
+/* Moon: title, a large phase image and the next upcoming date. Tighter padding than other cards. */
+.widget-frame:has(> .detail.moon) { padding: 8px; }
 .detail.moon { align-items: stretch; justify-content: flex-start; }
+.detail.moon .card-title { margin-bottom: 2px; }
 .moon-image {
   display: block;
   width: 100%;
-  max-width: 76px;
+  max-width: 96px;
   aspect-ratio: 1;
   object-fit: contain;
   align-self: center;
   margin: auto 0;
   pointer-events: none;
 }
-.moon-dates { display: flex; flex-direction: column; gap: 2px; font-size: 0.625rem; line-height: 1.2; color: var(--text-2); }
-.moon-dates > div { display: flex; align-items: center; gap: 5px; white-space: nowrap; }
+.moon-dates { display: flex; flex-direction: column; font-size: 0.625rem; line-height: 1.1; color: var(--text-2); }
+.moon-dates > div { display: flex; align-items: center; gap: 4px; white-space: nowrap; }
 .moon-dot { width: 7px; height: 7px; border-radius: 50%; flex: none; }
 .moon-dot.full { background: var(--warm); }
 .moon-dot.new { background: transparent; border: 1px solid var(--text-3); }

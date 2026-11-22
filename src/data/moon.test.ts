@@ -28,5 +28,7 @@ describe('moon phase', () => {
     expect(moonInfo(atFraction(0.5)).full).toBe('heute');
     expect(moonInfo(atFraction(0.4)).full).toBe('in 3 Tagen');
     expect(moonInfo(atFraction(0.5)).newMoon).toBe('in 15 Tagen');
+    expect(moonInfo(atFraction(0.8)).next).toEqual({ name: 'Neumond', when: 'in 6 Tagen' });
+    expect(moonInfo(atFraction(0.2)).next.name).toBe('Vollmond');
   });
 });

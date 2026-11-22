@@ -53,7 +53,7 @@ export interface WeatherNow {
     /** Current position on a 0–24 h clock axis (0 = midnight, 0.5 = noon). */
     sunClock: number;
     averages: { delta: number; todayHigh: number; averageHigh: number };
-    moon: { phase: string; illumination: number; rise: string; full: string; newMoon: string; image: number };
+    moon: { phase: string; illumination: number; rise: string; full: string; newMoon: string; next: { name: string; when: string }; image: number };
     air: { value: number; label: string; note: string };
     warning?: { badge: string; headline: string; text: string; source: string };
   };

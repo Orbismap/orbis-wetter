@@ -112,8 +112,10 @@ export function MoonCard({ moon, wide = false }: { moon: WeatherNow['current']['
   const image = <img class="moon-image" src={moonImageUrl(moon.image)} alt={moon.phase} draggable={false} />;
   const dates = (
     <div class="moon-dates">
-      <div><span class="moon-dot full" />Vollmond: {moon.full}</div>
-      <div><span class="moon-dot new" />Neumond: {moon.newMoon}</div>
+      <div>
+        <span class={`moon-dot ${moon.next.name === 'Vollmond' ? 'full' : 'new'}`} />
+        {moon.next.name}: {moon.next.when}
+      </div>
     </div>
   );
   if (!wide) {

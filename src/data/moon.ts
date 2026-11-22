@@ -14,6 +14,8 @@ export interface MoonInfo {
   full: string;
   /** Next new moon as a relative label. */
   newMoon: string;
+  /** Whichever of the two comes first. */
+  next: { name: 'Vollmond' | 'Neumond'; when: string };
   /** Index of public/moon/moonPhase<N>.webp (0 = new, 14 = full). */
   image: number;
 }
@@ -52,6 +54,9 @@ export function moonInfo(at: number = Date.now()): MoonInfo {
     rise: `${pad(Math.floor(riseMinutes / 60))}:${pad(riseMinutes % 60)}`,
     full: inDays(toFull),
     newMoon: inDays(toNew),
+    next: toFull <= toNew
+      ? { name: 'Vollmond', when: inDays(toFull) }
+      : { name: 'Neumond', when: inDays(toNew) },
     image,
   };
 }
