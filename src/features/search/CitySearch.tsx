@@ -12,6 +12,21 @@ export function CitySearch({ onSelect }: { onSelect: (place: Place) => void }) {
   const [loading, setLoading] = useState(false);
   const [error, setError] = useState(false);
   const root = useRef<HTMLDivElement>(null);
+  const input = useRef<HTMLInputElement>(null);
+
+  // Use the browser's find shortcut for place search instead.
+  useEffect(() => {
+    const onKeyDown = (event: KeyboardEvent) => {
+      if ((event.metaKey || event.ctrlKey) && event.key.toLowerCase() === 'f') {
+        event.preventDefault();
+        input.current?.focus();
+        input.current?.select();
+        setOpen(true);
+      }
+    };
+    document.addEventListener('keydown', onKeyDown);
+    return () => document.removeEventListener('keydown', onKeyDown);
+  }, []);
 
   useEffect(() => {
     const name = query.trim();
@@ -97,6 +112,7 @@ export function CitySearch({ onSelect }: { onSelect: (place: Place) => void }) {
           <line x1="12.5" y1="12.5" x2="17" y2="17" stroke="currentColor" stroke-width="1.6" stroke-linecap="round" />
         </svg>
         <input
+          ref={input}
           class="city-search-input"
           type="text"
           role="combobox"

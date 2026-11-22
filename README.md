@@ -49,8 +49,8 @@ eine gemeinsame, aus den Vorhersagewerten berechnete Skala (`tempScale`) statt f
 
 **Kopfzeile:** Oben links stehen das Wortmarken-Logo (Icon + „Wetter") und das Suchfeld. Die Suche ist echt:
 `data/geocoding.ts` fragt die Open-Meteo-Geokodierung (keyless, CORS `*`), `CitySearch.tsx` debounct die Eingabe
-(250 ms), bricht alte Anfragen ab und bietet Tastatursteuerung. Die Auswahl lädt Wetter und Kartenlayer für die
-Koordinaten des gefundenen Orts.
+(250 ms), bricht alte Anfragen ab und bietet Tastatursteuerung. **⌘F / Strg+F** fokussiert und markiert das Suchfeld
+statt der Browser-Suche. Die Auswahl lädt Wetter und Kartenlayer für die Koordinaten des gefundenen Orts.
 
 ## Datenquellen
 
