@@ -2,6 +2,7 @@
   "$schema": "node_modules/wrangler/config-schema.json",
   "name": "wetter",
   "compatibility_date": "2026-11-01",
+  "main": "./src/worker.ts",
   // Static site: Vite builds to dist/, Cloudflare serves it under /wetter/ on the same origin as the map.
   "assets": {
     "directory": "./dist",
