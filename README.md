@@ -107,11 +107,19 @@ per FLIP. `endGesture()` verwirft den Schnappschuss nach einem regulären Ablege
 unterstützte `variants`, `Component`), in `src/widgets/register.ts` registrieren und eine `Placement` in
 `src/dashboard/defaultLayout.ts` setzen. Die Grid-Engine muss nicht verändert werden.
 
+## Wetterkarte und Ebenen
+
+Statt eines Vergrößerungs-Buttons sitzt rechts in der Kartentitelzeile ein **Layer-Icon**. Es öffnet ein Menü mit
+den vier Ebenen `Radar`, `Niederschlag`, `Temperatur` und `Wind` (`features/forecast/mapLayers.ts`). Die Werte der
+Stadtmarker und des Standort-Markers kommen aus **einer** Open-Meteo-Multi-Location-Abfrage
+(`data/openMeteo.ts::loadCityConditions`, 10 min Cache) und werden je nach Ebene formatiert und eingefärbt.
+Der Vollbild-Link ist aus dem Titel ins Menü gewandert und übernimmt die gewählte Ebene als `l=`-Parameter.
+
 ## Übergang zur Karte
 
 Der Vertrag steht in [docs/HANDOFF.md](docs/HANDOFF.md). Kurz: Der Vollbild-Link ist ein echtes `<a>`, die
-Wetterkarte trägt `view-transition-name: wx-map`, und die URL übernimmt Center/Zoom sowie die Karte `wetter`.
-orbis-karten springt wegen seines `jumpTo`-Verhaltens ohne Fluganimation an genau diese Position.
+Wetterkarte trägt `view-transition-name: wx-map`, und die URL übernimmt Center/Zoom, die Karte `wetter` und die
+aktive Ebene. orbis-karten springt wegen seines `jumpTo`-Verhaltens ohne Fluganimation an genau diese Position.
 
 ## Deployment
 

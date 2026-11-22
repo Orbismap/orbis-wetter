@@ -127,7 +127,7 @@ export function buildWeather(
     : feelsLike > temp + 1 ? 'Durch die Luftfeuchtigkeit ist es gefühlt wärmer.' : 'Die gefühlte Temperatur entspricht der Lufttemperatur.';
 
   return {
-    place: { name: location.name, eyebrow: location.eyebrow },
+    place: { name: location.name, eyebrow: location.eyebrow, lat: location.lat, lng: location.lng },
     current: {
       temp: round(temp),
       feelsLike,

@@ -99,6 +99,43 @@ export function loadAirQuality(lat: number, lng: number, options: FetchOptions =
   });
 }
 
+// ---- conditions at the map's city markers ----------------------------------------------------
+
+export interface CityCondition {
+  temp: number;
+  precip: number;
+  wind: number;
+  code: number;
+}
+
+/** One multi-location request for all map markers (Open-Meteo accepts comma-separated coordinates). */
+export function loadCityConditions(
+  points: ReadonlyArray<{ lat: number; lng: number }>,
+  options: FetchOptions = {},
+): Promise<CityCondition[]> {
+  if (!points.length) return Promise.resolve([]);
+  const url = new URL(API.forecast);
+  url.search = new URLSearchParams({
+    latitude: points.map((p) => p.lat).join(','),
+    longitude: points.map((p) => p.lng).join(','),
+    current: 'temperature_2m,precipitation,wind_speed_10m,weather_code',
+    timezone: 'auto',
+  }).toString();
+  const key = `om:cities:${points.map((p) => `${p.lat.toFixed(2)},${p.lng.toFixed(2)}`).join(';')}`;
+  return cached(key, 10 * 60_000, async () => {
+    const raw = await fetchJson<{ current?: Record<string, unknown> } | { current?: Record<string, unknown> }[]>(
+      url.toString(), { ...options, timeout: 20_000 },
+    );
+    const list = Array.isArray(raw) ? raw : [raw];
+    return list.map((item) => ({
+      temp: num(item.current?.temperature_2m) ?? 0,
+      precip: num(item.current?.precipitation) ?? 0,
+      wind: num(item.current?.wind_speed_10m) ?? 0,
+      code: num(item.current?.weather_code) ?? 0,
+    }));
+  });
+}
+
 // ---- DWD warnings -----------------------------------------------------------------------------
 
 interface DwdFeature {

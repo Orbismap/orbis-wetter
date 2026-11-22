@@ -41,7 +41,7 @@ export function App() {
       .catch((error: unknown) => {
         if (controller.signal.aborted) return;
         setData({
-          weather: { ...sample, place: { name: city.name, eyebrow: city.region } },
+          weather: { ...sample, place: { name: city.name, eyebrow: city.region, lat: city.lat, lng: city.lng } },
           source: { label: 'Beispieldaten', detail: error instanceof Error ? error.message : 'Fehler' },
         });
       });

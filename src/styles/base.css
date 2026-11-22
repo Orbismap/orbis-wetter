@@ -192,8 +192,77 @@ body {
 /* ---------- wind map ---------- */
 .windmap { display: flex; flex-direction: column; }
 .windmap .card-title { justify-content: flex-start; }
-.expand { margin-left: auto; color: var(--text-1); font-size: 1.1rem; text-decoration: none; padding: 2px 6px; border-radius: 8px; }
-.expand:hover { background: var(--glass-hover); }
+/* Layer picker sits at the right end of the card title. */
+.layer-picker { position: relative; margin-left: auto; }
+.layer-toggle {
+  display: grid;
+  place-items: center;
+  width: 28px;
+  height: 28px;
+  padding: 0;
+  border: 1px solid var(--glass-line);
+  border-radius: 8px;
+  background: var(--glass);
+  color: var(--text-1);
+  cursor: pointer;
+}
+.layer-toggle:hover, .layer-toggle[aria-expanded='true'] { background: var(--glass-hover); }
+.layer-menu {
+  position: absolute;
+  z-index: 5;
+  top: calc(100% + 6px);
+  right: 0;
+  min-width: 168px;
+  padding: 6px;
+  border: 1px solid var(--glass-line);
+  border-radius: 12px;
+  background: rgba(20, 26, 36, 0.94);
+  -webkit-backdrop-filter: blur(24px) saturate(1.3);
+  backdrop-filter: blur(24px) saturate(1.3);
+  box-shadow: var(--g-shadow);
+  color: var(--text-1);
+}
+.layer-menu-title {
+  padding: 4px 8px 6px;
+  font-size: var(--fs-axis);
+  letter-spacing: 0.1em;
+  text-transform: uppercase;
+  color: var(--text-3);
+}
+.layer-item {
+  display: flex;
+  align-items: center;
+  gap: var(--s-2);
+  width: 100%;
+  padding: 7px 8px;
+  border: 0;
+  border-radius: 8px;
+  background: transparent;
+  color: inherit;
+  font: inherit;
+  font-size: var(--fs-ui);
+  text-align: left;
+  cursor: pointer;
+}
+.layer-item:hover, .layer-item.active { background: var(--glass-hover); }
+.layer-check { margin-left: auto; color: var(--warm); }
+.layer-swatch { width: 9px; height: 9px; border-radius: 50%; flex: none; }
+.layer-swatch[data-mode='radar'] { background: #c3ccd9; }
+.layer-swatch[data-mode='precip'] { background: #4aa8ff; }
+.layer-swatch[data-mode='temp'] { background: linear-gradient(90deg, #7cc4ff, #ff8a5e); }
+.layer-swatch[data-mode='wind'] { background: #6fd19a; }
+.layer-handoff {
+  display: flex;
+  justify-content: space-between;
+  gap: var(--s-2);
+  margin-top: 5px;
+  padding: 8px;
+  border-top: 1px solid var(--glass-line);
+  color: var(--text-2);
+  font-size: var(--fs-small);
+  text-decoration: none;
+}
+.layer-handoff:hover { color: var(--text-1); }
 /* Shared element: must match orbis-karten exactly. */
 .wx-map {
   flex: 1;
@@ -204,7 +273,18 @@ body {
   view-transition-name: wx-map;
 }
 .city-marker { display: flex; align-items: center; gap: 4px; color: #fff; font-size: 11px; text-shadow: 0 1px 3px #000; white-space: nowrap; pointer-events: none; }
-.city-marker::before { content: ''; width: 5px; height: 5px; border-radius: 50%; background: #fff; box-shadow: 0 0 0 1px rgba(0, 0, 0, 0.5); }
+.city-marker::before { content: ''; width: 6px; height: 6px; border-radius: 50%; background: var(--marker-color, #fff); box-shadow: 0 0 0 1px rgba(0, 0, 0, 0.5); }
 .here-marker { display: flex; flex-direction: column; align-items: center; pointer-events: none; }
-.here-value { display: grid; place-items: center; width: 40px; height: 40px; border: 2px solid #fff; border-radius: 50%; background: rgba(40, 70, 120, 0.75); font-size: 0.9375rem; font-weight: 600; }
+.here-value {
+  display: grid;
+  place-items: center;
+  width: 40px;
+  height: 40px;
+  border: 2px solid var(--marker-color, #fff);
+  border-radius: 50%;
+  background: color-mix(in srgb, var(--marker-color, #72c8f0) 48%, rgba(12, 20, 35, 0.82));
+  font-size: 0.9375rem;
+  font-weight: 600;
+  color: #fff;
+}
 .here-label { margin-top: 4px; padding: 2px 5px; border-radius: 5px; background: rgba(0, 0, 0, 0.45); font-size: 9px; white-space: nowrap; }

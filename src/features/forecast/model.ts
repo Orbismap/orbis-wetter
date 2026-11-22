@@ -22,7 +22,7 @@ export interface Day {
 }
 
 export interface WeatherNow {
-  place: { name: string; eyebrow: string };
+  place: { name: string; eyebrow: string; lat?: number; lng?: number };
   current: {
     temp: number;
     feelsLike: number;

@@ -4,7 +4,7 @@ import type { WidgetDefinition } from './types';
 
 function WindMapWidget() {
   const { place, current } = useWeather();
-  return <WindMapCard windSpeed={current.windSpeed} placeName={place.eyebrow} />;
+  return <WindMapCard windSpeed={current.windSpeed} placeName={place.name} lat={place.lat} lng={place.lng} />;
 }
 
 export const windMapWidget: WidgetDefinition = {
