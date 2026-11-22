@@ -259,7 +259,8 @@ body {
   -webkit-backdrop-filter: none;
   backdrop-filter: none;
 }
-body:has(.wx-map--fullscreen) .wx-hud-mini { z-index: 100000; }
+/* The whole HUD must clear the fullscreen map (z-index 99999) – a child cannot escape its context. */
+body:has(.wx-map--fullscreen) .wx-hud { z-index: 100000; }
 .widget-frame:has(> .mapcard) .mapcard { padding: 0; }
 .widget-frame:has(> .mapcard) .mapcard .card-title { padding: 0; }
 .widget-frame:has(> .mapcard) .wx-map { margin: -6px; width: calc(100% + 12px); height: calc(100% + 6px); }
