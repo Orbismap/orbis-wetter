@@ -1,12 +1,12 @@
 import type { ComponentChildren } from 'preact';
 import type { WeatherNow } from './model';
-import { Compass, GradientScale, PressureGauge, SunCurve, TempRange } from './visuals';
+import { Compass, GradientScale, PressureGauge, SunCurve, tempScale, TempRange } from './visuals';
 
 /** All detail cards are buttons already: clicking them will open more detail in a later step. */
 function DetailCard({ title, icon, className = '', children }: { title: string; icon: string; className?: string; children: ComponentChildren }) {
   return (
     <button type="button" class={`detail ${className}`} title="Details folgen in einer späteren Stufe">
-      <div class="card-title"><span class="title-icon">{icon}</span>{title}</div>
+      <div class="card-title"><span class="title-icon">{icon}</span><span class="title-text">{title}</span></div>
       {children}
     </button>
   );
@@ -22,14 +22,14 @@ export function AirQualityCard({ air }: { air: WeatherNow['current']['air'] }) {
   );
 }
 
-export function WindCard({ windSpeed, windGust, windDirection }: Pick<WeatherNow['current'], 'windSpeed' | 'windGust' | 'windDirection'>) {
+export function WindCard({ windSpeed, windGust, windDirection, windLabel }: Pick<WeatherNow['current'], 'windSpeed' | 'windGust' | 'windDirection' | 'windLabel'>) {
   return (
     <DetailCard title="Wind" icon="≋" className="wind">
       <div class="wind-layout">
         <div class="wind-rows">
           <div><span>Wind</span><b>{windSpeed} km/h</b></div>
           <div><span>Windböen</span><b>{windGust} km/h</b></div>
-          <div><span>Richtung</span><b>{windDirection}° N</b></div>
+          <div><span>Richtung</span><b>{windDirection}° {windLabel}</b></div>
         </div>
         <Compass speed={windSpeed} direction={windDirection} />
       </div>
@@ -43,6 +43,15 @@ export function WarningCard({ warning }: { warning: NonNullable<WeatherNow['curr
       <div class="big">{warning.headline}</div>
       <p class="note">{warning.text}</p>
       <div class="source">{warning.source}</div>
+    </DetailCard>
+  );
+}
+
+/** Same card chrome as a real warning, so "no warnings" doesn't look like a stray text fragment. */
+export function NoWarningCard() {
+  return (
+    <DetailCard title="Unwetterwarnung" icon="✓" className="warning">
+      <p class="note">Für diesen Ort liegen keine Warnungen vor.</p>
     </DetailCard>
   );
 }
@@ -69,12 +78,19 @@ export function SunCard({ sunrise, sunset }: Pick<WeatherNow['current'], 'sunris
 }
 
 export function FeelsLikeCard({ feelsLike, temp, feelsLikeNote: note }: Pick<WeatherNow['current'], 'feelsLike' | 'temp' | 'feelsLikeNote'>) {
+  const scale = tempScale([{ min: Math.min(feelsLike, temp), max: Math.max(feelsLike, temp) }]);
   return (
     <DetailCard title="Gefühlte Temperatur" icon="🌡" className="feels">
       <div class="big">{feelsLike}°</div>
       <div class="sub">Tatsächlich: {temp}°</div>
-      <TempRange min={-4} max={temp} scaleMin={-6} scaleMax={8} />
-      <div class="range-label">−4°</div>
+      <TempRange
+        min={Math.min(feelsLike, temp)}
+        max={Math.max(feelsLike, temp)}
+        marker={feelsLike}
+        scaleMin={scale.min}
+        scaleMax={scale.max}
+      />
+      <div class="range-label range-ends"><span>{scale.min}°</span><span>{scale.max}°</span></div>
       <p class="note">{note}</p>
     </DetailCard>
   );
@@ -93,9 +109,9 @@ export function PrecipCard({ precipitation, precipitationPeriod, precipitationNo
 export function MoonCard({ moon }: { moon: WeatherNow['current']['moon'] }) {
   return (
     <DetailCard title={moon.phase} icon="☾" className="moon">
-      <div class="kv"><span>Beleuchtungsgrad</span><b>{moon.illumination} %</b></div>
-      <div class="kv"><span>Nächster Mondaufgang</span><b>{moon.rise}</b></div>
-      <div class="kv"><span>Nächster Vollmond</span><b>{moon.full}</b></div>
+      <div class="kv"><span>Beleuchtung</span><b>{moon.illumination} %</b></div>
+      <div class="kv"><span>Mondaufgang</span><b>{moon.rise}</b></div>
+      <div class="kv"><span>Vollmond</span><b>{moon.full}</b></div>
     </DetailCard>
   );
 }
@@ -133,7 +149,7 @@ export function AveragesCard({ averages }: { averages: WeatherNow['current']['av
   return (
     <DetailCard title="Durchschnittswerte" icon="▤" className="averages">
       <div class="big">{averages.delta}°</div>
-      <p class="note">Abweichung vom durchschnittlichen Tageshöchstwert</p>
+      <p class="note">vs. Ø-Tageshöchstwert</p>
       <div class="kv"><span>Heute</span><b>H: {averages.todayHigh}°</b></div>
       <div class="kv"><span>Durchschnitt</span><b>H: {averages.averageHigh}°</b></div>
     </DetailCard>

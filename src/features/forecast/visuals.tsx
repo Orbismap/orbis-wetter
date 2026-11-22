@@ -1,14 +1,26 @@
 /** Small, dependency-free SVG visuals shared by the forecast cards. */
 
+/** Shared, padded temperature scale that adapts to the actual forecast instead of fixed sample values. */
+export function tempScale(values: Array<{ min: number; max: number }>, pad = 2): { min: number; max: number } {
+  if (!values.length) return { min: -10, max: 10 };
+  const lows = values.map((v) => v.min);
+  const highs = values.map((v) => v.max);
+  const lo = Math.floor((Math.min(...lows) - pad) / 5) * 5;
+  const hi = Math.ceil((Math.max(...highs) + pad) / 5) * 5;
+  return { min: lo, max: hi > lo ? hi : lo + 10 };
+}
+
 /** Horizontal temperature band, positioned on a shared scale so the rows are comparable. */
-export function TempRange({ min, max, scaleMin = -8, scaleMax = 6 }: { min: number; max: number; scaleMin?: number; scaleMax?: number }) {
+export function TempRange({
+  min, max, scaleMin = -8, scaleMax = 6, marker,
+}: { min: number; max: number; scaleMin?: number; scaleMax?: number; marker?: number }) {
   const pct = (v: number) => ((v - scaleMin) / (scaleMax - scaleMin)) * 100;
   const left = pct(min);
   const width = Math.max(6, pct(max) - left);
   return (
     <span class="range" aria-hidden="true">
       <span class="range-fill" style={{ left: `${left}%`, width: `${width}%` }} />
-      <span class="range-dot" style={{ left: `${left + width}%` }} />
+      <span class="range-dot" style={{ left: `${pct(marker ?? max)}%` }} />
     </span>
   );
 }

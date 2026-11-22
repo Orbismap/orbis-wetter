@@ -59,6 +59,12 @@ export interface FieldImage {
   bounds: [[number, number], [number, number], [number, number], [number, number]];
 }
 
+/** Web Mercator cannot represent the poles or the antimeridian exactly; MapLibre rejects such image corners. */
+export const MERCATOR_LAT = 85.0511287798066;
+const clamp = (value: number, min: number, max: number) => Math.max(min, Math.min(max, value));
+const mercatorLat = (lat: number) => clamp(lat, -MERCATOR_LAT, MERCATOR_LAT);
+const mercatorLng = (lng: number) => clamp(lng, -179.9999, 179.9999);
+
 /** Renders one time step of the given fields into a raster image for MapLibre. */
 export function buildFieldImage(
   fields: Partial<Record<'temperature_2m' | 'u' | 'v' | 'precipitation', OwxField>>,
@@ -95,10 +101,14 @@ export function buildFieldImage(
   }
   const east = lon0 + nx * Math.abs(dx);
   const south = lat0 - ny * Math.abs(dy);
+  const west = mercatorLng(lon0);
+  const right = mercatorLng(east);
+  const north = mercatorLat(lat0);
+  const bottom = mercatorLat(south);
   return {
     width: nx,
     height: ny,
     pixels,
-    bounds: [[lon0, lat0], [east, lat0], [east, south], [lon0, south]],
+    bounds: [[west, north], [right, north], [right, bottom], [west, bottom]],
   };
 }

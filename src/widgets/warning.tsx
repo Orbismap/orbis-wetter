@@ -1,10 +1,10 @@
 import { useWeather } from '../features/forecast/context';
-import { WarningCard } from '../features/forecast/Cards';
+import { NoWarningCard, WarningCard } from '../features/forecast/Cards';
 import type { WidgetDefinition } from './types';
 
 function WarningWidget() {
   const warning = useWeather().current.warning;
-  return warning ? <WarningCard warning={warning} /> : <p class="note">Keine Warnungen</p>;
+  return warning ? <WarningCard warning={warning} /> : <NoWarningCard />;
 }
 
 export const warningWidget: WidgetDefinition = {

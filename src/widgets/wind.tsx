@@ -4,7 +4,14 @@ import type { WidgetDefinition } from './types';
 
 function WindWidget() {
   const { current } = useWeather();
-  return <WindCard windSpeed={current.windSpeed} windGust={current.windGust} windDirection={current.windDirection} />;
+  return (
+    <WindCard
+      windSpeed={current.windSpeed}
+      windGust={current.windGust}
+      windDirection={current.windDirection}
+      windLabel={current.windLabel}
+    />
+  );
 }
 
 export const windWidget: WidgetDefinition = {

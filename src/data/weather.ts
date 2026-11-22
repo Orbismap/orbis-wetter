@@ -123,8 +123,8 @@ export function buildWeather(
   }));
 
   const summary = `${describe(code)}. ${gust > wind + 5 ? `Windböen bis ${round(gust)} km/h.` : `Wind ${round(wind)} km/h aus ${compass(direction)}.`}`;
-  const feelsLikeNote = feelsLike < temp - 1 ? 'Durch den Wind ist es gefühlt kälter.'
-    : feelsLike > temp + 1 ? 'Durch die Luftfeuchtigkeit ist es gefühlt wärmer.' : 'Die gefühlte Temperatur entspricht der Lufttemperatur.';
+  const feelsLikeNote = feelsLike < temp - 1 ? 'Durch Wind gefühlt kälter.'
+    : feelsLike > temp + 1 ? 'Durch Luftfeuchtigkeit wärmer.' : 'Entspricht der Lufttemperatur.';
 
   return {
     place: { name: location.name, eyebrow: location.eyebrow, lat: location.lat, lng: location.lng },

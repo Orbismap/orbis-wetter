@@ -35,7 +35,7 @@ src/
     types.ts          WidgetDefinition mit Varianten (1×1, 2×2, 3×2, …)
     registry.ts       Registrierung nach id
     placeholder.tsx   temporärer Inhalt
-    register.ts       registriert alle Widgets (aktuell alles Platzhalter)
+    register.ts       registriert alle 15 echten Widgets
 ```
 
 Das Desktop-Raster ist **6 Spalten × 5 Zeilen** auf festen **950 px** Breite; der Canvas skaliert nicht mit dem
@@ -43,7 +43,9 @@ Fenster, sondern wird zentriert (bei schmaleren Fenstern wird gescrollt). Weiter
 `presets.ts` (`desktop`, `wide`) – die UI hat bewusst keinen Preset-Umschalter. Jede Placement speichert `x, y, w, h`
 in Zellkoordinaten; die
 Pixelposition wird daraus berechnet. Der `LayoutStore` validiert jede Änderung gegen Rastergrenzen und
-Kollisionen.
+Kollisionen. Die Detailkarten passen ihre Dichte per CSS-Container-Query an die tatsächliche Zellgröße an – auch
+nach dem Verschieben bleiben Titel und Werte vollständig sichtbar. Die Temperatur-Balken der 10-Tage-Karte nutzen
+eine gemeinsame, aus den Vorhersagewerten berechnete Skala (`tempScale`) statt fester Beispielgrenzen.
 
 **Kopfzeile:** Oben links stehen das Wortmarken-Logo (Icon + „Wetter") und das Suchfeld. Die Suche ist echt:
 `data/geocoding.ts` fragt die Open-Meteo-Geokodierung (keyless, CORS `*`), `CitySearch.tsx` debounct die Eingabe
@@ -116,9 +118,10 @@ Die Ebenen sind **echte Flächenlayer**, keine Punkte: `applyMapLayer.ts` lädt 
 **viewport-abhängig** aus **R2** (primär, wie bei orbis-karten) – unter Zoom 4 die 0,5°-Weltübersicht, darüber genau
 die 45°-Tiles, die den aktuellen Kartenausschnitt schneiden. Bei `moveend` werden benötigte Tiles nachgeladen und
 nicht mehr sichtbare entfernt. Jedes Feld wird über `fieldLayers.ts` in ein georeferenziertes Canvas-Bild gerendert
-und als `raster`-Layer unter den Ortsbeschriftungen eingehängt. Wind nutzt `u`/`v` als Betrag, Farbskalen liegen in
-`fieldLayers.ts`. Radar kommt – wie bei orbis – aus den keylosen RainViewer-Kacheln, die von sich aus auf Zoom und
-Position reagieren.
+und als `raster`-Layer unter den Ortsbeschriftungen eingehängt. Die Bildecken werden dabei auf die
+Web-Mercator-Grenzen (±85,05° bzw. ±179,9999°) geclamppt – die ICON-Felder reichen bis zu den Polen, was MapLibre
+sonst als `outside of bounds` ablehnt. Wind nutzt `u`/`v` als Betrag, Farbskalen liegen in `fieldLayers.ts`. Radar
+kommt – wie bei orbis – aus den keylosen RainViewer-Kacheln, die von sich aus auf Zoom und Position reagieren.
 Es gibt bewusst **keine Stadt-Punkte** mehr, nur den Marker des gewählten Orts. Der Vollbild-Link ist ins Menü
 gewandert und übernimmt die gewählte Ebene als `l=`-Parameter. Bei einem Ortswechsel fliegt die Karte zum neuen
 Ort; der **5-Sekunden-Timer startet erst nach einer eigenen Interaktion** (`pointerdown`, `wheel`, `touchstart`,

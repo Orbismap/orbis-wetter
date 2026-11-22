@@ -1,6 +1,6 @@
 import { describe, expect, it } from 'vitest';
 import type { OwxField } from '../../data/owx';
-import { buildFieldImage, rampColor, TEMPERATURE_RAMP } from './fieldLayers';
+import { buildFieldImage, MERCATOR_LAT, rampColor, TEMPERATURE_RAMP } from './fieldLayers';
 
 function field(name: string, values: number[]): OwxField {
   return {
@@ -28,6 +28,16 @@ describe('ICON raster layers', () => {
     expect(image.bounds).toEqual([[10, 55], [12, 55], [12, 53], [10, 53]]);
     const first = rampColor(TEMPERATURE_RAMP, 0);
     expect([image.pixels[0], image.pixels[1], image.pixels[2], image.pixels[3]! / 255]).toEqual(first);
+  });
+
+  it('clamps polar/antimeridian corners to valid MapLibre image coordinates', () => {
+    const global = field('T', [0, 5, 10, 15]);
+    global.header = { ...global.header, nx: 2, ny: 4, lat0: 90, lon0: -180, dx: 180, dy: 45 };
+    const image = buildFieldImage({ temperature_2m: global }, 0, 'temp')!;
+    expect(image.bounds).toEqual([
+      [-179.9999, MERCATOR_LAT], [179.9999, MERCATOR_LAT],
+      [179.9999, -MERCATOR_LAT], [-179.9999, -MERCATOR_LAT],
+    ]);
   });
 
   it('computes wind magnitude from u/v and keeps nodata transparent', () => {

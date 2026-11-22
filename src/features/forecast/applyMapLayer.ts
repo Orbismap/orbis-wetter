@@ -5,6 +5,7 @@ import { cached, fetchJson } from '../../data/http';
 import { tileAt } from '../../data/owx';
 import type { WxMapMode } from '../handoff/modes';
 import { buildFieldImage, type FieldImage, type FieldMode } from './fieldLayers';
+import { MODE_TITLE } from './mapLayers';
 
 /** Below this zoom the 0.5° whole-world overview covers the view; above it the 45° tiles are loaded. */
 const LOW_ZOOM = 4;
@@ -89,7 +90,7 @@ async function mountField(
     const loaded = await Promise.all(variables.map(load));
     if (gen !== generation || disposed || signal.aborted || mounted.has(key)) return;
     const latest = loaded[0]!.latest;
-    onNote(`ICON · Lauf ${latest.run.slice(-2)} UTC`);
+    onNote(`${MODE_TITLE[mode]} · ICON ${latest.run.slice(-2)} UTC`);
     const fields = Object.fromEntries(loaded.map((item, i) => [variables[i]!, item.field]));
     const image = buildFieldImage(fields, stepOf(latest), mode);
     if (!image) return;

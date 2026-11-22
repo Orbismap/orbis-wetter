@@ -25,7 +25,7 @@ export const sample: WeatherNow = {
     precipitation: '< 1 mm',
     precipitationPeriod: 'Heute',
     precipitationNote: '3–4 cm Schnee morgen.',
-    feelsLikeNote: 'Durch den Wind ist es gefühlt kälter.',
+    feelsLikeNote: 'Durch Wind gefühlt kälter.',
     sunrise: '07:55',
     sunset: '16:06',
     averages: { delta: -1, todayHigh: 5, averageHigh: 6 },

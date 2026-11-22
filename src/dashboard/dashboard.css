@@ -54,6 +54,8 @@
   position: absolute;
   display: flex;
   overflow: hidden;
+  /* Cards adapt their density to the actual cell size, including after rearrange/resize. */
+  container-type: size;
 }
 
 /* Widget content fills the frame; the frame owns padding, border and background. */

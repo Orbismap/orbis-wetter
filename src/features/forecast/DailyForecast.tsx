@@ -1,8 +1,9 @@
 import type { Day } from './model';
 import { WeatherIcon } from './WeatherIcon';
-import { TempRange } from './visuals';
+import { tempScale, TempRange } from './visuals';
 
 export function DailyForecast({ days }: { days: Day[] }) {
+  const scale = tempScale(days);
   return (
     <section class="daily" aria-label="10-Tage-Vorhersage">
       <div class="card-title"><span class="title-icon">▦</span> 10-Tage-Vorhersage</div>
@@ -15,7 +16,7 @@ export function DailyForecast({ days }: { days: Day[] }) {
               <span class={`day-chance${(d.chance ?? 0) >= 30 ? ' wet' : ''}`}>{d.chance != null ? `${d.chance} %` : ''}</span>
             </span>
             <span class="day-min">{d.min}°</span>
-            <TempRange min={d.min} max={d.max} />
+            <TempRange min={d.min} max={d.max} scaleMin={scale.min} scaleMax={scale.max} />
             <span class="day-max">{d.max}°</span>
           </li>
         ))}
