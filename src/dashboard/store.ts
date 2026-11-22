@@ -17,6 +17,8 @@ const nextId = (widget: string) => `${widget}-${Date.now().toString(36)}-${insta
 export class LayoutStore {
   private state: LayoutState;
   private listeners = new Set<Listener>();
+  /** Position of every widget when the current drag gesture started. */
+  private gestureOrigin: Map<string, Placement> | null = null;
 
   constructor(initial: LayoutState) {
     this.state = loadLayout() ?? initial;
@@ -34,6 +36,28 @@ export class LayoutStore {
     saveLayout(next);
     this.listeners.forEach((listener) => listener());
   }
+
+  /** Remember where every widget was at the start of a drag gesture. */
+  beginGesture = (): void => {
+    this.gestureOrigin = new Map(this.state.placements.map((p) => [p.id, { ...p }]));
+  };
+
+  /** Put every widget back to its gesture origin – used when a drag ends outside the grid. */
+  restoreOrigin = (): void => {
+    if (!this.gestureOrigin) return;
+    const origin = this.gestureOrigin;
+    this.commit({
+      ...this.state,
+      placements: this.state.placements.map((p) => {
+        const original = origin.get(p.id);
+        return original ? { ...p, x: original.x, y: original.y, w: original.w, h: original.h } : p;
+      }),
+    });
+  };
+
+  endGesture = (): void => {
+    this.gestureOrigin = null;
+  };
 
   setLayout = (next: LayoutState): void => {
     this.commit(next);

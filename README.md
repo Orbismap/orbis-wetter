@@ -70,6 +70,11 @@ auf 3/4 so `3 4 / 2 2 / 1 1`: alle drei Gruppen rutschen je eine Position in Zie
 `swapRegion` die Region **eine Zelle hinter** dem gezogenen Widget und rotiert Vorgänger → alte Fläche →
 Zielbereich. Pro Aktion ändert sich dadurch nur die direkte Nachbarschaft.
 
+**Ursprung pro Zug:** `beginGesture()` merkt sich beim Ziehen die Position **aller** Widgets – auch der gezogenen.
+Verlässt der Pointer das Grid (oder wird der Zug abgebrochen), setzt `restoreOrigin()` die komplette Anordnung auf
+diesen Stand zurück. Das Widget wird dabei halbtransparent, solange es außerhalb liegt; die Rückkehr animiert wieder
+per FLIP. `endGesture()` verwirft den Schnappschuss nach einem regulären Ablegen.
+
 **Neues Widget hinzufügen:** Datei unter `src/widgets/` anlegen, die eine `WidgetDefinition` exportiert (Titel,
 unterstützte `variants`, `Component`), in `src/widgets/register.ts` registrieren und eine `Placement` in
 `src/dashboard/defaultLayout.ts` setzen. Die Grid-Engine muss nicht verändert werden.

@@ -26,6 +26,19 @@ describe('LayoutStore', () => {
     expect(s.getState().placements[0]).toMatchObject({ x: 0, y: 0 });
   });
 
+  it('restores every widget to its gesture origin when a drag is cancelled', () => {
+    const s = store([placement('a', 0, 0), placement('b', 1, 0)]);
+    s.beginGesture();
+    expect(s.move('a', 0, 1)).toBe(true);
+    expect(s.getState().placements[0]).toMatchObject({ x: 0, y: 1 });
+    s.restoreOrigin();
+    expect(s.getState().placements).toEqual([placement('a', 0, 0), placement('b', 1, 0)]);
+    s.endGesture();
+    s.move('a', 0, 1);
+    s.restoreOrigin();
+    expect(s.getState().placements[0]).toMatchObject({ x: 0, y: 1 }); // no gesture snapshot left
+  });
+
   it('swaps two widget positions', () => {
     const s = store([placement('a', 0, 0), placement('b', 1, 1)]);
     expect(s.swap('a', 'b')).toBe(true);

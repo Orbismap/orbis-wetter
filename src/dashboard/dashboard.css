@@ -56,6 +56,12 @@
   will-change: transform;
 }
 
+/* Pointer left the canvas – releasing here reverts every widget to the gesture origin. */
+.dashboard.editing .widget-frame.dragging.outside {
+  opacity: 0.45;
+  box-shadow: none;
+}
+
 /* ---------- placeholder content (temporary) ---------- */
 .placeholder {
   display: flex;

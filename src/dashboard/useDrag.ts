@@ -16,13 +16,16 @@ interface DragStart {
   x: number;
   y: number;
   element: HTMLElement;
+  /** Canvas bounds at drag start – leaving them cancels the whole gesture. */
+  bounds: DOMRect | null;
+  outside: boolean;
 }
 
 const clamp = (value: number, max: number) => Math.max(0, Math.min(max, value));
 
 /**
- * Pointer-driven snapping with live displacement: as soon as the dragged widget reaches an occupied
- * cell, the occupant is swapped away and its FLIP animation starts – still during the drag.
+ * Pointer-driven snapping with live displacement. The store snapshots every widget's position at
+ * drag start; dragging outside the canvas (or cancelling) restores that snapshot for all widgets.
  */
 export function useDrag(placement: Placement, metrics: CellMetrics, enabled: boolean) {
   const start = useRef<DragStart | null>(null);
@@ -32,20 +35,30 @@ export function useDrag(placement: Placement, metrics: CellMetrics, enabled: boo
     const origin = start.current;
     if (!origin) return;
 
+    const bounds = origin.bounds;
+    const outside = !!bounds && (
+      event.clientX < bounds.left || event.clientX > bounds.right
+      || event.clientY < bounds.top || event.clientY > bounds.bottom
+    );
+    origin.outside = outside;
+    origin.element.classList.toggle('outside', outside);
+
     // Top-left of the widget relative to the grid canvas, anchored at the drag start.
     const visualX = origin.cellX * metrics.stepX + (event.clientX - origin.px);
     const visualY = origin.cellY * metrics.stepY + (event.clientY - origin.py);
-    const targetX = clamp(Math.round(visualX / metrics.stepX), metrics.cols - placement.w);
-    const targetY = clamp(Math.round(visualY / metrics.stepY), metrics.rows - placement.h);
 
-    if (targetX !== origin.x || targetY !== origin.y) {
-      // swapRegion handles empty cells as well as several displaced widgets at once.
-      if (layoutStore.swapRegion(placement.id, targetX, targetY)) {
-        origin.x = targetX;
-        origin.y = targetY;
-        // Keep the DOM base in sync now; Preact writes the same values on the next render.
-        origin.element.style.left = `${targetX * metrics.stepX}px`;
-        origin.element.style.top = `${targetY * metrics.stepY}px`;
+    if (!outside) {
+      const targetX = clamp(Math.round(visualX / metrics.stepX), metrics.cols - placement.w);
+      const targetY = clamp(Math.round(visualY / metrics.stepY), metrics.rows - placement.h);
+      if (targetX !== origin.x || targetY !== origin.y) {
+        // swapRegion handles empty cells as well as several displaced widgets at once.
+        if (layoutStore.swapRegion(placement.id, targetX, targetY)) {
+          origin.x = targetX;
+          origin.y = targetY;
+          // Keep the DOM base in sync now; Preact writes the same values on the next render.
+          origin.element.style.left = `${targetX * metrics.stepX}px`;
+          origin.element.style.top = `${targetY * metrics.stepY}px`;
+        }
       }
     }
 
@@ -60,6 +73,7 @@ export function useDrag(placement: Placement, metrics: CellMetrics, enabled: boo
     if (!enabled || event.button !== 0) return;
     const element = event.currentTarget;
     cancelFlip(element); // a running layout animation must not override the drag transform
+    layoutStore.beginGesture();
     start.current = {
       px: event.clientX,
       py: event.clientY,
@@ -68,6 +82,8 @@ export function useDrag(placement: Placement, metrics: CellMetrics, enabled: boo
       x: placement.x,
       y: placement.y,
       element,
+      bounds: document.querySelector<HTMLElement>('.dashboard')?.getBoundingClientRect() ?? null,
+      outside: false,
     };
     // Pointer capture is unavailable for synthetic events and some embedded browsers.
     try { element.setPointerCapture(event.pointerId); } catch { /* optional enhancement */ }
@@ -82,10 +98,18 @@ export function useDrag(placement: Placement, metrics: CellMetrics, enabled: boo
     if (!origin) return;
     update(event); // apply the final cell too
 
-    // Capture the visual position (still including the drag transform), then settle into the cell.
+    // Capture the visual position (still including the drag transform), then settle.
     captureFlip();
     origin.element.style.transform = '';
-    playFlip();
+    origin.element.classList.remove('outside');
+
+    if (origin.outside) {
+      // Everything goes back to where it was when the gesture began.
+      layoutStore.restoreOrigin();
+    } else {
+      playFlip();
+    }
+    layoutStore.endGesture();
 
     start.current = null;
     setDragging(false);
@@ -101,7 +125,10 @@ export function useDrag(placement: Placement, metrics: CellMetrics, enabled: boo
     if (!origin) return;
     captureFlip();
     origin.element.style.transform = '';
-    playFlip(); // snap back to the cell it currently occupies
+    origin.element.classList.remove('outside');
+    layoutStore.restoreOrigin();
+    layoutStore.endGesture();
+
     start.current = null;
     setDragging(false);
     try {
