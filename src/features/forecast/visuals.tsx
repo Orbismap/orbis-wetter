@@ -97,15 +97,20 @@ export function PressureGauge({ value }: { value: number }) {
   );
 }
 
-/** Sun arc between sunrise and sunset, with the current time marked. */
-export function SunCurve({ sunrise, sunset }: { sunrise: string; sunset: string }) {
+/** Sun path across the horizon with a marker at the current position (below the horizon at night). */
+export function SunCurve({ sunrise, sunset, progress }: { sunrise: string; sunset: string; progress: number }) {
+  const night = progress < 0 || progress > 1;
+  const t = night ? (progress < 0 ? 0.06 : 0.94) : progress;
+  const x = (1 - t) ** 2 * 8 + 2 * (1 - t) * t * 80 + t ** 2 * 152;
+  const y = night
+    ? (1 - t) ** 2 * 38 + 2 * (1 - t) * t * 66 + t ** 2 * 38
+    : (1 - t) ** 2 * 38 + 2 * (1 - t) * t * -10 + t ** 2 * 38;
   return (
     <svg class="sun-curve" viewBox="0 0 160 64" aria-label={`Sonnenaufgang ${sunrise}, Sonnenuntergang ${sunset}`}>
-      <line x1="6" y1="50" x2="154" y2="50" class="horizon" />
-      <path d="M 8 50 Q 80 -12 152 50" class="arc" />
-      <circle cx="80" cy="10" r="5" class="sun-dot" />
-      <text x="8" y="62" class="axis">{sunrise}</text>
-      <text x="152" y="62" text-anchor="end" class="axis">{sunset}</text>
+      <path d="M 8 38 Q 80 -10 152 38" class="arc" />
+      <path d="M 8 38 Q 80 66 152 38" class="night-arc" />
+      <line x1="4" y1="38" x2="156" y2="38" class="horizon" />
+      <circle cx={x} cy={y} r="4.5" class="sun-dot" />
     </svg>
   );
 }

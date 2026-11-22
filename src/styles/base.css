@@ -202,10 +202,10 @@ body {
 .wind-rows span { color: var(--text-2); }
 
 .sun-curve { width: 100%; height: 64px; margin: var(--s-2) 0; }
-.sun-curve .horizon { stroke: rgba(255, 255, 255, 0.3); stroke-width: 1; }
-.sun-curve .arc { fill: none; stroke: rgba(255, 255, 255, 0.6); stroke-width: 1.5; stroke-dasharray: 3 3; }
-.sun-curve .sun-dot { fill: var(--warm); }
-.sun-curve .axis { fill: var(--text-3); font-size: 9px; font-family: var(--font-ui); }
+.sun-curve .horizon { stroke: rgba(255, 255, 255, 0.6); stroke-width: 1.5; }
+.sun-curve .arc { fill: none; stroke: rgba(255, 255, 255, 0.7); stroke-width: 2; }
+.sun-curve .night-arc { fill: none; stroke: rgba(255, 255, 255, 0.2); stroke-width: 2; }
+.sun-curve .sun-dot { fill: #101724; stroke: #fff; stroke-width: 2; }
 
 .warning .big { font-size: 1.25rem; }
 .warning .note { color: var(--text-1); }
@@ -226,6 +226,8 @@ body {
   .detail.wind .gauge { width: 96px; height: 96px; }
   .detail.wind .wind-rows > div { padding: 3px 0; font-size: var(--fs-axis); }
 
+  .detail.sun .big { font-size: 2rem; }
+  .detail.sun .source { white-space: nowrap; font-size: 0.625rem; }
   .detail.sun .sun-curve { height: 42px; margin: 4px 0; }
 
   .detail.averages .big { font-size: 1.375rem; }

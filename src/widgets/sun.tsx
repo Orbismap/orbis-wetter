@@ -4,8 +4,8 @@ import type { WidgetDefinition } from './types';
 import { detailVariants } from './variants';
 
 function SunWidget() {
-  const { sunrise, sunset } = useWeather().current;
-  return <SunCard sunrise={sunrise} sunset={sunset} />;
+  const { sunrise, sunset, sunUp, sunProgress } = useWeather().current;
+  return <SunCard sunrise={sunrise} sunset={sunset} sunUp={sunUp} sunProgress={sunProgress} />;
 }
 
-export const sunWidget: WidgetDefinition = { id: 'sun', title: 'Sonnenuntergang', variants: detailVariants, Component: SunWidget };
+export const sunWidget: WidgetDefinition = { id: 'sun', title: 'Sonne', variants: detailVariants, Component: SunWidget };

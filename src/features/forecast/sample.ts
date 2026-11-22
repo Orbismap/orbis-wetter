@@ -28,6 +28,8 @@ export const sample: WeatherNow = {
     feelsLikeNote: 'Durch Wind gefühlt kälter.',
     sunrise: '07:55',
     sunset: '16:06',
+    sunUp: false,
+    sunProgress: -0.1,
     averages: { delta: -1, todayHigh: 5, averageHigh: 6 },
     moon: { phase: 'Zunehmender Mond', illumination: 94, rise: '06:32', full: '2 Tg.' },
     air: { value: 20, label: 'Gut', note: 'Die Luftqualität ist ähnlich wie gestern zu dieser Zeit.' },

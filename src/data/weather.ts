@@ -117,6 +117,17 @@ export function buildWeather(
   const feelsLike = round(apparentTemperature(temp, humidity, wind / 3.6));
   const visibility = at(supplements.visibility, Math.min(index, (supplements.visibility?.length ?? 1) - 1));
   const sun = supplements.sun?.[0];
+  const sunrise = sun?.sunrise ?? sample.current.sunrise;
+  const sunset = sun?.sunset ?? sample.current.sunset;
+  const riseMinutes = minutesOf(sunrise) ?? 0;
+  const setMinutes = minutesOf(sunset) ?? 0;
+  const localNow = new Date(now + series.offsetSeconds * 1000);
+  const nowMinutes = localNow.getUTCHours() * 60 + localNow.getUTCMinutes();
+  const daylight = setMinutes - riseMinutes;
+  const sunUp = daylight > 0
+    ? nowMinutes >= riseMinutes && nowMinutes < setMinutes
+    : nowMinutes >= riseMinutes || nowMinutes < setMinutes;
+  const sunProgress = daylight > 0 ? (nowMinutes - riseMinutes) / daylight : 0;
   const uv = sun?.uv ?? sample.current.uvIndex;
   const daily = supplements.daily?.length ? supplements.daily : dailyFromSeries(series, location);
 
@@ -197,8 +208,10 @@ export function buildWeather(
       precipitationPeriod: 'Heute',
       precipitationNote: daily[1]?.precipitation !== undefined ? `Morgen ${round(daily[1].precipitation)} mm.` : '',
       feelsLikeNote,
-      sunrise: sun?.sunrise ?? sample.current.sunrise,
-      sunset: sun?.sunset ?? sample.current.sunset,
+      sunrise,
+      sunset,
+      sunUp,
+      sunProgress,
       averages: { delta: round(high - averageHigh), todayHigh: high, averageHigh },
       moon: sample.current.moon, // moon phase is global and not part of either data source
       air: airOf(supplements.aqi),

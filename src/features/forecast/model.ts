@@ -48,6 +48,10 @@ export interface WeatherNow {
     feelsLikeNote: string;
     sunrise: string;
     sunset: string;
+    /** Whether the sun is currently above the horizon at the selected place. */
+    sunUp: boolean;
+    /** Position in today's daylight: 0 at sunrise, 1 at sunset, outside when it's dark. */
+    sunProgress: number;
     averages: { delta: number; todayHigh: number; averageHigh: number };
     moon: { phase: string; illumination: number; rise: string; full: string };
     air: { value: number; label: string; note: string };
