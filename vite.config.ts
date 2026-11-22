@@ -10,6 +10,7 @@ export default defineConfig({
   plugins: [preact()],
   resolve: { alias: { '@': src } },
   build: {
+    outDir: 'dist/wetter',
     target: 'es2022',
     sourcemap: false,
     rollupOptions: {
