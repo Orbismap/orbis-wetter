@@ -229,6 +229,29 @@ body {
 .sun-curve .sun-path { fill: none; stroke: url(#wx-sun-path); stroke-width: 3; stroke-linecap: round; stroke-linejoin: round; }
 .sun-curve .sun-dot { fill: #101724; stroke: #fff; stroke-width: 2; }
 
+/* Moon: title, a large phase image and the two upcoming dates. */
+.detail.moon { align-items: stretch; justify-content: flex-start; }
+.moon-image {
+  display: block;
+  width: 100%;
+  max-width: 76px;
+  aspect-ratio: 1;
+  object-fit: contain;
+  align-self: center;
+  margin: auto 0;
+  pointer-events: none;
+}
+.moon-dates { display: flex; flex-direction: column; gap: 2px; font-size: 0.625rem; line-height: 1.2; color: var(--text-2); }
+.moon-dates > div { display: flex; align-items: center; gap: 5px; white-space: nowrap; }
+.moon-dot { width: 7px; height: 7px; border-radius: 50%; flex: none; }
+.moon-dot.full { background: var(--warm); }
+.moon-dot.new { background: transparent; border: 1px solid var(--text-3); }
+
+/* Wide variant: image on the left, phase details on the right. */
+.moon-wide-body { display: flex; align-items: center; gap: var(--s-3); flex: 1; min-height: 0; }
+.moon-wide .moon-image { max-width: 92px; flex: none; margin: 0; }
+.moon-wide .moon-info { flex: 1; min-width: 0; }
+
 .warning .big { font-size: 1.25rem; }
 .warning .note { color: var(--text-1); }
 
@@ -237,6 +260,7 @@ body {
   /* Small cells may show a two-line title rather than cutting words off with an ellipsis. */
   .detail .card-title { margin-bottom: 6px; font-size: 0.625rem; line-height: 1.2; }
   .detail .title-text { white-space: normal; overflow: visible; text-overflow: clip; }
+  .detail.moon .title-text { white-space: nowrap; overflow: hidden; text-overflow: ellipsis; }
   .detail .big { font-size: 1.5rem; }
   .detail .note { margin-top: 4px; }
   .detail .kv { padding: 3px 0; font-size: var(--fs-axis); }

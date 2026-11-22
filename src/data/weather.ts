@@ -3,6 +3,7 @@ import { sample } from '../features/forecast/sample';
 import type { WeatherNow } from '../features/forecast/model';
 import { describe } from '../features/wmo/weather';
 import { loadIconSeries } from './icon';
+import { moonInfo } from './moon';
 import { loadOpenMeteoSeries, loadSupplements } from './openMeteo';
 import type { DailyInfo, PointSeries, SourceInfo, SunInfo, WeatherSupplements } from './types';
 
@@ -212,7 +213,7 @@ export function buildWeather(
       sunUp,
       sunClock,
       averages: { delta: round(high - averageHigh), todayHigh: high, averageHigh },
-      moon: sample.current.moon, // moon phase is global and not part of either data source
+      moon: moonInfo(now), // neither source provides the moon; derive it from the synodic cycle
       air: airOf(supplements.aqi),
       warning: supplements.warning,
     },

@@ -1,4 +1,5 @@
 import type { ComponentChildren } from 'preact';
+import { moonImageUrl } from '../../data/moon';
 import type { WeatherNow } from './model';
 import { Compass, GradientScale, PressureGauge, SunCurve, tempScale, TempRange } from './visuals';
 
@@ -107,12 +108,32 @@ export function PrecipCard({ precipitation, precipitationPeriod, precipitationNo
   );
 }
 
-export function MoonCard({ moon }: { moon: WeatherNow['current']['moon'] }) {
+export function MoonCard({ moon, wide = false }: { moon: WeatherNow['current']['moon']; wide?: boolean }) {
+  const image = <img class="moon-image" src={moonImageUrl(moon.image)} alt={moon.phase} draggable={false} />;
+  const dates = (
+    <div class="moon-dates">
+      <div><span class="moon-dot full" />Vollmond: {moon.full}</div>
+      <div><span class="moon-dot new" />Neumond: {moon.newMoon}</div>
+    </div>
+  );
+  if (!wide) {
+    return (
+      <DetailCard title={moon.phase} className="moon">
+        {image}
+        {dates}
+      </DetailCard>
+    );
+  }
   return (
-    <DetailCard title={moon.phase} className="moon">
-      <div class="kv"><span>Beleuchtung</span><b>{moon.illumination} %</b></div>
-      <div class="kv"><span>Mondaufgang</span><b>{moon.rise}</b></div>
-      <div class="kv"><span>Vollmond</span><b>{moon.full}</b></div>
+    <DetailCard title={moon.phase} className="moon moon-wide">
+      <div class="moon-wide-body">
+        {image}
+        <div class="moon-info">
+          <div class="kv"><span>Beleuchtung</span><b>{moon.illumination} %</b></div>
+          <div class="kv"><span>Mondaufgang</span><b>{moon.rise}</b></div>
+          {dates}
+        </div>
+      </div>
     </DetailCard>
   );
 }

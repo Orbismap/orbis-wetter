@@ -1,3 +1,4 @@
+import { moonInfo } from '../../data/moon';
 import type { WeatherNow } from './model';
 
 /** Values from the desktop design reference. Replaced by real data in the next step. */
@@ -31,7 +32,7 @@ export const sample: WeatherNow = {
     sunUp: false,
     sunClock: 0.9,
     averages: { delta: -1, todayHigh: 5, averageHigh: 6 },
-    moon: { phase: 'Zunehmender Mond', illumination: 94, rise: '06:32', full: '2 Tg.' },
+    moon: moonInfo(),
     air: { value: 20, label: 'Gut', note: 'Die Luftqualität ist ähnlich wie gestern zu dieser Zeit.' },
     warning: {
       badge: 'Warnstufe Gelb',
