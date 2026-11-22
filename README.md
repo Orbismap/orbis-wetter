@@ -66,6 +66,11 @@ Exact-Cover; passt die Fläche nicht, wird der Zug abgelehnt. Hovert man ein neu
 getauschte Gruppe wieder auf ihren Ursprung zurück – es ist immer nur **eine** Tauschbeziehung aktiv. Rotation
 oder Kettenverschiebungen gibt es bewusst nicht.
 
+**Sichtbare Tauschzellen:** Während des Ziehens zeigt `dragPreview.ts` zwei Overlays über dem Raster: die
+**Ursprungszelle** mit fester Outline (farbig, `border-radius` wie die Karten) und die **Zielzelle** gestrichelt.
+So ist jederzeit erkennbar, welche Fläche getauscht wird. Die Overlays stammen aus demselben Ursprungs-Snapshot
+und verschwinden beim Ablegen.
+
 **Ursprung pro Zug:** `beginGesture()` merkt sich beim Ziehen die Position **aller** Widgets – auch der gezogenen.
 Verlässt der Pointer das Grid (oder wird der Zug abgebrochen), setzt `restoreOrigin()` die komplette Anordnung auf
 diesen Stand zurück. Das Widget wird dabei halbtransparent, solange es außerhalb liegt; die Rückkehr animiert wieder

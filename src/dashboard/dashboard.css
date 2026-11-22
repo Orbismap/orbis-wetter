@@ -62,6 +62,25 @@
   box-shadow: none;
 }
 
+/* ---------- swap preview outlines ---------- */
+.dashboard .swap-outline {
+  position: absolute;
+  z-index: 20;
+  pointer-events: none;
+  box-sizing: border-box;
+  border-radius: var(--r-panel);
+}
+
+.dashboard .swap-origin {
+  border: 2px solid var(--limb);
+  box-shadow: 0 0 0 4px var(--limb-quiet), inset 0 0 0 1px var(--limb-quiet);
+}
+
+.dashboard .swap-target {
+  border: 2px dashed rgba(255, 255, 255, 0.6);
+  transition: left 200ms var(--ease), top 200ms var(--ease);
+}
+
 /* ---------- placeholder content (temporary) ---------- */
 .placeholder {
   display: flex;

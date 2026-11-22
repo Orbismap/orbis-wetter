@@ -1,17 +1,32 @@
 import type { CSSProperties } from 'preact';
 import { useLayoutEffect } from 'preact/hooks';
+import { useDragPreview } from './dragPreview';
 import { useEditing } from './editStore';
 import { playFlip } from './flip';
-import { cellMetrics } from './geometry';
+import { cellMetrics, placementRect } from './geometry';
 import { getPreset } from './presets';
 import { useLayout } from './store';
 import { WidgetFrame } from './WidgetFrame';
 import './dashboard.css';
 
+const outlineStyle = (
+  rect: { x: number; y: number; w: number; h: number },
+  metrics: ReturnType<typeof cellMetrics>,
+): CSSProperties => {
+  const box = placementRect(rect, metrics);
+  return {
+    left: `${box.left}px`,
+    top: `${box.top}px`,
+    width: `${box.width}px`,
+    height: `${box.height}px`,
+  } as CSSProperties;
+};
+
 /** The grid surface. Widgets are absolutely positioned from cell coordinates. */
 export function Dashboard() {
   const layout = useLayout();
   const editing = useEditing();
+  const preview = useDragPreview();
   useLayoutEffect(playFlip);
   const preset = getPreset(layout.preset);
   const metrics = cellMetrics(preset);
@@ -30,6 +45,12 @@ export function Dashboard() {
         {layout.placements.map((placement) => (
           <WidgetFrame key={placement.id} placement={placement} metrics={metrics} />
         ))}
+        {preview.origin && (
+          <div class="swap-outline swap-origin" style={outlineStyle(preview.origin, metrics)} aria-hidden="true" />
+        )}
+        {preview.target && (
+          <div class="swap-outline swap-target" style={outlineStyle(preview.target, metrics)} aria-hidden="true" />
+        )}
       </div>
     </div>
   );

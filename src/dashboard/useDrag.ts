@@ -1,5 +1,6 @@
 import { useRef, useState } from 'preact/hooks';
 import type { TargetedPointerEvent } from 'preact';
+import { dragPreview } from './dragPreview';
 import { cancelFlip, captureFlip, playFlip } from './flip';
 import { layoutStore } from './store';
 import type { CellMetrics, Placement } from './types';
@@ -46,10 +47,21 @@ export function useDrag(placement: Placement, metrics: CellMetrics, enabled: boo
     // Top-left of the widget relative to the grid canvas, anchored at the drag start.
     const visualX = origin.cellX * metrics.stepX + (event.clientX - origin.px);
     const visualY = origin.cellY * metrics.stepY + (event.clientY - origin.py);
+    const targetX = clamp(Math.round(visualX / metrics.stepX), metrics.cols - placement.w);
+    const targetY = clamp(Math.round(visualY / metrics.stepY), metrics.rows - placement.h);
+
+    // Highlight the origin cell (where a swapped group lands) and the hovered destination.
+    const previewTarget = outside ? null : { x: targetX, y: targetY, w: placement.w, h: placement.h };
+    const currentTarget = dragPreview.getState().target;
+    if (outside ? currentTarget !== null : !currentTarget
+      || currentTarget.x !== targetX || currentTarget.y !== targetY) {
+      dragPreview.set({
+        origin: { x: origin.cellX, y: origin.cellY, w: placement.w, h: placement.h },
+        target: previewTarget,
+      });
+    }
 
     if (!outside) {
-      const targetX = clamp(Math.round(visualX / metrics.stepX), metrics.cols - placement.w);
-      const targetY = clamp(Math.round(visualY / metrics.stepY), metrics.rows - placement.h);
       if (targetX !== origin.appliedX || targetY !== origin.appliedY) {
         const applied = layoutStore.hoverSwap(placement.id, targetX, targetY);
         origin.appliedX = applied ? targetX : origin.cellX;
@@ -70,6 +82,8 @@ export function useDrag(placement: Placement, metrics: CellMetrics, enabled: boo
     const element = event.currentTarget;
     cancelFlip(element); // a running layout animation must not override the drag transform
     layoutStore.beginGesture();
+    const startCell = { x: placement.x, y: placement.y, w: placement.w, h: placement.h };
+    dragPreview.set({ origin: startCell, target: startCell });
     start.current = {
       px: event.clientX,
       py: event.clientY,
@@ -105,6 +119,7 @@ export function useDrag(placement: Placement, metrics: CellMetrics, enabled: boo
       playFlip();
     }
     layoutStore.endGesture();
+    dragPreview.clear();
 
     start.current = null;
     setDragging(false);
@@ -123,6 +138,7 @@ export function useDrag(placement: Placement, metrics: CellMetrics, enabled: boo
     origin.element.classList.remove('outside');
     layoutStore.restoreOrigin();
     layoutStore.endGesture();
+    dragPreview.clear();
 
     start.current = null;
     setDragging(false);
