@@ -1,11 +1,12 @@
 import type { CSSProperties } from 'preact';
 import { useLayoutEffect } from 'preact/hooks';
 import { useDragPreview } from './dragPreview';
+import { defaultLayouts } from './defaultLayout';
 import { editStore, useEditing } from './editStore';
 import { playFlip } from './flip';
 import { cellMetrics, placementRect } from './geometry';
 import { getPreset } from './presets';
-import { useLayout } from './store';
+import { layoutStore, useLayout } from './store';
 import { WidgetFrame } from './WidgetFrame';
 import './dashboard.css';
 
@@ -53,9 +54,20 @@ export function Dashboard() {
             <div class="swap-outline swap-target" style={outlineStyle(preview.target, metrics)} aria-hidden="true" />
           )}
         </div>
-        <button type="button" class={`edit-toggle${editing ? ' active' : ''}`} onClick={editStore.toggle}>
-          {editing ? 'Fertig' : 'Anordnen'}
-        </button>
+        <div class="edit-controls">
+          <button type="button" class={`edit-toggle${editing ? ' active' : ''}`} onClick={editStore.toggle}>
+            {editing ? 'Fertig' : 'Anordnen'}
+          </button>
+          {editing && (
+            <button
+              type="button"
+              class="reset-toggle"
+              onClick={() => layoutStore.setLayout(defaultLayouts[layout.preset] ?? defaultLayouts.desktop!)}
+            >
+              Zurücksetzen
+            </button>
+          )}
+        </div>
       </div>
     </div>
   );

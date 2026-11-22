@@ -5,11 +5,17 @@
   margin: 0 auto;
 }
 
-.edit-toggle {
+.edit-controls {
   position: absolute;
   z-index: 30;
   top: -40px;
   right: 0;
+  display: flex;
+  gap: var(--s-2);
+}
+
+.edit-toggle,
+.reset-toggle {
   font: inherit;
   font-size: var(--fs-axis);
   color: var(--text-1);
