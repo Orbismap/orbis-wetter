@@ -59,8 +59,9 @@ export async function loadIconSeries(lat: number, lng: number, options: FetchOpt
   const br = (i: number) => ({ i0: i, i1: i, f: 0 });
 
   const series: PointSeries = {
-    label: 'ICON · R2',
+    label: 'ICON · R2 (Fallback)',
     detail: `Lauf ${latest.run.slice(-2)} UTC`,
+    issued: latest.issued,
     offsetSeconds: Math.round(lng / 15) * 3600,
     times: [...latest.times],
     temp: [], dewPoint: [], wind: [], gust: [], dir: [], precip: [], cloud: [], pressure: [],

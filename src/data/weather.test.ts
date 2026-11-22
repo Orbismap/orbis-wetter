@@ -14,7 +14,7 @@ function series(label = 'ICON · R2'): PointSeries {
   const base = Date.now() - 30 * 60_000;
   const times = Array.from({ length: 24 }, (_, i) => base + i * 3_600_000);
   return {
-    label, detail: 'Lauf 12 UTC', offsetSeconds: 3600, times,
+    label, detail: 'Lauf 12 UTC', issued: Date.now(), offsetSeconds: 3600, times,
     temp: times.map(() => 4),
     dewPoint: times.map(() => 1),
     wind: times.map(() => 14),
@@ -73,25 +73,33 @@ describe('weather view model', () => {
 describe('source chain', () => {
   beforeEach(() => vi.clearAllMocks());
 
-  it('uses R2 ICON first', async () => {
-    vi.mocked(loadIconSeries).mockResolvedValue(series());
-    vi.mocked(loadSupplements).mockResolvedValue(supplements);
-    const result = await loadWeather(location);
-    expect(result.source.label).toBe('ICON · R2');
-    expect(result.weather.current.temp).toBe(4);
-  });
-
-  it('falls back to Open-Meteo when R2 fails', async () => {
-    vi.mocked(loadIconSeries).mockRejectedValue(new Error('R2 down'));
+  it('uses Open-Meteo by default', async () => {
     vi.mocked(loadOpenMeteoSeries).mockResolvedValue(series('Open-Meteo'));
     vi.mocked(loadSupplements).mockResolvedValue(supplements);
     const result = await loadWeather(location);
     expect(result.source.label).toBe('Open-Meteo');
+    expect(vi.mocked(loadIconSeries)).not.toHaveBeenCalled();
+    expect(result.weather.current.temp).toBe(4);
+  });
+
+  it('falls back to R2 when Open-Meteo fails', async () => {
+    vi.mocked(loadOpenMeteoSeries).mockRejectedValue(new Error('API down'));
+    vi.mocked(loadIconSeries).mockResolvedValue(series('ICON · R2 (Fallback)'));
+    vi.mocked(loadSupplements).mockResolvedValue(supplements);
+    const result = await loadWeather(location);
+    expect(result.source.label).toBe('ICON · R2 (Fallback)');
+  });
+
+  it('does not use an outdated ICON run as fallback', async () => {
+    vi.mocked(loadOpenMeteoSeries).mockRejectedValue(new Error('API down'));
+    vi.mocked(loadIconSeries).mockResolvedValue({ ...series('ICON · R2 (Fallback)'), issued: Date.now() - 24 * 3_600_000 });
+    const result = await loadWeather(location);
+    expect(result.source.label).toBe('Beispieldaten');
   });
 
   it('falls back to sample data when every live source fails', async () => {
-    vi.mocked(loadIconSeries).mockRejectedValue(new Error('R2 down'));
     vi.mocked(loadOpenMeteoSeries).mockRejectedValue(new Error('API down'));
+    vi.mocked(loadIconSeries).mockRejectedValue(new Error('R2 down'));
     const result = await loadWeather(location);
     expect(result.source.label).toBe('Beispieldaten');
     expect(result.weather.place.name).toBe('Bad Kleinen');

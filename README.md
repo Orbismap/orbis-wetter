@@ -54,16 +54,16 @@ für diesen Ort – es gibt keinen Geocoding-Aufruf.
 
 Reihenfolge in `data/weather.ts` (`loadWeather`):
 
-1. **R2 zuerst:** `orbis-wetter.maltee.dev` liefert ICON-Felder im OWX-Format. `data/owx.ts` dekodiert genau den
-   45°-Tile des Ortes (8 Variablen, ~10 MB) und sampled daraus die 25 dreistündlichen Schritte. Fällt ein Tile
-   aus, wird die gröbere 0,5°-Übersicht desselben Laufs genommen. `data/icon.ts` nutzt `v1/latest.json` (15 min
-   Cache).
-2. **Live-API als Fallback und Ergänzung:** Open-Meteo (`models=icon_global`) liefert dieselbe Modellfamilie als
-   kompakte Punktvorhersage. `data/openMeteo.ts` holt zusätzlich die 10-Tage-Werte, Sonnenauf-/untergang, UV,
-   Sichtweite und die Luftqualität (CAMS). Diese Ergänzungen laufen parallel zur R2-Abfrage.
-3. **DWD-Warnungen** kommen direkt aus dem WFS von `maps.dwd.de` (CORS `*`). Der Abfrage dauert mehrere Sekunden,
-   deshalb wird sie nachgeladen und in den bestehenden View Model gemergt, statt das Raster zu blockieren.
-4. **Beispieldaten** greifen nur, wenn R2 *und* Open-Meteo scheitern.
+1. **Live-API als Standard:** Open-Meteo (`models=icon_global`) liefert eine kompakte Punktvorhersage derselben
+   Modellfamilie. `data/openMeteo.ts` holt zusätzlich die 10-Tage-Werte, Sonnenauf-/untergang, UV, Sichtweite und
+   die Luftqualität (CAMS).
+2. **R2 nur als Fallback:** Wenn Open-Meteo scheitert, liefert `orbis-wetter.maltee.dev` ICON-Felder im OWX-Format.
+   `data/owx.ts` dekodiert genau den 45°-Tile des Ortes (8 Variablen, ~10 MB) und sampled daraus die 25
+   dreistündlichen Schritte. Fällt ein Tile aus, wird die gröbere 0,5°-Übersicht genommen. Da der Spiegel nicht
+   immer aktuell ist, werden Läufe älter als 12 Stunden verworfen (`MAX_ICON_AGE`).
+3. **DWD-Warnungen** kommen direkt aus dem WFS von `maps.dwd.de` (CORS `*`). Die Abfrage dauert mehrere Sekunden,
+   deshalb wird sie nachgeladen und in das bestehende View Model gemergt, statt das Raster zu blockieren.
+4. **Beispieldaten** greifen nur, wenn Open-Meteo *und* der R2-Fallback scheitern oder veraltet sind.
 
 Die aktive Quelle steht als kleine Zeile unter der Hero (z. B. „Quelle: ICON · R2 · Lauf 12 UTC"). Alle Hosts sind
 über `VITE_WETTER_BASE`, `VITE_LIVE_BASE` und `VITE_DATA_BASE` in `data/endpoints.ts` überschreibbar. Der

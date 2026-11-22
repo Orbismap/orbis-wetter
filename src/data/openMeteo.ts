@@ -42,7 +42,8 @@ export async function loadOpenMeteoSeries(lat: number, lng: number, options: Fet
   const values = (key: string) => arr(response, key).map(num);
   const series: PointSeries = {
     label: 'Open-Meteo',
-    detail: 'ICON · Fallback',
+    detail: 'ICON · Live',
+    issued: Date.now(),
     offsetSeconds: offset,
     times,
     temp: values('temperature_2m'),

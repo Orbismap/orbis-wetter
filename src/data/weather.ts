@@ -182,18 +182,22 @@ function dailyFromSeries(series: PointSeries, location: WeatherLocation): DailyI
   }));
 }
 
-/** R2 first, live APIs as fallback and as supplement, sample data as last resort. */
+/** ICON mirror in R2 may lag behind – Open-Meteo is the default, R2 only a freshness-checked fallback. */
+const MAX_ICON_AGE = 12 * 3_600_000;
+
 export async function loadWeather(location: WeatherLocation, signal?: AbortSignal): Promise<WeatherResult> {
   let series: PointSeries | undefined;
   let source: SourceInfo = { label: 'Beispieldaten', detail: 'Live-Quellen nicht erreichbar' };
   try {
-    series = await loadIconSeries(location.lat, location.lng, { signal });
+    series = await loadOpenMeteoSeries(location.lat, location.lng, { signal });
     source = { label: series.label, detail: series.detail };
   } catch (error) {
     if (signal?.aborted) throw error;
     try {
-      series = await loadOpenMeteoSeries(location.lat, location.lng, { signal });
-      source = { label: series.label, detail: series.detail };
+      const fallback = await loadIconSeries(location.lat, location.lng, { signal });
+      if (Date.now() - fallback.issued > MAX_ICON_AGE) throw new Error('ICON-Lauf veraltet');
+      series = fallback;
+      source = { label: fallback.label, detail: fallback.detail };
     } catch (fallbackError) {
       if (signal?.aborted) throw fallbackError;
     }

@@ -3,6 +3,8 @@ export interface PointSeries {
   label: string;
   /** Short source detail, e.g. the model run. */
   detail: string;
+  /** When the underlying model run was issued (UTC ms). */
+  issued: number;
   /** Seconds east of UTC, used to render local hours. */
   offsetSeconds: number;
   /** UTC ms per step. */
