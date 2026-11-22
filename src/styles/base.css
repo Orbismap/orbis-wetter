@@ -114,15 +114,24 @@ body {
   overflow: hidden;
   text-overflow: ellipsis;
 }
-.hours { display: flex; gap: 4px; overflow: hidden; }
+.hours {
+  display: flex;
+  gap: 4px;
+  overflow-x: auto;
+  overflow-y: hidden;
+  scrollbar-width: none;
+  scroll-snap-type: x proximity;
+  overscroll-behavior-x: contain;
+}
+.hours::-webkit-scrollbar { display: none; }
 .hour {
-  flex: 1;
-  min-width: 0;
+  flex: 0 0 74px;
   padding: var(--s-2) 2px;
   border-radius: 12px;
   text-align: center;
+  scroll-snap-align: start;
 }
-.hour-event { flex: 2; background: rgba(255, 255, 255, 0.14); }
+.hour-event { flex-basis: 112px; background: rgba(255, 255, 255, 0.14); }
 .hour-label { font-size: 0.75rem; font-weight: 600; color: var(--text-2); white-space: nowrap; }
 .hour-icon { height: 34px; display: grid; place-items: center; margin: var(--s-1) 0; }
 .hour-icon .icon, .day-icon .icon { display: inline-flex; }

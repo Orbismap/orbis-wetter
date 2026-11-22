@@ -99,7 +99,8 @@ export function buildWeather(
 
   const hours = [] as WeatherNow['hourly'];
   const sunsetHour = sun?.sunset ? Number(sun.sunset.slice(0, 2)) : undefined;
-  for (let i = index; i < Math.min(size, index + 9); i++) {
+  // A full day ahead – the strip scrolls horizontally, so it no longer needs to be truncated to nine slots.
+  for (let i = index; i < Math.min(size, index + 24); i++) {
     const local = localHour(series.times[i]!, series.offsetSeconds);
     const sunset = sunsetHour === local
       ? sun!.sunset

@@ -51,7 +51,7 @@ describe('weather view model', () => {
     expect(weather.current.low).toBe(0);
     expect(weather.current.air).toMatchObject({ value: 20, label: 'Gut' });
     expect(weather.current.warning).toEqual(supplements.warning);
-    expect(weather.hourly).toHaveLength(9);
+    expect(weather.hourly.length).toBeGreaterThan(9);
     expect(weather.daily).toHaveLength(10);
     expect(weather.daily[0]!.label).toBe('Heute');
   });

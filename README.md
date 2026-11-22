@@ -17,7 +17,9 @@ pnpm typecheck
 Feste 6×5-Widget-Raster mit **15 echten Widgets** (Stundenleiste, 10-Tage-Vorhersage, Wetterkarte,
 Detailkarten …), die über einen `WeatherProvider` mit **echten Wetterdaten** versorgt werden. Echte Ortsuche
 via Open-Meteo, echte 2D-Wetterlayer (ICON aus R2, Radar von RainViewer). Im Bearbeitungsmodus lassen sich die
-Widgets per Ziehen neu anordnen; die Anordnung bleibt lokal gespeichert. Skalieren und Mobil-Layout sind noch offen.
+Widgets per Ziehen neu anordnen; die Anordnung bleibt lokal gespeichert. Die Stundenleiste zeigt **24 Stunden** und
+lässt sich horizontal scrollen (Trackpad, Touch, Mausrad und Shift+Mausrad); die Scrollbar ist ausgeblendet. Skalieren
+und Mobil-Layout sind noch offen.
 
 ## Architektur
 
