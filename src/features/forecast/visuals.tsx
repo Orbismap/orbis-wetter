@@ -97,12 +97,24 @@ export function PressureGauge({ value }: { value: number }) {
   );
 }
 
-/** One smooth sine curve: sunrise at the left horizon, sunset in the middle, next sunrise at the right. */
-export function SunCurve({ sunrise, sunset, phase }: { sunrise: string; sunset: string; phase: number }) {
+/** Sun path on a 0–24 h axis: night on both sides, a smooth arc peaking at noon. */
+export function SunCurve({ sunrise, sunset, clock }: { sunrise: string; sunset: string; clock: number }) {
   const horizon = 38;
-  const amplitude = 22;
+  const amplitude = 13;
+  const minutes = (value: string) => {
+    const [hours = 0, mins = 0] = value.split(':').map(Number);
+    return hours * 60 + mins;
+  };
+  const rise = minutes(sunrise) / 1440;
+  const set = minutes(sunset) / 1440;
+  const day = Math.max(1 / 1440, set - rise);
+  const night = Math.max(1 / 1440, 1 - day);
   const xAt = (t: number) => 8 + t * 144;
-  const yAt = (t: number) => horizon - amplitude * Math.sin(2 * Math.PI * t);
+  const yAt = (t: number) => {
+    if (t >= rise && t <= set) return horizon - amplitude * Math.sin(Math.PI * (t - rise) / day);
+    const q = ((((t - set) % 1) + 1) % 1) / night;
+    return horizon + amplitude * Math.sin(Math.PI * q);
+  };
   const path = Array.from({ length: 97 }, (_, i) => {
     const t = i / 96;
     return `${i === 0 ? 'M' : 'L'}${xAt(t).toFixed(1)} ${yAt(t).toFixed(1)}`;
@@ -110,7 +122,7 @@ export function SunCurve({ sunrise, sunset, phase }: { sunrise: string; sunset: 
   return (
     <svg class="sun-curve" viewBox="0 0 160 64" aria-label={`Sonnenaufgang ${sunrise}, Sonnenuntergang ${sunset}`}>
       <defs>
-        <linearGradient id="wx-sun-path" gradientUnits="userSpaceOnUse" x1="0" y1="16" x2="0" y2="60">
+        <linearGradient id="wx-sun-path" gradientUnits="userSpaceOnUse" x1="0" y1="25" x2="0" y2="51">
           <stop offset="0" stop-color="rgba(255,255,255,0.8)" />
           <stop offset="0.49" stop-color="rgba(255,255,255,0.8)" />
           <stop offset="0.51" stop-color="rgba(255,255,255,0.28)" />
@@ -119,7 +131,7 @@ export function SunCurve({ sunrise, sunset, phase }: { sunrise: string; sunset: 
       </defs>
       <path d={path} class="sun-path" />
       <line x1="4" y1={horizon} x2="156" y2={horizon} class="horizon" />
-      <circle cx={xAt(phase)} cy={yAt(phase)} r="4.5" class="sun-dot" />
+      <circle cx={xAt(clock)} cy={yAt(clock)} r="4.5" class="sun-dot" />
     </svg>
   );
 }

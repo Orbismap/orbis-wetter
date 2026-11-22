@@ -123,17 +123,10 @@ export function buildWeather(
   const setMinutes = minutesOf(sunset) ?? 0;
   const localNow = new Date(now + series.offsetSeconds * 1000);
   const nowMinutes = localNow.getUTCHours() * 60 + localNow.getUTCMinutes();
-  const dayLength = setMinutes > riseMinutes ? setMinutes - riseMinutes : setMinutes + 1440 - riseMinutes;
-  const nightLength = 1440 - dayLength;
-  const sunUp = dayLength > 0
+  const sunUp = setMinutes > riseMinutes
     ? nowMinutes >= riseMinutes && nowMinutes < setMinutes
     : nowMinutes >= riseMinutes || nowMinutes < setMinutes;
-  // One continuous sunrise → sunset → next sunrise cycle for the sun curve marker.
-  const sunPhase = dayLength > 0 && nowMinutes >= riseMinutes && nowMinutes <= setMinutes
-    ? Math.min(0.5, 0.5 * (nowMinutes - riseMinutes) / dayLength)
-    : Math.min(1, 0.5 + 0.5 * (
-      (nowMinutes >= setMinutes ? nowMinutes - setMinutes : nowMinutes + 1440 - setMinutes) / nightLength
-    ));
+  const sunClock = nowMinutes / 1440;
   const uv = sun?.uv ?? sample.current.uvIndex;
   const daily = supplements.daily?.length ? supplements.daily : dailyFromSeries(series, location);
 
@@ -217,7 +210,7 @@ export function buildWeather(
       sunrise,
       sunset,
       sunUp,
-      sunPhase,
+      sunClock,
       averages: { delta: round(high - averageHigh), todayHigh: high, averageHigh },
       moon: sample.current.moon, // moon phase is global and not part of either data source
       air: airOf(supplements.aqi),

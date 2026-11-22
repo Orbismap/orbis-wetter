@@ -50,8 +50,8 @@ export interface WeatherNow {
     sunset: string;
     /** Whether the sun is currently above the horizon at the selected place. */
     sunUp: boolean;
-    /** Position in the sun cycle: 0 at sunrise, 0.5 at sunset, 1 at the next sunrise. */
-    sunPhase: number;
+    /** Current position on a 0–24 h clock axis (0 = midnight, 0.5 = noon). */
+    sunClock: number;
     averages: { delta: number; todayHigh: number; averageHigh: number };
     moon: { phase: string; illumination: number; rise: string; full: string };
     air: { value: number; label: string; note: string };

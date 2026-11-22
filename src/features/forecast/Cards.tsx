@@ -67,12 +67,12 @@ export function UvCard({ uvIndex, uvLabel, uvNote }: Pick<WeatherNow['current'],
   );
 }
 
-export function SunCard({ sunrise, sunset, sunUp, sunPhase }: Pick<WeatherNow['current'], 'sunrise' | 'sunset' | 'sunUp' | 'sunPhase'>) {
+export function SunCard({ sunrise, sunset, sunUp, sunClock }: Pick<WeatherNow['current'], 'sunrise' | 'sunset' | 'sunUp' | 'sunClock'>) {
   const rising = !sunUp;
   return (
     <DetailCard title={rising ? 'Sonnenaufgang' : 'Sonnenuntergang'} className="sun">
       <div class="big">{rising ? sunrise : sunset}</div>
-      <SunCurve sunrise={sunrise} sunset={sunset} phase={sunPhase} />
+      <SunCurve sunrise={sunrise} sunset={sunset} clock={sunClock} />
       <div class="source">{rising ? `Sonnenuntergang: ${sunset}` : `Sonnenaufgang: ${sunrise}`}</div>
     </DetailCard>
   );
