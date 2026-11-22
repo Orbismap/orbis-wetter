@@ -1,6 +1,12 @@
 /** Pure helpers for the compact map's layer switcher. */
 import type { WxMapMode } from '../handoff/modes';
-import type { CityCondition } from '../../data/openMeteo';
+
+export interface MarkerCondition {
+  temp: number;
+  precip: number;
+  wind: number;
+  code: number;
+}
 
 export const MAP_MODES: WxMapMode[] = ['radar', 'precip', 'temp', 'wind'];
 export const MODE_TITLE: Record<WxMapMode, string> = {
@@ -18,7 +24,7 @@ export function conditionSymbol(code: number): string {
 }
 
 /** Short value shown on a city marker for the active layer. */
-export function markerValue(mode: WxMapMode, condition: CityCondition): string {
+export function markerValue(mode: WxMapMode, condition: MarkerCondition): string {
   switch (mode) {
     case 'temp': return `${Math.round(condition.temp)}°`;
     case 'precip': return condition.precip >= 0.1 ? condition.precip.toFixed(1) : '–';
@@ -28,7 +34,7 @@ export function markerValue(mode: WxMapMode, condition: CityCondition): string {
 }
 
 /** Marker colour by layer and value (cool → warm for temperature, dry → wet for precipitation). */
-export function markerColor(mode: WxMapMode, condition: CityCondition): string {
+export function markerColor(mode: WxMapMode, condition: MarkerCondition): string {
   switch (mode) {
     case 'temp':
       return condition.temp <= 0 ? '#7cc4ff' : condition.temp <= 8 ? '#9bd6c4' : condition.temp <= 16 ? '#ffd27a' : '#ff8a5e';

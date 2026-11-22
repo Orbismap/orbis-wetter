@@ -119,12 +119,11 @@ nicht mehr sichtbare entfernt. Jedes Feld wird über `fieldLayers.ts` in ein geo
 und als `raster`-Layer unter den Ortsbeschriftungen eingehängt. Wind nutzt `u`/`v` als Betrag, Farbskalen liegen in
 `fieldLayers.ts`. Radar kommt – wie bei orbis – aus den keylosen RainViewer-Kacheln, die von sich aus auf Zoom und
 Position reagieren.
-Die Stadtmarker zeigen ergänzend Live-Werte aus einer Open-Meteo-Multi-Location-Abfrage
-(`data/openMeteo.ts::loadCityConditions`, 10 min Cache). Der Vollbild-Link ist ins Menü gewandert und übernimmt die
-gewählte Ebene als `l=`-Parameter. Bei einem Ortswechsel fliegt die Karte zum neuen Ort; nach **5 s ohne
-Interaktion** fliegt sie automatisch auf die Ursprungsposition (gewählter Ort, Zoom 6) zurück. Der Timer hört nur
-auf echte Eingaben auf der Kartenfläche (`pointerdown`, `wheel`, `touchstart`, `keydown`), nicht auf die eigenen
-Kamerabewegungen.
+Es gibt bewusst **keine Stadt-Punkte** mehr, nur den Marker des gewählten Orts. Der Vollbild-Link ist ins Menü
+gewandert und übernimmt die gewählte Ebene als `l=`-Parameter. Bei einem Ortswechsel fliegt die Karte zum neuen
+Ort; der **5-Sekunden-Timer startet erst nach einer eigenen Interaktion** (`pointerdown`, `wheel`, `touchstart`,
+`keydown` auf der Kartenfläche) und fliegt dann auf die Ursprungsposition (gewählter Ort, Zoom 6) zurück. Mounten,
+Ortswechsel und die eigenen Kamerabewegungen starten ihn nicht.
 
 ## Übergang zur Karte
 

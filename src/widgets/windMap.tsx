@@ -4,7 +4,16 @@ import type { WidgetDefinition } from './types';
 
 function WindMapWidget() {
   const { place, current } = useWeather();
-  return <WindMapCard windSpeed={current.windSpeed} placeName={place.name} lat={place.lat} lng={place.lng} />;
+  return (
+    <WindMapCard
+      windSpeed={current.windSpeed}
+      placeName={place.name}
+      lat={place.lat}
+      lng={place.lng}
+      temp={current.temp}
+      precip={Number.parseFloat(current.precipitation) || 0}
+    />
+  );
 }
 
 export const windMapWidget: WidgetDefinition = {
