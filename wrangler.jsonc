@@ -1,6 +1,6 @@
 {
   "$schema": "node_modules/wrangler/config-schema.json",
-  "name": "orbis-wetter",
+  "name": "wetter",
   "compatibility_date": "2026-11-01",
   // Static site: Vite builds to dist/, Cloudflare serves it under /wetter/ on the same origin as the map.
   "assets": {
