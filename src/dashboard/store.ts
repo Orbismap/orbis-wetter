@@ -1,6 +1,6 @@
 import { useSyncExternalStore } from 'preact/compat';
 import { defaultLayout } from './defaultLayout';
-import { clampToGrid, firstFreeSlot, fits, overlaps } from './geometry';
+import { clampToGrid, collisions, firstFreeSlot, fits, overlaps } from './geometry';
 import { loadLayout, saveLayout } from './persistence';
 import { getPreset } from './presets';
 import type { LayoutState, Placement, Rect } from './types';
@@ -61,14 +61,16 @@ export class LayoutStore {
     const first = this.state.placements.find((p) => p.id === firstId);
     const second = this.state.placements.find((p) => p.id === secondId);
     if (!first || !second) return false;
-    this.commit({
-      ...this.state,
-      placements: this.state.placements.map((p) => {
-        if (p.id === firstId) return { ...p, x: second.x, y: second.y };
-        if (p.id === secondId) return { ...p, x: first.x, y: first.y };
-        return p;
-      }),
+    const preset = getPreset(this.state.preset);
+    const next = this.state.placements.map((p) => {
+      if (p.id === firstId) return { ...p, x: second.x, y: second.y };
+      if (p.id === secondId) return { ...p, x: first.x, y: first.y };
+      return p;
     });
+    // Bounds alone are not enough: the exchanged cells must not collide with a third widget.
+    if (next.some((p) => !fits(preset, p))) return false;
+    if (collisions(next).length > 0) return false;
+    this.commit({ ...this.state, placements: next });
     return true;
   };
 

@@ -4,6 +4,7 @@ import { LayoutStore } from './store';
 import type { LayoutState, Placement } from './types';
 
 registerPreset({ id: 'testgrid', label: 'Test', cols: 3, rows: 3, width: 300, gap: 0, aspect: 1 });
+registerPreset({ id: 'testgrid4', label: 'Test 4', cols: 4, rows: 3, width: 400, gap: 0, aspect: 1 });
 
 const placement = (id: string, x: number, y: number, w = 1, h = 1): Placement => ({ id, widget: 'w', x, y, w, h });
 const state = (placements: Placement[]): LayoutState => ({ preset: 'testgrid', placements });
@@ -31,6 +32,16 @@ describe('LayoutStore', () => {
     expect(s.getState().placements[0]).toMatchObject({ x: 1, y: 1 });
     expect(s.getState().placements[1]).toMatchObject({ x: 0, y: 0 });
     expect(s.swap('a', 'missing')).toBe(false);
+
+    const invalid = store([placement('wide', 0, 0, 3, 1), placement('small', 2, 2)]);
+    expect(invalid.swap('wide', 'small')).toBe(false); // the wide widget would leave the grid
+
+    // In bounds, but the wide widget would land on top of a third widget.
+    const third = new LayoutStore({
+      preset: 'testgrid4',
+      placements: [placement('a', 0, 0, 2, 1), placement('b', 2, 2), placement('c', 3, 2)],
+    });
+    expect(third.swap('a', 'b')).toBe(false);
   });
 
   it('resizes a widget with clamping and collision checks', () => {

@@ -10,6 +10,7 @@ const desktop = getPreset('desktop');
 describe('cellMetrics', () => {
   it('fills the fixed canvas width and derives square cells', () => {
     const m = cellMetrics(desktop);
+    expect([m.cols, m.rows]).toEqual([6, 5]);
     expect(m.cellW).toBeCloseTo(890 / 6);
     expect(m.cellH).toBeCloseTo(m.cellW);
     expect(m.stepX).toBeCloseTo(m.cellW + desktop.gap);

@@ -51,6 +51,8 @@ export function playFlip(): void {
   if (window.matchMedia('(prefers-reduced-motion: reduce)').matches) return;
 
   host.querySelectorAll<HTMLElement>(FRAME_SELECTOR).forEach((element) => {
+    // The dragged widget's transform is driven by the pointer – never animate it here.
+    if (element.style.transform) return;
     const id = element.dataset.placementId;
     const before = id ? first.get(id) : undefined;
     const after = id ? last.get(id) : undefined;

@@ -39,6 +39,8 @@ export interface LayoutState {
 
 /** Derived pixel metrics for a preset. */
 export interface CellMetrics {
+  cols: number;
+  rows: number;
   cellW: number;
   cellH: number;
   stepX: number;

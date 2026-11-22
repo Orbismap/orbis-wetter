@@ -7,6 +7,8 @@ export function cellMetrics(preset: GridPreset): CellMetrics {
   const cellW = (preset.width - (preset.cols - 1) * preset.gap) / preset.cols;
   const cellH = cellW / preset.aspect;
   return {
+    cols: preset.cols,
+    rows: preset.rows,
     cellW,
     cellH,
     stepX: cellW + preset.gap,

@@ -1,3 +1,5 @@
+import { collisions, fits } from './geometry';
+import { getPreset } from './presets';
 import type { LayoutState, Placement } from './types';
 
 const STORAGE_KEY = 'orbis.wetter.layout.v1';
@@ -22,7 +24,13 @@ export function loadLayout(): LayoutState | null {
     if (typeof state.preset !== 'string' || !Array.isArray(state.placements) || !state.placements.every(isPlacement)) {
       return null;
     }
-    return { preset: state.preset, placements: state.placements };
+    // Never restore an invalid (overlapping or out-of-bounds) arrangement from an older session.
+    let preset;
+    try { preset = getPreset(state.preset); } catch { return null; }
+    const placements = state.placements;
+    if (placements.some((p) => !fits(preset, p))) return null;
+    if (collisions(placements).length > 0) return null;
+    return { preset: state.preset, placements };
   } catch {
     return null;
   }

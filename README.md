@@ -50,9 +50,14 @@ Die Anordnung wird in `localStorage` gespeichert (`orbis.wetter.layout.v1`), „
 wieder her. Skalieren der Widgets kommt später – die `resize`-Aktion im Store ist schon vorbereitet.
 
 Das Ziehen ist flüssig animiert: Während der Bewegung schreibt `useDrag.ts` den `translate3d` direkt ins DOM (kein
-Re-Render pro Pointermove). Beim Ablegen misst `flip.ts` die alten Positionen und spielt eine **FLIP**-Animation über
-die Web Animations API ab – sowohl für das gezogene Widget als auch für alle anderen, die ihre Position ändern.
-Nur `transform` wird animiert (GPU-composited), `prefers-reduced-motion` wird respektiert.
+Re-Render pro Pointermove). Sobald die Zielzelle erreicht ist, wird **live getauscht** – das andere Widget weicht
+bereits während des Ziehens aus und wird per **FLIP** über die Web Animations API animiert. `flip.ts` übernimmt auch
+das sanfte Einrasten des gezogenen Widgets beim Loslassen. Nur `transform` wird animiert (GPU-composited),
+`prefers-reduced-motion` wird respektiert.
+
+Überlappungen sind ausgeschlossen: `move` und `swap` im Store validieren Rastergrenzen **und** Kollisionen mit
+allen anderen Widgets. Ein Tausch, der ein drittes Widget überdecken würde, wird abgelehnt. Beim Laden verwirft
+`persistence.ts` gespeicherte Anordnungen, die nicht mehr gültig sind (z. B. aus älteren Versionen).
 
 **Neues Widget hinzufügen:** Datei unter `src/widgets/` anlegen, die eine `WidgetDefinition` exportiert (Titel,
 unterstützte `variants`, `Component`), in `src/widgets/register.ts` registrieren und eine `Placement` in
