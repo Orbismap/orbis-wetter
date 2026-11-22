@@ -230,13 +230,13 @@ body {
 .sun-curve .sun-dot { fill: #101724; stroke: #fff; stroke-width: 2; }
 
 /* Moon: title, a large phase image and the next upcoming date. Tighter padding than other cards. */
-.widget-frame:has(> .detail.moon) { padding: 8px; }
+.widget-frame:has(> .detail.moon) { padding: 4px; }
 .detail.moon { align-items: stretch; justify-content: flex-start; }
 .detail.moon .card-title { margin-bottom: 2px; }
 .moon-image {
   display: block;
   width: 100%;
-  max-width: 96px;
+  max-width: 100px;
   aspect-ratio: 1;
   object-fit: contain;
   align-self: center;
@@ -251,7 +251,7 @@ body {
 
 /* Wide variant: image on the left, phase details on the right. */
 .moon-wide-body { display: flex; align-items: center; gap: var(--s-3); flex: 1; min-height: 0; }
-.moon-wide .moon-image { max-width: 92px; flex: none; margin: 0; }
+.moon-wide .moon-image { max-width: 104px; flex: none; margin: 0; }
 .moon-wide .moon-info { flex: 1; min-width: 0; }
 
 .warning .big { font-size: 1.25rem; }
@@ -262,7 +262,6 @@ body {
   /* Small cells may show a two-line title rather than cutting words off with an ellipsis. */
   .detail .card-title { margin-bottom: 6px; font-size: 0.625rem; line-height: 1.2; }
   .detail .title-text { white-space: normal; overflow: visible; text-overflow: clip; }
-  .detail.moon .title-text { white-space: nowrap; overflow: hidden; text-overflow: ellipsis; }
   .detail .big { font-size: 1.5rem; }
   .detail .note { margin-top: 4px; }
   .detail .kv { padding: 3px 0; font-size: var(--fs-axis); }
