@@ -1,11 +1,18 @@
 {
+  "id": "/wetter/",
   "name": "Orbis Wetter",
   "short_name": "Wetter",
   "description": "Wetter vor der Haustür, nahtlos verbunden mit orbis-karten",
+  "lang": "de",
   "start_url": "/wetter/",
   "scope": "/wetter/",
   "display": "standalone",
+  "orientation": "any",
   "background_color": "#0a0f18",
   "theme_color": "#0a0f18",
-  "icons": [{ "src": "/wetter/favicon.svg", "sizes": "any", "type": "image/svg+xml", "purpose": "any" }]
+  "icons": [
+    { "src": "/wetter/favicon.svg", "sizes": "any", "type": "image/svg+xml", "purpose": "any" },
+    { "src": "/wetter/icons/icon-192.png", "sizes": "192x192", "type": "image/png", "purpose": "any maskable" },
+    { "src": "/wetter/icons/icon-512.png", "sizes": "512x512", "type": "image/png", "purpose": "any maskable" }
+  ]
 }

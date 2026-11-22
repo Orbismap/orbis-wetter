@@ -145,6 +145,12 @@ Der Vertrag steht in [docs/HANDOFF.md](docs/HANDOFF.md). Kurz: Der Vollbild-Link
 Wetterkarte trägt `view-transition-name: wx-map`, und die URL übernimmt Center/Zoom, die Karte `wetter` und die
 aktive Ebene. orbis-karten springt wegen seines `jumpTo`-Verhaltens ohne Fluganimation an genau diese Position.
 
+## PWA
+
+Die App ist installierbar: `public/manifest.webmanifest` liefert Name, Farben und PNG-Icons (192/512 px, auch als Maskable-Icon), `index.html` zusätzlich ein `apple-touch-icon` für iOS. `src/pwa/register.ts` registriert den aus `src/pwa/sw.js` gebauten Service Worker nur im Produktionsbau, damit Entwicklung und HMR unberührt bleiben.
+
+Der Service Worker hält die App-Shell (HTML, JS, CSS, Manifest, Icons, Mondbilder) beim Install vor. Die URL-Liste erzeugt das Vite-Plugin `pwaPrecache()` in `vite.config.ts` während des Builds als `precache.json`; sie trägt auch einen Versions-Hash, mit dem veraltete Caches beim Aktivieren gelöscht werden. Der Hash steht zusätzlich als Kommentar in `sw.js`, damit der Browser bei jedem Deploy nach einer neuen Version prüft. Die Version liegt auch offline in einem kleinen Meta-Cache, damit die gecachte Shell auch ohne Netz auffindbar bleibt. Navigationen und Wetterdaten laufen **network-first mit Cache-Fallback** – offline bleibt die zuletzt geladene Vorhersage sichtbar –, statische Assets **cache-first**. Grosse Binärdaten (OWX-Felder, `application/octet-stream`) werden nicht gecacht, das Laufzeit-Cache ist auf 200 Einträge begrenzt.
+
 ## Deployment
 
 `wrangler.jsonc` served `dist/` über die Route `maps.maltee.dev/wetter/*`. Der Workflow
