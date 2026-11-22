@@ -105,7 +105,14 @@ body {
 
 /* ---------- hourly banner ---------- */
 .hourly { display: flex; flex-direction: column; justify-content: center; gap: var(--s-3); }
-.summary { margin: 0 0 var(--s-3); font-size: 0.8125rem; color: var(--text-2); }
+.summary {
+  margin: 0 0 var(--s-3);
+  font-size: var(--fs-axis);
+  color: var(--text-2);
+  white-space: nowrap;
+  overflow: hidden;
+  text-overflow: ellipsis;
+}
 .hours { display: flex; gap: 4px; overflow: hidden; }
 .hour {
   flex: 1;

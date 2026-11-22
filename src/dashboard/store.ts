@@ -32,6 +32,9 @@ export class LayoutStore {
   };
 
   private commit(next: LayoutState): void {
+    // Hard invariant: no arrangement with overlaps or out-of-bounds widgets can ever be stored.
+    const preset = getPreset(next.preset);
+    if (next.placements.some((p) => !fits(preset, p)) || collisions(next.placements).length > 0) return;
     this.state = next;
     saveLayout(next);
     this.listeners.forEach((listener) => listener());

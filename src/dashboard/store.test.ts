@@ -1,4 +1,5 @@
 import { describe, expect, it, vi } from 'vitest';
+import { collisions } from './geometry';
 import { registerPreset } from './presets';
 import { LayoutStore } from './store';
 import type { LayoutState, Placement } from './types';
@@ -117,6 +118,30 @@ describe('LayoutStore', () => {
     expect(s.hoverSwap('two', 0, 0)).toBe(true);
     const cells = Object.fromEntries(s.getState().placements.map((p) => [p.id, [p.x, p.y]]));
     expect(cells).toEqual({ one: [0, 1], two: [0, 0] });
+  });
+
+  it('never leaves overlapping widgets when a drag is repeated', () => {
+    // 1 1 / 1 1 / 2 2 – first push 2 up, then drag it back down past a rejected middle cell.
+    const s = new LayoutStore({
+      preset: 'testgrid',
+      placements: [placement('one', 0, 0, 2, 2), placement('two', 0, 2, 2, 1)],
+    });
+    const cells = () => Object.fromEntries(s.getState().placements.map((p) => [p.id, [p.x, p.y]]));
+
+    s.beginGesture();
+    expect(s.hoverSwap('two', 0, 0)).toBe(true);
+    s.endGesture();
+    expect(cells()).toEqual({ one: [0, 1], two: [0, 0] });
+
+    s.beginGesture();
+    expect(s.hoverSwap('two', 0, 1)).toBe(false); // an intermediate target is impossible
+    s.restoreOrigin(); // rejected hover drops the previous preview
+    expect(cells()).toEqual({ one: [0, 1], two: [0, 0] });
+    expect(s.hoverSwap('two', 0, 2)).toBe(true);
+    s.endGesture();
+
+    expect(cells()).toEqual({ one: [0, 0], two: [0, 2] });
+    expect(collisions(s.getState().placements)).toEqual([]);
   });
 
   it('shifts a whole stack vertically when a row is dragged to the far end', () => {

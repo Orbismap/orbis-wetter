@@ -17,6 +17,8 @@ interface DragStart {
   appliedX: number;
   appliedY: number;
   element: HTMLElement;
+  /** Whether a swap preview is currently applied in the store. */
+  swapApplied: boolean;
   /** Canvas bounds at drag start – leaving them cancels the whole gesture. */
   bounds: DOMRect | null;
   outside: boolean;
@@ -61,13 +63,21 @@ export function useDrag(placement: Placement, metrics: CellMetrics, enabled: boo
       });
     }
 
-    if (!outside) {
-      if (targetX !== origin.appliedX || targetY !== origin.appliedY) {
-        const applied = layoutStore.hoverSwap(placement.id, targetX, targetY);
-        origin.appliedX = applied ? targetX : origin.cellX;
-        origin.appliedY = applied ? targetY : origin.cellY;
-        origin.element.style.left = `${origin.appliedX * metrics.stepX}px`;
-        origin.element.style.top = `${origin.appliedY * metrics.stepY}px`;
+    if (!outside && (targetX !== origin.appliedX || targetY !== origin.appliedY)) {
+      const applied = layoutStore.hoverSwap(placement.id, targetX, targetY);
+      if (!applied && origin.swapApplied) {
+        // A rejected hover must also drop the previous preview – store and DOM stay in sync.
+        layoutStore.restoreOrigin();
+      }
+      origin.swapApplied = applied;
+
+      // The store is the single source of truth for the DOM base position.
+      const current = layoutStore.getState().placements.find((p) => p.id === placement.id);
+      if (current) {
+        origin.appliedX = current.x;
+        origin.appliedY = current.y;
+        origin.element.style.left = `${current.x * metrics.stepX}px`;
+        origin.element.style.top = `${current.y * metrics.stepY}px`;
       }
     }
 
@@ -92,6 +102,7 @@ export function useDrag(placement: Placement, metrics: CellMetrics, enabled: boo
       appliedX: placement.x,
       appliedY: placement.y,
       element,
+      swapApplied: false,
       bounds: document.querySelector<HTMLElement>('.dashboard')?.getBoundingClientRect() ?? null,
       outside: false,
     };
