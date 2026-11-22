@@ -231,7 +231,7 @@ body {
 
 /* Moon: the image is oversized and absolutely centred behind the text;
    its transparent edges extend beyond the card and are clipped. */
-.widget-frame:has(> .detail.moon) { padding: 4px; }
+.widget-frame:has(> .detail.moon) { padding: var(--s-3); }
 .detail.moon { position: relative; display: flex; flex-direction: column; align-items: stretch; }
 .detail.moon .card-title { position: relative; z-index: 2; margin-bottom: var(--s-3); }
 .detail.moon .moon-image {
