@@ -16,9 +16,9 @@ describe('moon phase', () => {
 
   it('keeps illumination and phase labels consistent between quarters', () => {
     const waxing = moonInfo(atFraction(0.4));
-    expect(waxing.phase).toBe('Zunehmender Dreiviertelmond');
+    expect(waxing.phase).toBe('Zunehmender Mond');
     expect(waxing.illumination).toBeGreaterThan(80);
-    expect(moonInfo(atFraction(0.7)).phase).toBe('Abnehmender Dreiviertelmond');
+    expect(moonInfo(atFraction(0.7)).phase).toBe('Abnehmender Mond');
     const waning = moonInfo(atFraction(0.9));
     expect(waning.phase).toBe('Abnehmende Sichel');
     expect(waning.illumination).toBeLessThan(20);

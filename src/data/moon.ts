@@ -35,8 +35,8 @@ function phaseName(index: number): string {
   const exact = PHASE_NAMES.find(([at]) => at === index);
   if (exact) return exact[1];
   if (index < 7) return 'Zunehmende Sichel';
-  if (index < 14) return 'Zunehmender Dreiviertelmond';
-  if (index < 21) return 'Abnehmender Dreiviertelmond';
+  if (index < 14) return 'Zunehmender Mond';
+  if (index < 21) return 'Abnehmender Mond';
   return 'Abnehmende Sichel';
 }
 
