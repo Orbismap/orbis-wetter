@@ -31,17 +31,16 @@ export function App() {
 
         <div class="row row-main">
           <DailyForecast days={daily} />
-          <div class="col">
+          <div class="col mid-column">
             <AirQualityCard air={current.air} />
             <WindCard windSpeed={current.windSpeed} windGust={current.windGust} windDirection={current.windDirection} />
           </div>
-          <div class="col">
+          <div class="col warn-column">
             {current.warning && <WarningCard warning={current.warning} />}
           </div>
         </div>
 
         <div class="row row-four">
-          <div class="row-spacer" aria-hidden="true" />
           <UvCard uvIndex={current.uvIndex} uvLabel={current.uvLabel} uvNote={current.uvNote} />
           <SunCard sunrise={current.sunrise} sunset={current.sunset} />
           <FeelsLikeCard feelsLike={current.feelsLike} temp={current.temp} feelsLikeNote={current.feelsLikeNote} />

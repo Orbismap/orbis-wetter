@@ -10,8 +10,10 @@ export function DailyForecast({ days }: { days: Day[] }) {
         {days.map((d, i) => (
           <li class="day" key={`${d.label}-${i}`}>
             <span class="day-name">{d.label}</span>
-            <span class="day-icon"><WeatherIcon code={d.code} size={26} /></span>
-            <span class={`day-chance${(d.chance ?? 0) >= 30 ? ' wet' : ''}`}>{d.chance != null ? `${d.chance} %` : ''}</span>
+            <span class="day-icon-wrap">
+              <span class="day-icon"><WeatherIcon code={d.code} size={24} /></span>
+              <span class={`day-chance${(d.chance ?? 0) >= 30 ? ' wet' : ''}`}>{d.chance != null ? `${d.chance} %` : ''}</span>
+            </span>
             <span class="day-min">{d.min}°</span>
             <TempRange min={d.min} max={d.max} />
             <span class="day-max">{d.max}°</span>
