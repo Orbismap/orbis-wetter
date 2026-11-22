@@ -60,6 +60,9 @@ statt der Browser-Suche. Neben dem Ortsnamen steht ein Stern, der den Ort in ein
 hinzufügt/entfernt; die Favoriten erscheinen im Suchfeld, solange es leer ist. Die Auswahl lädt Wetter und
 Kartenlayer für die Koordinaten des gefundenen Orts.
 
+**Seitenleiste:** Ortsuche und Favoriten sitzen in der linken Seitenleiste. Die Buttons in der Kopfzeile blenden sie
+ein und aus; **⌘B / Strg+B** schaltet genauso um.
+
 ## Datenquellen
 
 Reihenfolge in `data/weather.ts` (`loadWeather`):

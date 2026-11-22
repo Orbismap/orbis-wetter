@@ -44,6 +44,18 @@ export function App() {
     }
   }, [listOpen, focusSearch]);
 
+  // ⌘B / Strg+B toggles the left sidebar – like the buttons in the HUD.
+  useEffect(() => {
+    const onKeyDown = (event: KeyboardEvent) => {
+      if ((event.metaKey || event.ctrlKey) && event.key.toLowerCase() === 'b') {
+        event.preventDefault();
+        setListOpen((open) => !open);
+      }
+    };
+    document.addEventListener('keydown', onKeyDown);
+    return () => document.removeEventListener('keydown', onKeyDown);
+  }, []);
+
   useEffect(() => {
     const controller = new AbortController();
     const location = { name: city.name, eyebrow: city.region || city.country, lat: city.lat, lng: city.lng };
@@ -83,7 +95,7 @@ export function App() {
                   <OrbisMark size={32} variant="small" />
                   Orbis Wetter
                 </h1>
-                <button type="button" class="wx-hud-rbtn" aria-label="Menü ausblenden" onClick={() => setListOpen(false)}>
+                <button type="button" class="wx-hud-rbtn" aria-label="Menü ausblenden" aria-keyshortcuts="Meta+B Control+B" onClick={() => setListOpen(false)}>
                   <svg viewBox="0 0 20 20" width="20" height="20" aria-hidden="true">
                     <path d="M4.5 3.5h11A1.5 1.5 0 0 1 17 5v10a1.5 1.5 0 0 1-1.5 1.5h-11A1.5 1.5 0 0 1 3 15V5a1.5 1.5 0 0 1 1.5-1.5zM8 3.5v13" fill="none" stroke="currentColor" stroke-width="1.3" stroke-linejoin="round" />
                   </svg>
@@ -97,7 +109,7 @@ export function App() {
               <OrbisMark size={28} variant="small" />
               Orbis Wetter
             </h1>
-            <button type="button" class="wx-hud-rbtn" aria-label="Menü einblenden" onClick={() => setListOpen(true)}>
+            <button type="button" class="wx-hud-rbtn" aria-label="Menü einblenden" aria-keyshortcuts="Meta+B Control+B" onClick={() => setListOpen(true)}>
               <svg viewBox="0 0 20 20" width="20" height="20" aria-hidden="true">
                 <path d="M4.5 3.5h11A1.5 1.5 0 0 1 17 5v10a1.5 1.5 0 0 1-1.5 1.5h-11A1.5 1.5 0 0 1 3 15V5a1.5 1.5 0 0 1 1.5-1.5zM8 3.5v13" fill="none" stroke="currentColor" stroke-width="1.3" stroke-linejoin="round" />
               </svg>
