@@ -4,6 +4,10 @@ Der Übergang soll so aussehen, als würde die kleine Karte einfach groß werden
 Apps auf **derselben Origin** liegen (`maps.maltee.dev`). Es gibt kein Shared-Paket; die wenigen gemeinsamen
 Werte stehen hier und sind auf der anderen Seite gespiegelt.
 
+> **Stand:** Die Wetter-App wurde auf das Widget-Raster umgestellt; die Windkarte ist vorübergehend ein
+> Platzhalter. Der Vertrag unten bleibt gültig und greift wieder, sobald `WindMapCard` als echtes Widget
+> eingebunden ist.
+
 ## 1. View Transition
 
 Beide Dokumente opten ein – in einem globalen Stylesheet:

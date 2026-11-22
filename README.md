@@ -14,11 +14,40 @@ pnpm typecheck
 
 ## Stand
 
-Desktop-Layout nach Designreferenz: Hero, Stundenleiste, 10-Tage-Vorhersage, Luftqualität, Wind, Windkarte,
-Warnung und die kleinen Detailkarten. Die Werte kommen aus `src/features/forecast/sample.ts` – **statische
-Beispieldaten**, kein Live-API. Die Windkarte zeigt Stationen und den Standort-Marker; beim Klick auf „⤢" geht es
-nahtlos in die große Karte von orbis-karten. Die kleinen Detailkarten sind schon als Buttons angelegt, bekommen
-aber erst später Inhalte. Hintergrundbild und Mobil-Layout sind bewusst noch nicht drin.
+Die **Architektur-Grundlage** steht: ein festes Widget-Raster mit registrierten Widgets und verwaltbarem Layout.
+Alle 15 Widgets zeigen aktuell Platzhalter – die echten Widgets (Stundenleiste, 10-Tage-Vorhersage, Windkarte,
+Detailkarten …) werden als Nächstes in dieses System überführt. Die bisherigen Komponenten liegen noch unter
+`src/features/forecast/` und dienen als Vorlage.
+
+## Architektur
+
+```
+src/
+  dashboard/          Grid-Engine
+    types.ts          GridPreset, Placement, LayoutState
+    presets.ts        Raster-Presets (desktop 6×5 / wide 8×5), registrierbar
+    geometry.ts       Zellmaße, Kollisionen, freie Plätze, Clamping (rein, getestet)
+    store.ts          LayoutStore: move / resize / add / remove + useLayout()
+    defaultLayout.ts  Standard-Anordnung je Preset
+    Dashboard.tsx     zeichnet die Grid-Fläche
+    WidgetFrame.tsx   positioniert ein Widget anhand seiner Zelle
+  widgets/            Widget-Vertrag
+    types.ts          WidgetDefinition mit Varianten (1×1, 2×2, 3×2, …)
+    registry.ts       Registrierung nach id
+    placeholder.tsx   temporärer Inhalt
+    register.ts       registriert alle Widgets (aktuell alles Platzhalter)
+```
+
+Das Desktop-Raster ist **6 Spalten × 5 Zeilen** auf festen **950 px** Breite; der Canvas skaliert nicht mit dem
+Fenster, sondern wird zentriert (bei schmaleren Fenstern wird gescrollt). Weitere Rastergrößen sind Presets – der
+Preset-Auswahl im Kopf testet `desktop` und `wide`. Jede Placement speichert `x, y, w, h` in Zellkoordinaten; die
+Pixelposition wird daraus berechnet. Der `LayoutStore` validiert jede Änderung gegen Rastergrenzen und
+Kollisionen – damit ist die Basis für den späteren Bearbeitungsmodus (Ziehen/Skalieren) gelegt, auch wenn die UI
+dafür noch fehlt.
+
+**Neues Widget hinzufügen:** Datei unter `src/widgets/` anlegen, die eine `WidgetDefinition` exportiert (Titel,
+unterstützte `variants`, `Component`), in `src/widgets/register.ts` registrieren und eine `Placement` in
+`src/dashboard/defaultLayout.ts` setzen. Die Grid-Engine muss nicht verändert werden.
 
 ## Übergang zur Karte
 

@@ -1,0 +1,75 @@
+/* ---------- grid surface ---------- */
+.dashboard-wrap {
+  width: 100%;
+  padding: 0 var(--s-5) var(--s-6);
+  overflow-x: auto; /* small windows scroll instead of reshaping the fixed canvas */
+}
+
+.dashboard {
+  position: relative;
+  margin: 0 auto;
+  border-radius: var(--r-panel);
+  background-color: rgba(255, 255, 255, 0.02);
+  /* Faint cell lines make the grid visible – they get stronger in the later edit mode. */
+  background-image:
+    linear-gradient(to right, rgba(255, 255, 255, 0.055) 1px, transparent 1px),
+    linear-gradient(to bottom, rgba(255, 255, 255, 0.055) 1px, transparent 1px);
+  background-size: var(--step-x) var(--step-y);
+}
+
+.dashboard .widget-frame {
+  position: absolute;
+  display: flex;
+  overflow: hidden;
+}
+
+/* ---------- placeholder content (temporary) ---------- */
+.placeholder {
+  display: flex;
+  flex: 1;
+  min-width: 0;
+  flex-direction: column;
+  justify-content: space-between;
+  gap: var(--s-2);
+}
+
+.placeholder .card-title { margin-bottom: 0; }
+
+.placeholder-title {
+  font-size: 1rem;
+  font-weight: 600;
+  letter-spacing: -0.02em;
+  line-height: 1.2;
+}
+
+.placeholder-meta {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 6px;
+}
+
+.badge {
+  padding: 2px 8px;
+  border: 1px solid rgba(255, 255, 255, 0.18);
+  border-radius: var(--r-round);
+  background: rgba(255, 255, 255, 0.14);
+  font-size: var(--fs-axis);
+  line-height: 1.4;
+  white-space: nowrap;
+}
+
+.badge.muted {
+  background: transparent;
+  color: var(--text-2);
+}
+
+.placeholder-note {
+  font-size: var(--fs-axis);
+  color: var(--text-3);
+}
+
+.placeholder-edit {
+  align-self: flex-start;
+  font-size: var(--fs-axis);
+  color: var(--limb);
+}

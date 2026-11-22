@@ -1,1 +1,55 @@
-/* App-specific layout lives here; shared colours and sizes are in ../styles/tokens.css. */
+.app {
+  min-height: 100vh;
+  padding-top: var(--s-4);
+}
+
+.app-header {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: var(--s-4);
+  padding: 0 var(--s-5) var(--s-4);
+}
+
+.brand {
+  display: flex;
+  align-items: center;
+  gap: var(--s-2);
+  font-size: var(--fs-title);
+  font-weight: 600;
+}
+
+.header-right {
+  display: flex;
+  align-items: center;
+  gap: var(--s-4);
+}
+
+.header-hint {
+  font-size: var(--fs-axis);
+  color: var(--text-3);
+}
+
+.preset-picker {
+  display: flex;
+  align-items: center;
+  gap: var(--s-2);
+  font-size: var(--fs-axis);
+  color: var(--text-2);
+}
+
+.preset-picker select {
+  appearance: none;
+  font: inherit;
+  color: var(--text-1);
+  background: var(--g-fill);
+  border: 1px solid var(--g-rim);
+  border-radius: var(--r-input);
+  padding: 6px 10px;
+  cursor: pointer;
+}
+
+.preset-picker option {
+  color: #111;
+  background: #fff;
+}
