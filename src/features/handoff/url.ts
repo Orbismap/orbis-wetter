@@ -24,5 +24,5 @@ export function buildKartenUrl(h: KartenHandoff): string {
   if (h.place) {
     q.push(`p=${[round(h.lat, 5), round(h.lng, 5), encodeURIComponent(h.place.name), encodeURIComponent(h.place.region ?? '')].join(',')}`);
   }
-  return `#/${view}?${q.join('&')}`;
+  return `/#/${view}?${q.join('&')}`;
 }
