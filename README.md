@@ -12,11 +12,13 @@ pnpm test         # Vitest
 pnpm typecheck
 ```
 
-## Stand v1
+## Stand
 
-Das Grundgerüst steht: App-Shell im Orbis-Design, leere Forecast-Seite mit Platzhaltern, echte MapLibre-Vorschau
-und der Vollbild-Link zu orbis-karten. **Noch keine Wetterdaten, keine Modi, keine Zeitachse.** Der Ports der
-WMO-Icon-Logik (`src/features/wmo/`) und die Open-Meteo-Grundlagen (`src/api/`) liegen bereit für den nächsten Schritt.
+Desktop-Layout nach Designreferenz: Hero, Stundenleiste, 10-Tage-Vorhersage, Luftqualität, Wind, Windkarte,
+Warnung und die kleinen Detailkarten. Die Werte kommen aus `src/features/forecast/sample.ts` – **statische
+Beispieldaten**, kein Live-API. Die Windkarte zeigt Stationen und den Standort-Marker; beim Klick auf „⤢" geht es
+nahtlos in die große Karte von orbis-karten. Die kleinen Detailkarten sind schon als Buttons angelegt, bekommen
+aber erst später Inhalte. Hintergrundbild und Mobil-Layout sind bewusst noch nicht drin.
 
 ## Übergang zur Karte
 

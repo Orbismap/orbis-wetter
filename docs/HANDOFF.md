@@ -21,7 +21,7 @@ Die Kartenfläche trägt in **beiden** Apps exakt denselben Namen:
 ```
 
 In orbis-karten sitzt die Klasse am Wrapper in `src/app/MapView.tsx`, hier an `.wx-map` in
-`src/features/weather-map/WeatherMap.tsx`. Nur die Kartenfläche, keine Panels.
+`src/features/forecast/WindMapCard.tsx`. Nur die Kartenfläche, keine Panels.
 
 Wichtig: Der Vollbild-Button muss ein echtes `<a href="…">` sein. `navigation: auto` greift nur bei
 nutzerinitiierten Navigationen – `location.href = …` aus JavaScript löst keine Cross-Document-Transition aus.
@@ -29,7 +29,8 @@ Ohne Browser-Unterstützung (aktuell Firefox) bleibt es ein normaler Seitenwechs
 
 ## 2. URL
 
-`buildKartenUrl()` in `src/features/handoff/url.ts` erzeugt die Ziel-URL im Hash-Format von orbis-karten:
+`buildKartenUrl()` in `src/features/handoff/url.ts` erzeugt die Ziel-URL im Hash-Format von orbis-karten.
+Der Windkarten-Modus (`wind`) wird übergeben, solange die kleine Karte Wind zeigt:
 
 ```
 #/@51.1657,10.4515,5.37z?k=wetter&l=radar&g=0
