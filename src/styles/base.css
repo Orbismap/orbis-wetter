@@ -397,3 +397,19 @@ body {
   color: #fff;
 }
 .here-label { margin-top: 4px; padding: 2px 5px; border-radius: 5px; background: rgba(0, 0, 0, 0.45); font-size: 9px; white-space: nowrap; }
+
+/* Map attribution: collapsed by default, expand on hover/focus. */
+.wx-map .maplibregl-ctrl-attrib.maplibregl-compact {
+  padding: 2px 24px 2px 0;
+}
+.wx-map .maplibregl-ctrl-attrib.maplibregl-compact .maplibregl-ctrl-attrib-inner {
+  display: none;
+}
+.wx-map .maplibregl-ctrl-attrib.maplibregl-compact:hover,
+.wx-map .maplibregl-ctrl-attrib.maplibregl-compact:focus-within {
+  padding: 2px 28px 2px 8px;
+}
+.wx-map .maplibregl-ctrl-attrib.maplibregl-compact:hover .maplibregl-ctrl-attrib-inner,
+.wx-map .maplibregl-ctrl-attrib.maplibregl-compact:focus-within .maplibregl-ctrl-attrib-inner {
+  display: block;
+}
