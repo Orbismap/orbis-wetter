@@ -1,6 +1,6 @@
 import { useSyncExternalStore } from 'preact/compat';
 import { defaultLayout } from './defaultLayout';
-import { clampToGrid, collisions, firstFreeSlot, fits, overlaps } from './geometry';
+import { clampToGrid, collisions, firstFreeSlot, fits, overlaps, packIntoCells, rectCells } from './geometry';
 import { loadLayout, saveLayout } from './persistence';
 import { getPreset } from './presets';
 import type { LayoutState, Placement, Rect } from './types';
@@ -68,6 +68,35 @@ export class LayoutStore {
       return p;
     });
     // Bounds alone are not enough: the exchanged cells must not collide with a third widget.
+    if (next.some((p) => !fits(preset, p))) return false;
+    if (collisions(next).length > 0) return false;
+    this.commit({ ...this.state, placements: next });
+    return true;
+  };
+
+  /**
+   * Move a widget into a target cell, swapping with **all** widgets in its way. The displaced widgets
+   * are packed into the dragged widget's old footprint. This makes e.g. a 2×1 widget trade places
+   * with two 1×1 widgets at once.
+   */
+  swapRegion = (draggedId: string, x: number, y: number): boolean => {
+    const preset = getPreset(this.state.preset);
+    const dragged = this.state.placements.find((p) => p.id === draggedId);
+    if (!dragged) return false;
+    const target = { x, y, w: dragged.w, h: dragged.h };
+    if (!fits(preset, target)) return false;
+
+    const occupants = this.state.placements.filter((p) => p.id !== draggedId && overlaps(target, p));
+    if (occupants.length === 0) return this.move(draggedId, x, y);
+
+    const packed = packIntoCells(occupants, rectCells(dragged));
+    if (!packed) return false;
+
+    const next = this.state.placements.map((p) => {
+      if (p.id === draggedId) return { ...p, x, y };
+      const spot = packed.get(p.id);
+      return spot ? { ...p, ...spot } : p;
+    });
     if (next.some((p) => !fits(preset, p))) return false;
     if (collisions(next).length > 0) return false;
     this.commit({ ...this.state, placements: next });

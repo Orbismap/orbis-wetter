@@ -44,6 +44,28 @@ describe('LayoutStore', () => {
     expect(third.swap('a', 'b')).toBe(false);
   });
 
+  it('swaps a wide widget with all widgets in the target region at once', () => {
+    // Layout:  wide wide  /  a b
+    const s = new LayoutStore({
+      preset: 'testgrid4',
+      placements: [placement('wide', 0, 0, 2, 1), placement('a', 0, 1), placement('b', 1, 1)],
+    });
+    expect(s.swapRegion('wide', 0, 1)).toBe(true);
+    expect(s.getState().placements).toEqual([
+      { id: 'wide', widget: 'w', x: 0, y: 1, w: 2, h: 1 },
+      { id: 'a', widget: 'w', x: 0, y: 0, w: 1, h: 1 },
+      { id: 'b', widget: 'w', x: 1, y: 0, w: 1, h: 1 },
+    ]);
+  });
+
+  it('refuses a region swap when the displaced widgets do not fit the old footprint', () => {
+    const s = new LayoutStore({
+      preset: 'testgrid4',
+      placements: [placement('one', 0, 0), placement('big', 1, 1, 2, 2)],
+    });
+    expect(s.swapRegion('one', 1, 1)).toBe(false);
+  });
+
   it('resizes a widget with clamping and collision checks', () => {
     const s = store([placement('a', 2, 2)]);
     expect(s.resize('a', 5, 5)).toBe(true);

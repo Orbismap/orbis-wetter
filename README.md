@@ -55,9 +55,14 @@ bereits während des Ziehens aus und wird per **FLIP** über die Web Animations 
 das sanfte Einrasten des gezogenen Widgets beim Loslassen. Nur `transform` wird animiert (GPU-composited),
 `prefers-reduced-motion` wird respektiert.
 
-Überlappungen sind ausgeschlossen: `move` und `swap` im Store validieren Rastergrenzen **und** Kollisionen mit
-allen anderen Widgets. Ein Tausch, der ein drittes Widget überdecken würde, wird abgelehnt. Beim Laden verwirft
-`persistence.ts` gespeicherte Anordnungen, die nicht mehr gültig sind (z. B. aus älteren Versionen).
+Überlappungen sind ausgeschlossen: `move`, `swap` und `swapRegion` im Store validieren Rastergrenzen **und**
+Kollisionen mit allen anderen Widgets. Beim Laden verwirft `persistence.ts` gespeicherte Anordnungen, die nicht
+mehr gültig sind (z. B. aus älteren Versionen).
+
+**Regel für breite Widgets:** Zieht man ein Widget in ein Ziel, in dem mehrere andere liegen, tauscht `swapRegion`
+die gesamte Region: Alle betroffenen Widgets rücken gemeinsam in die alte Fläche des gezogenen Widgets. Bei
+`1 1 / 2 3` wandert das 2×1-Widget nach unten, während 2 und 3 zusammen nach oben rücken. `packIntoCells()`
+berechnet die neue Anordnung per Exact-Cover-Suche; passt die Fläche nicht, wird der Zug abgelehnt.
 
 **Neues Widget hinzufügen:** Datei unter `src/widgets/` anlegen, die eine `WidgetDefinition` exportiert (Titel,
 unterstützte `variants`, `Component`), in `src/widgets/register.ts` registrieren und eine `Placement` in

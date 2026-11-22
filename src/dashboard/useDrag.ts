@@ -1,7 +1,6 @@
 import { useRef, useState } from 'preact/hooks';
 import type { TargetedPointerEvent } from 'preact';
 import { cancelFlip, captureFlip, playFlip } from './flip';
-import { overlaps } from './geometry';
 import { layoutStore } from './store';
 import type { CellMetrics, Placement } from './types';
 
@@ -40,15 +39,8 @@ export function useDrag(placement: Placement, metrics: CellMetrics, enabled: boo
     const targetY = clamp(Math.round(visualY / metrics.stepY), metrics.rows - placement.h);
 
     if (targetX !== origin.x || targetY !== origin.y) {
-      const occupant = layoutStore.getState().placements.find((other) =>
-        other.id !== placement.id
-        && overlaps({ x: targetX, y: targetY, w: placement.w, h: placement.h }, other));
-
-      const applied = occupant
-        ? layoutStore.swap(placement.id, occupant.id)
-        : layoutStore.move(placement.id, targetX, targetY);
-
-      if (applied) {
+      // swapRegion handles empty cells as well as several displaced widgets at once.
+      if (layoutStore.swapRegion(placement.id, targetX, targetY)) {
         origin.x = targetX;
         origin.y = targetY;
         // Keep the DOM base in sync now; Preact writes the same values on the next render.
