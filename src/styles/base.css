@@ -203,8 +203,7 @@ body {
 
 .sun-curve { width: 100%; height: 64px; margin: var(--s-2) 0; }
 .sun-curve .horizon { stroke: rgba(255, 255, 255, 0.6); stroke-width: 1.5; }
-.sun-curve .arc { fill: none; stroke: rgba(255, 255, 255, 0.7); stroke-width: 2; }
-.sun-curve .night-arc { fill: none; stroke: rgba(255, 255, 255, 0.2); stroke-width: 2; }
+.sun-curve .sun-path { fill: none; stroke: url(#wx-sun-path); stroke-width: 2; stroke-linecap: round; }
 .sun-curve .sun-dot { fill: #101724; stroke: #fff; stroke-width: 2; }
 
 .warning .big { font-size: 1.25rem; }

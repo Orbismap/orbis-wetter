@@ -97,20 +97,29 @@ export function PressureGauge({ value }: { value: number }) {
   );
 }
 
-/** Sun path across the horizon with a marker at the current position (below the horizon at night). */
-export function SunCurve({ sunrise, sunset, progress }: { sunrise: string; sunset: string; progress: number }) {
-  const night = progress < 0 || progress > 1;
-  const t = night ? (progress < 0 ? 0.06 : 0.94) : progress;
-  const x = (1 - t) ** 2 * 8 + 2 * (1 - t) * t * 80 + t ** 2 * 152;
-  const y = night
-    ? (1 - t) ** 2 * 38 + 2 * (1 - t) * t * 66 + t ** 2 * 38
-    : (1 - t) ** 2 * 38 + 2 * (1 - t) * t * -10 + t ** 2 * 38;
+/** One smooth sine curve: sunrise at the left horizon, sunset in the middle, next sunrise at the right. */
+export function SunCurve({ sunrise, sunset, phase }: { sunrise: string; sunset: string; phase: number }) {
+  const horizon = 38;
+  const amplitude = 22;
+  const xAt = (t: number) => 8 + t * 144;
+  const yAt = (t: number) => horizon - amplitude * Math.sin(2 * Math.PI * t);
+  const path = Array.from({ length: 97 }, (_, i) => {
+    const t = i / 96;
+    return `${i === 0 ? 'M' : 'L'}${xAt(t).toFixed(1)} ${yAt(t).toFixed(1)}`;
+  }).join(' ');
   return (
     <svg class="sun-curve" viewBox="0 0 160 64" aria-label={`Sonnenaufgang ${sunrise}, Sonnenuntergang ${sunset}`}>
-      <path d="M 8 38 Q 80 -10 152 38" class="arc" />
-      <path d="M 8 38 Q 80 66 152 38" class="night-arc" />
-      <line x1="4" y1="38" x2="156" y2="38" class="horizon" />
-      <circle cx={x} cy={y} r="4.5" class="sun-dot" />
+      <defs>
+        <linearGradient id="wx-sun-path" gradientUnits="userSpaceOnUse" x1="0" y1="16" x2="0" y2="60">
+          <stop offset="0" stop-color="rgba(255,255,255,0.8)" />
+          <stop offset="0.49" stop-color="rgba(255,255,255,0.8)" />
+          <stop offset="0.51" stop-color="rgba(255,255,255,0.28)" />
+          <stop offset="1" stop-color="rgba(255,255,255,0.28)" />
+        </linearGradient>
+      </defs>
+      <path d={path} class="sun-path" />
+      <line x1="4" y1={horizon} x2="156" y2={horizon} class="horizon" />
+      <circle cx={xAt(phase)} cy={yAt(phase)} r="4.5" class="sun-dot" />
     </svg>
   );
 }
