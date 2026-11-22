@@ -41,6 +41,7 @@ export function WindMapCard({
 }) {
   const host = useRef<HTMLDivElement>(null);
   const mapRef = useRef<MlMap | null>(null);
+  const mountedLayer = useRef<MountedLayer | null>(null);
   const markers = useRef<MarkerRefs | null>(null);
   const [mode, setMode] = useState<WxMapMode>('wind');
   const [layerNote, setLayerNote] = useState('');
@@ -104,7 +105,9 @@ export function WindMapCard({
       const c = map.getCenter();
       setView({ lat: c.lat, lng: c.lng, zoom: map.getZoom() });
     };
+    const onMoveEnd = () => mountedLayer.current?.refresh();
     map.on('move', sync);
+    map.on('moveend', onMoveEnd);
     sync();
     // The card is laid out by the grid after mount; MapLibre needs a nudge once it has a real size.
     const ro = new ResizeObserver(() => map.resize());
@@ -123,6 +126,7 @@ export function WindMapCard({
       events.forEach((type) => surface.removeEventListener(type, onInteract));
       ro.disconnect();
       map.off('move', sync);
+      map.off('moveend', onMoveEnd);
       cityMarkers.forEach((marker) => marker.remove());
       hereMarker.remove();
       map.remove();
@@ -152,11 +156,11 @@ export function WindMapCard({
     let mounted: MountedLayer | undefined;
     const map = mapRef.current;
     if (map) {
-      applyMapLayer(map, mode, here.lat, here.lng, controller.signal)
+      applyMapLayer(map, mode, controller.signal, setLayerNote)
         .then((layer) => {
           if (controller.signal.aborted) { layer.dispose(); return; }
           mounted = layer;
-          setLayerNote(layer.note);
+          mountedLayer.current = layer;
         })
         .catch(() => {
           if (!controller.signal.aborted) setLayerNote('Kein Layer verfügbar');
@@ -165,6 +169,7 @@ export function WindMapCard({
     return () => {
       controller.abort();
       mounted?.dispose();
+      mountedLayer.current = null;
     };
   }, [mode, here]);
 

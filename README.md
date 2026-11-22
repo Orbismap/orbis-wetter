@@ -112,10 +112,13 @@ unterstützte `variants`, `Component`), in `src/widgets/register.ts` registriere
 Statt eines Vergrößerungs-Buttons sitzt rechts in der Kartentitelzeile ein **Layer-Icon**. Es öffnet ein Menü mit
 den vier Ebenen `Radar`, `Niederschlag`, `Temperatur` und `Wind` (`features/forecast/mapLayers.ts`).
 
-Die Ebenen sind **echte Flächenlayer**, keine Punkte: `applyMapLayer.ts` dekodiert für Temperatur/Wind/Niederschlag
-je einen ICON-Tile aus **R2** (primär, wie bei orbis-karten), renders ihn über `fieldLayers.ts` in ein georeferenziertes
-Canvas-Bild und legt es als `raster`-Layer unter den Ortsbeschriftungen auf die Karte. Wind nutzt `u`/`v` als
-Betrag, Farbskalen liegen in `fieldLayers.ts`. Radar kommt – wie bei orbis – aus den keylosen RainViewer-Kacheln.
+Die Ebenen sind **echte Flächenlayer**, keine Punkte: `applyMapLayer.ts` lädt für Temperatur/Wind/Niederschlag
+**viewport-abhängig** aus **R2** (primär, wie bei orbis-karten) – unter Zoom 4 die 0,5°-Weltübersicht, darüber genau
+die 45°-Tiles, die den aktuellen Kartenausschnitt schneiden. Bei `moveend` werden benötigte Tiles nachgeladen und
+nicht mehr sichtbare entfernt. Jedes Feld wird über `fieldLayers.ts` in ein georeferenziertes Canvas-Bild gerendert
+und als `raster`-Layer unter den Ortsbeschriftungen eingehängt. Wind nutzt `u`/`v` als Betrag, Farbskalen liegen in
+`fieldLayers.ts`. Radar kommt – wie bei orbis – aus den keylosen RainViewer-Kacheln, die von sich aus auf Zoom und
+Position reagieren.
 Die Stadtmarker zeigen ergänzend Live-Werte aus einer Open-Meteo-Multi-Location-Abfrage
 (`data/openMeteo.ts::loadCityConditions`, 10 min Cache). Der Vollbild-Link ist ins Menü gewandert und übernimmt die
 gewählte Ebene als `l=`-Parameter. Bei einem Ortswechsel fliegt die Karte zum neuen Ort; nach **5 s ohne

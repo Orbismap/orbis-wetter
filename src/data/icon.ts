@@ -36,34 +36,56 @@ export function loadLatest(options: FetchOptions = {}): Promise<OwxLatest> {
   });
 }
 
+type Part = 'o' | { c: number; r: number };
+const partName = (part: Part): string => part === 'o' ? 'o' : `t${part.c}_${part.r}`;
+const fieldCache = new Map<string, OwxField>();
+
+/** Decodes one 45° tile or the global 0.5° overview, cached by run/variable/part. */
+async function loadPart(latest: OwxLatest, variable: string, part: Part, options: FetchOptions): Promise<OwxField> {
+  const name = partName(part);
+  const key = `${latest.run}/${variable}/${name}`;
+  const hit = fieldCache.get(key);
+  if (hit) return hit;
+  const url = r2Url('wetter', `v1/${latest.run}/${variable}/${name}.owx`);
+  const field = await decodeOwx(await fetchArrayBuffer(url, { ...options, timeout: part === 'o' ? 60_000 : 30_000 }));
+  if (fieldCache.size > 24) fieldCache.clear();
+  fieldCache.set(key, field);
+  return field;
+}
+
 /** Tile for the point; if a variable has no tile, its coarser global overview is used. */
 async function loadField(latest: OwxLatest, variable: string, lng: number, lat: number, options: FetchOptions): Promise<OwxField> {
   const { c, r } = tileAt(lng, lat);
-  const tile = r2Url('wetter', `v1/${latest.run}/${variable}/t${c}_${r}.owx`);
-  const overview = r2Url('wetter', `v1/${latest.run}/${variable}/o.owx`);
   try {
-    return await decodeOwx(await fetchArrayBuffer(tile, { ...options, timeout: 30_000 }));
+    return await loadPart(latest, variable, { c, r }, options);
   } catch (error) {
     if (options.signal?.aborted) throw error;
-    return await decodeOwx(await fetchArrayBuffer(overview, { ...options, timeout: 60_000 }));
+    return await loadPart(latest, variable, 'o', options);
   }
 }
 
-const fieldCache = new Map<string, OwxField>();
-
-/** One decoded ICON field for an area layer, plus the run it belongs to. */
 export async function loadIconField(
   variable: string, lat: number, lng: number, options: FetchOptions = {},
 ): Promise<{ field: OwxField; latest: OwxLatest }> {
   const latest = await loadLatest(options);
   const { c, r } = tileAt(lng, lat);
-  const key = `${latest.run}/${variable}/t${c}_${r}`;
-  const cachedField = fieldCache.get(key);
-  if (cachedField) return { field: cachedField, latest };
-  const field = await loadField(latest, variable, lng, lat, options);
-  if (fieldCache.size > 12) fieldCache.clear();
-  fieldCache.set(key, field);
-  return { field, latest };
+  return { field: await loadPart(latest, variable, { c, r }, options), latest };
+}
+
+/** Explicit tile for the viewport-driven weather layer. */
+export async function loadIconFieldByTile(
+  variable: string, c: number, r: number, options: FetchOptions = {},
+): Promise<{ field: OwxField; latest: OwxLatest }> {
+  const latest = await loadLatest(options);
+  return { field: await loadPart(latest, variable, { c, r }, options), latest };
+}
+
+/** Whole-world overview for zoomed-out views. */
+export async function loadIconFieldOverview(
+  variable: string, options: FetchOptions = {},
+): Promise<{ field: OwxField; latest: OwxLatest }> {
+  const latest = await loadLatest(options);
+  return { field: await loadPart(latest, variable, 'o', options), latest };
 }
 
 export async function loadIconSeries(lat: number, lng: number, options: FetchOptions = {}): Promise<PointSeries> {
