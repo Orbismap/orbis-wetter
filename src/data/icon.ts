@@ -49,6 +49,23 @@ async function loadField(latest: OwxLatest, variable: string, lng: number, lat: 
   }
 }
 
+const fieldCache = new Map<string, OwxField>();
+
+/** One decoded ICON field for an area layer, plus the run it belongs to. */
+export async function loadIconField(
+  variable: string, lat: number, lng: number, options: FetchOptions = {},
+): Promise<{ field: OwxField; latest: OwxLatest }> {
+  const latest = await loadLatest(options);
+  const { c, r } = tileAt(lng, lat);
+  const key = `${latest.run}/${variable}/t${c}_${r}`;
+  const cachedField = fieldCache.get(key);
+  if (cachedField) return { field: cachedField, latest };
+  const field = await loadField(latest, variable, lng, lat, options);
+  if (fieldCache.size > 12) fieldCache.clear();
+  fieldCache.set(key, field);
+  return { field, latest };
+}
+
 export async function loadIconSeries(lat: number, lng: number, options: FetchOptions = {}): Promise<PointSeries> {
   const latest = await loadLatest(options);
   const entries = await Promise.all(Object.entries(VARS).map(async ([key, variable]) => [

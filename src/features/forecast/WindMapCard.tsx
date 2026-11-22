@@ -3,6 +3,7 @@ import { Map as MlMap, Marker } from 'maplibre-gl';
 import { loadCityConditions, type CityCondition } from '../../data/openMeteo';
 import { buildKartenUrl } from '../handoff/url';
 import type { WxMapMode } from '../handoff/modes';
+import { applyMapLayer, type MountedLayer } from './applyMapLayer';
 import { MapLayerPicker } from './MapLayerPicker';
 import { MODE_TITLE, markerColor, markerValue } from './mapLayers';
 import { wxStyle } from './map-style';
@@ -37,8 +38,10 @@ export function WindMapCard({
   lng?: number;
 }) {
   const host = useRef<HTMLDivElement>(null);
+  const mapRef = useRef<MlMap | null>(null);
   const markers = useRef<MarkerRefs | null>(null);
   const [mode, setMode] = useState<WxMapMode>('wind');
+  const [layerNote, setLayerNote] = useState('');
   const [conditions, setConditions] = useState<CityCondition[]>([]);
   const [view, setView] = useState({ lat: 53.7, lng: 11.4, zoom: 6 });
   const here = useMemo(() => ({ lat: lat ?? FALLBACK[1], lng: lng ?? FALLBACK[0] }), [lat, lng]);
@@ -58,6 +61,7 @@ export function WindMapCard({
       dragRotate: false,
       pitchWithRotate: false,
     });
+    mapRef.current = map;
 
     const cityMarkers = CITIES.map(([name, cityLng, cityLat]) => {
       const el = document.createElement('div');
@@ -96,6 +100,7 @@ export function WindMapCard({
       cityMarkers.forEach((marker) => marker.remove());
       hereMarker.remove();
       map.remove();
+      mapRef.current = null;
       markers.current = null;
     };
     // Map lifecycle is independent of the selected layer; marker text is updated below.
@@ -110,6 +115,27 @@ export function WindMapCard({
       .catch(() => { /* markers keep their labels without live values */ });
     return () => controller.abort();
   }, [here]);
+
+  useEffect(() => {
+    const controller = new AbortController();
+    let mounted: MountedLayer | undefined;
+    const map = mapRef.current;
+    if (map) {
+      applyMapLayer(map, mode, here.lat, here.lng, controller.signal)
+        .then((layer) => {
+          if (controller.signal.aborted) { layer.dispose(); return; }
+          mounted = layer;
+          setLayerNote(layer.note);
+        })
+        .catch(() => {
+          if (!controller.signal.aborted) setLayerNote('Kein Layer verfügbar');
+        });
+    }
+    return () => {
+      controller.abort();
+      mounted?.dispose();
+    };
+  }, [mode, here]);
 
   useEffect(() => {
     const refs = markers.current;
@@ -132,7 +158,10 @@ export function WindMapCard({
     <section class="windmap" aria-label={`${MODE_TITLE[mode]}karte`}>
       <div class="card-title">
         <span class="title-icon">⌁</span> {MODE_TITLE[mode]}
-        <MapLayerPicker mode={mode} onChange={setMode} href={href} />
+        <div class="layer-controls">
+          {layerNote && <span class="layer-note">{layerNote}</span>}
+          <MapLayerPicker mode={mode} onChange={setMode} href={href} />
+        </div>
       </div>
       <div ref={host} class="wx-map" role="application" aria-label="Wetterkarte" />
     </section>

@@ -193,7 +193,9 @@ body {
 .windmap { display: flex; flex-direction: column; }
 .windmap .card-title { justify-content: flex-start; }
 /* Layer picker sits at the right end of the card title. */
-.layer-picker { position: relative; margin-left: auto; }
+.layer-controls { margin-left: auto; display: flex; align-items: center; gap: var(--s-2); }
+.layer-note { font-size: var(--fs-axis); color: var(--text-3); white-space: nowrap; letter-spacing: 0; text-transform: none; }
+.layer-picker { position: relative; }
 .layer-toggle {
   display: grid;
   place-items: center;

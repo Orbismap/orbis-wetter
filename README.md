@@ -14,10 +14,10 @@ pnpm typecheck
 
 ## Stand
 
-Feste 6×5-Widget-Raster mit **15 echten Widgets** (Stundenleiste, 10-Tage-Vorhersage, Windkarte,
-Detailkarten …), die über einen `WeatherProvider` mit **echten Wetterdaten** versorgt werden. Im Bearbeitungsmodus
-lassen sich die Widgets per Ziehen neu anordnen; die Anordnung bleibt lokal gespeichert. Skalieren, Mobil-Layout
-und eine echte Geocoding-Suche sind noch offen.
+Feste 6×5-Widget-Raster mit **15 echten Widgets** (Stundenleiste, 10-Tage-Vorhersage, Wetterkarte,
+Detailkarten …), die über einen `WeatherProvider` mit **echten Wetterdaten** versorgt werden. Echte Ortsuche
+via Open-Meteo, echte 2D-Wetterlayer (ICON aus R2, Radar von RainViewer). Im Bearbeitungsmodus lassen sich die
+Widgets per Ziehen neu anordnen; die Anordnung bleibt lokal gespeichert. Skalieren und Mobil-Layout sind noch offen.
 
 ## Architektur
 
@@ -45,10 +45,10 @@ in Zellkoordinaten; die
 Pixelposition wird daraus berechnet. Der `LayoutStore` validiert jede Änderung gegen Rastergrenzen und
 Kollisionen.
 
-**Kopfzeile:** Oben links stehen das Wortmarken-Logo (Icon + „Wetter") und das Suchfeld. Die Suche ist bewusst
-offline: `features/search/cities.ts` enthält eine feste Städteliste **mit Koordinaten**, `CitySearch.tsx` liefert
-Vorschläge (auch umlautunabhängig, z. B. „munchen" → München) mit Tastatursteuerung. Die Auswahl lädt das Wetter
-für diesen Ort – es gibt keinen Geocoding-Aufruf.
+**Kopfzeile:** Oben links stehen das Wortmarken-Logo (Icon + „Wetter") und das Suchfeld. Die Suche ist echt:
+`data/geocoding.ts` fragt die Open-Meteo-Geokodierung (keyless, CORS `*`), `CitySearch.tsx` debounct die Eingabe
+(250 ms), bricht alte Anfragen ab und bietet Tastatursteuerung. Die Auswahl lädt Wetter und Kartenlayer für die
+Koordinaten des gefundenen Orts.
 
 ## Datenquellen
 
@@ -110,10 +110,15 @@ unterstützte `variants`, `Component`), in `src/widgets/register.ts` registriere
 ## Wetterkarte und Ebenen
 
 Statt eines Vergrößerungs-Buttons sitzt rechts in der Kartentitelzeile ein **Layer-Icon**. Es öffnet ein Menü mit
-den vier Ebenen `Radar`, `Niederschlag`, `Temperatur` und `Wind` (`features/forecast/mapLayers.ts`). Die Werte der
-Stadtmarker und des Standort-Markers kommen aus **einer** Open-Meteo-Multi-Location-Abfrage
-(`data/openMeteo.ts::loadCityConditions`, 10 min Cache) und werden je nach Ebene formatiert und eingefärbt.
-Der Vollbild-Link ist aus dem Titel ins Menü gewandert und übernimmt die gewählte Ebene als `l=`-Parameter.
+den vier Ebenen `Radar`, `Niederschlag`, `Temperatur` und `Wind` (`features/forecast/mapLayers.ts`).
+
+Die Ebenen sind **echte Flächenlayer**, keine Punkte: `applyMapLayer.ts` dekodiert für Temperatur/Wind/Niederschlag
+je einen ICON-Tile aus **R2** (primär, wie bei orbis-karten), renders ihn über `fieldLayers.ts` in ein georeferenziertes
+Canvas-Bild und legt es als `raster`-Layer unter den Ortsbeschriftungen auf die Karte. Wind nutzt `u`/`v` als
+Betrag, Farbskalen liegen in `fieldLayers.ts`. Radar kommt – wie bei orbis – aus den keylosen RainViewer-Kacheln.
+Die Stadtmarker zeigen ergänzend Live-Werte aus einer Open-Meteo-Multi-Location-Abfrage
+(`data/openMeteo.ts::loadCityConditions`, 10 min Cache). Der Vollbild-Link ist ins Menü gewandert und übernimmt die
+gewählte Ebene als `l=`-Parameter.
 
 ## Übergang zur Karte
 

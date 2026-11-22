@@ -16,6 +16,7 @@ export const R2 = {
 
 export const API = {
   forecast: 'https://api.open-meteo.com/v1/forecast',
+  geocoding: 'https://geocoding-api.open-meteo.com/v1/search',
   airQuality: 'https://air-quality-api.open-meteo.com/v1/air-quality',
   /** DWD warning districts (GeoJSON, CORS enabled) */
   warnings: 'https://maps.dwd.de/geoserver/dwd/ows?service=WFS&version=1.0.0&request=GetFeature&typeName=dwd:Warnungen_Landkreise&outputFormat=application/json',

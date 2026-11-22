@@ -1,30 +1,73 @@
 import { useEffect, useRef, useState } from 'preact/hooks';
 import type { JSX } from 'preact';
-import { filterCities, type City } from './cities';
+import { searchPlaces, type Place } from '../../data/geocoding';
 import './search.css';
 
-/** UI-only location search: suggestions come from a fixed list and selecting one changes the place name. */
-export function CitySearch({ onSelect }: { onSelect: (city: City) => void }) {
+/** Real place search (Open-Meteo Geocoding) with debounce, keyboard control and abortable requests. */
+export function CitySearch({ onSelect }: { onSelect: (place: Place) => void }) {
   const [query, setQuery] = useState('');
+  const [results, setResults] = useState<Place[]>([]);
   const [open, setOpen] = useState(false);
   const [active, setActive] = useState(0);
+  const [loading, setLoading] = useState(false);
+  const [error, setError] = useState(false);
   const root = useRef<HTMLDivElement>(null);
-  const results = filterCities(query);
+
+  useEffect(() => {
+    const name = query.trim();
+    if (name.length < 2) {
+      setResults([]);
+      setLoading(false);
+      setError(false);
+      return;
+    }
+    const controller = new AbortController();
+    setLoading(true);
+    setError(false);
+    const timer = setTimeout(() => {
+      searchPlaces(name, { signal: controller.signal })
+        .then((places) => {
+          if (controller.signal.aborted) return;
+          setResults(places);
+          setActive(0);
+        })
+        .catch(() => {
+          if (controller.signal.aborted) return;
+          setResults([]);
+          setError(true);
+        })
+        .finally(() => {
+          if (!controller.signal.aborted) setLoading(false);
+        });
+    }, 250);
+    return () => {
+      clearTimeout(timer);
+      controller.abort();
+    };
+  }, [query]);
 
   useEffect(() => {
     if (!open) return;
     const onPointerDown = (event: PointerEvent) => {
       if (!root.current?.contains(event.target as Node)) setOpen(false);
     };
+    const onKeyDown = (event: KeyboardEvent) => {
+      if (event.key === 'Escape') setOpen(false);
+    };
     document.addEventListener('pointerdown', onPointerDown);
-    return () => document.removeEventListener('pointerdown', onPointerDown);
+    document.addEventListener('keydown', onKeyDown);
+    return () => {
+      document.removeEventListener('pointerdown', onPointerDown);
+      document.removeEventListener('keydown', onKeyDown);
+    };
   }, [open]);
 
-  const choose = (city: City) => {
-    setQuery(city.name);
+  const choose = (place: Place) => {
+    setQuery(place.name);
+    setResults([]);
     setOpen(false);
     setActive(0);
-    onSelect(city);
+    onSelect(place);
   };
 
   const onKeyDown = (event: JSX.TargetedKeyboardEvent<HTMLInputElement>) => {
@@ -44,6 +87,8 @@ export function CitySearch({ onSelect }: { onSelect: (city: City) => void }) {
     }
   };
 
+  const showResults = open && query.trim().length >= 2;
+
   return (
     <div class="city-search" ref={root}>
       <div class="city-search-field">
@@ -56,7 +101,7 @@ export function CitySearch({ onSelect }: { onSelect: (city: City) => void }) {
           type="text"
           role="combobox"
           aria-label="Ort suchen"
-          aria-expanded={open}
+          aria-expanded={showResults}
           aria-autocomplete="list"
           aria-controls="city-search-results"
           placeholder="Ort suchen…"
@@ -76,6 +121,7 @@ export function CitySearch({ onSelect }: { onSelect: (city: City) => void }) {
             aria-label="Suche löschen"
             onClick={() => {
               setQuery('');
+              setResults([]);
               setActive(0);
               setOpen(true);
             }}
@@ -85,21 +131,23 @@ export function CitySearch({ onSelect }: { onSelect: (city: City) => void }) {
         )}
       </div>
 
-      {open && (
+      {showResults && (
         <ul class="city-search-results" id="city-search-results" role="listbox">
-          {results.length === 0 && <li class="city-search-empty">Kein Ort gefunden</li>}
-          {results.map((city, index) => (
-            <li key={`${city.name}-${city.region}`}>
+          {loading && <li class="city-search-empty">Suche läuft …</li>}
+          {!loading && error && <li class="city-search-empty">Orte konnten nicht geladen werden</li>}
+          {!loading && !error && results.length === 0 && <li class="city-search-empty">Kein Ort gefunden</li>}
+          {!loading && results.map((place, index) => (
+            <li key={`${place.name}-${place.lat}-${place.lng}`}>
               <button
                 type="button"
                 role="option"
                 aria-selected={index === active}
                 class={index === active ? 'active' : ''}
                 onMouseEnter={() => setActive(index)}
-                onClick={() => choose(city)}
+                onClick={() => choose(place)}
               >
-                <span class="city-search-name">{city.name}</span>
-                <span class="city-search-region">{city.region}</span>
+                <span class="city-search-name">{place.name}</span>
+                <span class="city-search-region">{place.region}</span>
               </button>
             </li>
           ))}
