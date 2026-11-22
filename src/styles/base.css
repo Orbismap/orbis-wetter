@@ -165,14 +165,21 @@ body {
 .scale-mark { position: absolute; top: -4px; width: 4px; height: 13px; margin-left: -2px; border-radius: 2px; background: #fff; box-shadow: 0 0 0 2px rgba(0, 0, 0, 0.25); }
 
 .gauge { width: 120px; height: 120px; }
-.gauge line { stroke: rgba(255, 255, 255, 0.75); stroke-width: 1.2; }
-.gauge .needle { stroke: #fff; stroke-width: 2.5; stroke-linecap: round; }
-.gauge .needle.tail { stroke: rgba(255, 255, 255, 0.4); stroke-width: 2; }
-.gauge .needle-pivot { fill: #fff; }
-.cardinal { fill: var(--text-2); font-size: 9px; font-family: var(--font-ui); }
-.gauge-value { fill: #fff; font-size: 17px; font-weight: 600; font-family: var(--font-ui); }
-.gauge-unit { fill: var(--text-2); font-size: 8px; font-family: var(--font-ui); }
 .pressure-gauge { width: 130px; height: 86px; }
+.pressure-gauge line { stroke: rgba(255, 255, 255, 0.75); stroke-width: 1.2; }
+.pressure-gauge .needle { stroke: #fff; stroke-width: 2.5; stroke-linecap: round; }
+.pressure-gauge .needle-pivot { fill: #fff; }
+
+/* Wind compass: graduated face, tapered needle, clean centre hub. */
+.wind-gauge .compass-face { fill: rgba(255, 255, 255, 0.045); stroke: rgba(255, 255, 255, 0.16); stroke-width: 1; }
+.wind-gauge .compass-tick { stroke: rgba(255, 255, 255, 0.22); stroke-width: 1; stroke-linecap: round; }
+.wind-gauge .compass-tick.medium { stroke: rgba(255, 255, 255, 0.4); stroke-width: 1.2; }
+.wind-gauge .compass-tick.major { stroke: rgba(255, 255, 255, 0.75); stroke-width: 1.8; }
+.wind-gauge .compass-sheen { fill: #fff; opacity: 0.22; }
+.wind-gauge .compass-hub { fill: #101724; stroke: rgba(255, 255, 255, 0.85); stroke-width: 1.6; }
+.wind-gauge .compass-hub-dot { fill: #fff; }
+.wind-gauge .cardinal { fill: var(--text-2); font-family: var(--font-ui); font-size: 10px; font-weight: 600; }
+.wind-gauge .cardinal.north { fill: #fff; font-size: 12px; font-weight: 700; }
 .pressure-value { text-align: center; font-size: 1.25rem; font-weight: 500; }
 .pressure-value small { display: block; font-size: var(--fs-axis); color: var(--text-3); }
 .pressure-trend { text-align: center; color: var(--text-3); }
@@ -205,7 +212,7 @@ body {
   .detail.feels .range { flex: none; }
   .detail.feels .note { margin-top: 2px; font-size: 0.625rem; line-height: 1.2; }
 
-  .detail.wind .gauge { width: 78px; height: 78px; }
+  .detail.wind .gauge { width: 96px; height: 96px; }
   .detail.wind .wind-rows > div { padding: 3px 0; font-size: var(--fs-axis); }
 
   .detail.sun .sun-curve { height: 42px; margin: 4px 0; }

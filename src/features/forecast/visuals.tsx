@@ -36,27 +36,47 @@ export function GradientScale({ value, min, max, colors }: { value: number; min:
   );
 }
 
-/** Wind compass with ticks, cardinal letters and a needle. */
+/** Wind compass: graduated dial, cardinal points and a tapered needle speed-tinted from calm to strong. */
 export function Compass({ speed, direction }: { speed: number; direction: number }) {
-  const ticks = Array.from({ length: 36 }, (_, i) => {
-    const a = (i * 10 * Math.PI) / 180;
-    const long = i % 9 === 0;
-    const r1 = long ? 40 : 44;
-    return <line key={i} x1={60 + Math.sin(a) * r1} y1={60 - Math.cos(a) * r1} x2={60 + Math.sin(a) * 48} y2={60 - Math.cos(a) * 48} opacity={long ? 0.85 : 0.3} />;
+  const accent = speed >= 40 ? '#ff6b5e' : speed >= 20 ? '#f2b45a' : '#6fd19a';
+  const ticks = Array.from({ length: 24 }, (_, i) => {
+    const a = (i * 15 * Math.PI) / 180;
+    const major = i % 6 === 0;
+    const medium = i % 3 === 0;
+    const inner = major ? 35 : medium ? 39 : 42;
+    return (
+      <line
+        key={i}
+        class={`compass-tick${major ? ' major' : medium ? ' medium' : ''}`}
+        x1={60 + Math.sin(a) * inner}
+        y1={60 - Math.cos(a) * inner}
+        x2={60 + Math.sin(a) * 46}
+        y2={60 - Math.cos(a) * 46}
+      />
+    );
   });
   return (
-    <svg class="gauge wind-gauge" viewBox="0 0 120 120" aria-label={`${speed} km/h aus ${direction} Grad`}>
+    <svg class="gauge wind-gauge" viewBox="0 0 120 120" role="img" aria-label={`${speed} km/h aus ${direction} Grad`}>
+      <defs>
+        <linearGradient id="wx-needle-gradient" gradientUnits="userSpaceOnUse" x1="60" y1="12" x2="60" y2="94">
+          <stop offset="0" stop-color={accent} />
+          <stop offset="0.55" stop-color={accent} stop-opacity="0.92" />
+          <stop offset="1" stop-color={accent} stop-opacity="0.35" />
+        </linearGradient>
+      </defs>
+      <circle cx="60" cy="60" r="49" class="compass-face" />
       {ticks}
-      <text x="60" y="13" text-anchor="middle" class="cardinal">N</text>
-      <text x="110" y="64" text-anchor="middle" class="cardinal">O</text>
-      <text x="60" y="116" text-anchor="middle" class="cardinal">S</text>
-      <text x="10" y="64" text-anchor="middle" class="cardinal">W</text>
-      <g transform={`rotate(${direction} 60 60)`}>
-        <line x1="60" y1="26" x2="60" y2="52" class="needle" />
-        <line x1="60" y1="68" x2="60" y2="94" class="needle tail" />
+      <g transform={`rotate(${direction} 60 60)`} style={{ filter: `drop-shadow(0 0 3px ${accent}80)` }}>
+        <path d="M60 70 L56 88 L60 94 L64 88 Z" class="compass-tail" fill="url(#wx-needle-gradient)" />
+        <path d="M60 10 L67 45 L60 54 L53 45 Z" class="compass-needle" fill="url(#wx-needle-gradient)" />
+        <path d="M60 10 L60 54 L53 45 Z" class="compass-sheen" />
       </g>
-      <text x="60" y="57" text-anchor="middle" class="gauge-value">{speed}</text>
-      <text x="60" y="70" text-anchor="middle" class="gauge-unit">km/h</text>
+      <circle cx="60" cy="60" r="5" class="compass-hub" />
+      <circle cx="60" cy="60" r="1.6" class="compass-hub-dot" />
+      <text x="60" y="29" text-anchor="middle" class="cardinal north">N</text>
+      <text x="92" y="64" text-anchor="middle" class="cardinal">O</text>
+      <text x="60" y="96" text-anchor="middle" class="cardinal">S</text>
+      <text x="28" y="64" text-anchor="middle" class="cardinal">W</text>
     </svg>
   );
 }
