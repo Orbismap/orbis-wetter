@@ -1,4 +1,4 @@
-import { useEffect, useState } from 'preact/hooks';
+import { useEffect, useRef, useState } from 'preact/hooks';
 import { OrbisMark } from '../ui/brand/OrbisMark';
 import { Dashboard } from '../dashboard/Dashboard';
 import { loadWarning } from '../data/openMeteo';
@@ -19,6 +19,30 @@ export function App() {
   const [city, setCity] = useState<Place>(DEFAULT_PLACE);
   const [data, setData] = useState<WeatherResult>(INITIAL);
   const [listOpen, setListOpen] = useState(true);
+  const searchInput = useRef<HTMLInputElement>(null);
+  const [focusSearch, setFocusSearch] = useState(false);
+
+  // ⌘F / Strg+F opens the side menu and focuses its search field instead of the browser find.
+  useEffect(() => {
+    const onKeyDown = (event: KeyboardEvent) => {
+      if ((event.metaKey || event.ctrlKey) && event.key.toLowerCase() === 'f') {
+        event.preventDefault();
+        setListOpen(true);
+        setFocusSearch(true);
+      }
+    };
+    document.addEventListener('keydown', onKeyDown);
+    return () => document.removeEventListener('keydown', onKeyDown);
+  }, []);
+
+  // Focus only once the panel is open – while closed it is inert and cannot take focus.
+  useEffect(() => {
+    if (listOpen && focusSearch) {
+      searchInput.current?.focus();
+      searchInput.current?.select();
+      setFocusSearch(false);
+    }
+  }, [listOpen, focusSearch]);
 
   useEffect(() => {
     const controller = new AbortController();
@@ -65,7 +89,7 @@ export function App() {
                   </svg>
                 </button>
               </header>
-              <PlaceList onSelect={setCity} />
+              <PlaceList onSelect={setCity} inputRef={searchInput} />
             </aside>
           </div>
           <div class="wx-hud-mini" aria-label="Orbis Wetter">

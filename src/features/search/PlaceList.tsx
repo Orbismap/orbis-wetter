@@ -1,3 +1,4 @@
+import type { Ref } from 'preact';
 import { useEffect, useState } from 'preact/hooks';
 import { loadFavorites, subscribeFavorites } from '../../data/favorites';
 import type { Place } from '../../data/geocoding';
@@ -5,14 +6,14 @@ import { CitySearch } from './CitySearch';
 import './placeList.css';
 
 /** Scrollable content of the left sidebar: place search and saved favourites. */
-export function PlaceList({ onSelect }: { onSelect: (place: Place) => void }) {
+export function PlaceList({ onSelect, inputRef }: { onSelect: (place: Place) => void; inputRef?: Ref<HTMLInputElement> }) {
   const [favorites, setFavorites] = useState<Place[]>(() => loadFavorites());
 
   useEffect(() => subscribeFavorites(() => setFavorites(loadFavorites())), []);
 
   return (
     <div class="place-list">
-      <CitySearch onSelect={onSelect} inlineFavorites shortcut />
+      <CitySearch onSelect={onSelect} inlineFavorites shortcut inputRef={inputRef} />
 
       <div class="place-list-scroll">
         <h2 class="place-list-sect place-list-sect-first">Orte</h2>
