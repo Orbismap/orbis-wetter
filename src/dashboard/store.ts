@@ -153,6 +153,16 @@ export class LayoutStore {
    * exactly fills the old footprint is packed into it; otherwise the corridor is shifted dynamically.
    * Hovering a new target reverts the previous preview, so only one swap is active at a time.
    */
+  /** An impossible hover target puts everything back to the gesture origin – never keep a stale preview. */
+  private revertPreview(): false {
+    const origin = this.gestureOrigin;
+    if (origin && this.state.placements.some((p) => {
+      const o = origin.get(p.id);
+      return o && (o.x !== p.x || o.y !== p.y || o.w !== p.w || o.h !== p.h);
+    })) this.restoreOrigin();
+    return false;
+  }
+
   hoverSwap = (draggedId: string, x: number, y: number): boolean => {
     const origin = this.gestureOrigin;
     if (!origin) return false;
@@ -160,7 +170,7 @@ export class LayoutStore {
     if (!dragged) return false;
     const preset = getPreset(this.state.preset);
     const target = { x, y, w: dragged.w, h: dragged.h };
-    if (!fits(preset, target)) return false;
+    if (!fits(preset, target)) return this.revertPreview();
 
     const placements = [...origin.values()];
     const group = placements.filter((p) => p.id !== draggedId && overlaps(target, p));
@@ -177,8 +187,7 @@ export class LayoutStore {
     } else {
       next = this.shiftCorridor(placements, dragged, x, y);
     }
-    if (!next) return false;
-    if (next.some((p) => !fits(preset, p)) || collisions(next).length > 0) return false;
+    if (!next || next.some((p) => !fits(preset, p)) || collisions(next).length > 0) return this.revertPreview();
     this.commit({ ...this.state, placements: next });
     return true;
   };
