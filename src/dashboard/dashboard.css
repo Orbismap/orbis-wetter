@@ -62,6 +62,10 @@
   overflow: hidden;
   /* Cards adapt their density to the actual cell size, including after rearrange/resize. */
   container-type: size;
+  /* The rim is an inset shadow, not a border: a border would be an unclipped strip that the resize
+     handles cannot cover, and dragging there would move the card instead. */
+  border: 0;
+  box-shadow: inset 0 0 0 1px var(--glass-line), 0 8px 30px rgba(12, 20, 35, 0.14);
 }
 
 /* Widget content fills the frame; the frame owns padding, border and background. */
@@ -137,7 +141,7 @@
   cursor: grabbing;
   z-index: 10;
   opacity: 0.88;
-  box-shadow: 0 14px 44px rgba(0, 0, 0, 0.38);
+  box-shadow: inset 0 0 0 1px var(--glass-line), 0 14px 44px rgba(0, 0, 0, 0.38);
   will-change: transform;
 }
 
