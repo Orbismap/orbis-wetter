@@ -106,7 +106,7 @@ export function PressureGauge({ value }: { value: number }) {
   );
 }
 
-/** Sun path on a 0–24 h axis: one continuous wave across the full width, bright by day, dim by night. */
+/** Sun path on a 24 h axis centred on solar noon: one continuous wave across the full width, bright by day, dim by night. */
 export function SunCurve({ sunrise, sunset, clock }: { sunrise: string; sunset: string; clock: number }) {
   const horizon = 32;
   const amplitude = 25;
@@ -120,29 +120,31 @@ export function SunCurve({ sunrise, sunset, clock }: { sunrise: string; sunset: 
   const day = polar ? 1 : set - rise;
   // One continuous cosine over 24 h that crosses the horizon at sunrise and
   // sunset – day and night share the same slope there, so there is no kink.
-  const noon = (rise + set) / 2;
+  // The axis is centred on solar noon (u = 0), so the peak is always in the middle.
+  const noon = polar ? 0.5 : (rise + set) / 2;
   const cross = Math.cos(Math.PI * day);
   const scale = amplitude / (1 + Math.abs(cross));
-  const xAt = (t: number) => t * 160;
-  const yAt = (t: number) => {
+  const xAt = (u: number) => (u + 0.5) * 160;
+  const yAt = (u: number) => {
     if (polar) return horizon - amplitude * 0.5;
-    return horizon - scale * (Math.cos(2 * Math.PI * (t - noon)) - cross);
+    return horizon - scale * (Math.cos(2 * Math.PI * u) - cross);
   };
   const trace = (from: number, to: number, steps: number) => Array.from({ length: steps + 1 }, (_, i) => {
-    const t = from + ((to - from) * i) / steps;
-    return `${i === 0 ? 'M' : 'L'}${xAt(t).toFixed(1)} ${yAt(t).toFixed(1)}`;
+    const u = from + ((to - from) * i) / steps;
+    return `${i === 0 ? 'M' : 'L'}${xAt(u).toFixed(1)} ${yAt(u).toFixed(1)}`;
   }).join(' ');
-  const nightPaths = polar ? [] : [trace(0, rise, 48), trace(set, 1, 48)];
-  const sunClock = ((clock % 1) + 1) % 1;
-  const sx = xAt(sunClock);
-  const sy = yAt(sunClock);
+  const half = day / 2;
+  const nightPaths = polar ? [] : [trace(-0.5, -half, 48), trace(half, 0.5, 48)];
+  const su = ((((clock - noon + 0.5) % 1) + 1) % 1) - 0.5;
+  const sx = xAt(su);
+  const sy = yAt(su);
   return (
     <div class="sun-curve" role="img" aria-label={`Sonnenaufgang ${sunrise}, Sonnenuntergang ${sunset}`}>
       {/* Stretched to whatever the card allows; the dot is HTML so it stays round. */}
       <svg viewBox="0 0 160 64" preserveAspectRatio="none" aria-hidden="true">
         <line x1="0" y1={horizon} x2="160" y2={horizon} class="horizon" />
         {nightPaths.map((d, i) => <path key={i} d={d} class="sun-night" />)}
-        <path d={polar ? trace(0, 1, 2) : trace(rise, set, 64)} class="sun-path" />
+        <path d={polar ? trace(-0.5, 0.5, 2) : trace(-half, half, 64)} class="sun-path" />
       </svg>
       <span class="sun-dot" style={{ left: `${(sx / 160) * 100}%`, top: `${(sy / 64) * 100}%` }} />
     </div>
