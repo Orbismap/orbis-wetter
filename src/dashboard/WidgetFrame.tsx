@@ -56,7 +56,6 @@ export function WidgetFrame({ placement, metrics }: { placement: Placement; metr
       )}
       {editing && (
         <>
-          <div class="size-badge" aria-hidden="true">{placement.w}×{placement.h}</div>
           {variants.length > 1 && HANDLES.map((handle) => (
             <div
               key={handle}
