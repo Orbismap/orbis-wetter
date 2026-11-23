@@ -67,10 +67,13 @@ export function useDrag(placement: Placement, metrics: CellMetrics, enabled: boo
     const targetY = pick(visualY / metrics.stepY, origin.appliedY, origin.cellY, metrics.rows - placement.h);
 
     // Highlight the origin cell (where a swapped group lands) and the hovered destination.
-    const previewTarget = outside ? null : { x: targetX, y: targetY, w: placement.w, h: placement.h };
+    // The dashed outline always shows the cell under the pointer; only the layout change is sticky.
+    const hoverX = clamp(Math.round(visualX / metrics.stepX), metrics.cols - placement.w);
+    const hoverY = clamp(Math.round(visualY / metrics.stepY), metrics.rows - placement.h);
+    const previewTarget = outside ? null : { x: hoverX, y: hoverY, w: placement.w, h: placement.h };
     const currentTarget = dragPreview.getState().target;
     if (outside ? currentTarget !== null : !currentTarget
-      || currentTarget.x !== targetX || currentTarget.y !== targetY) {
+      || currentTarget.x !== hoverX || currentTarget.y !== hoverY) {
       dragPreview.set({
         origin: { x: origin.cellX, y: origin.cellY, w: placement.w, h: placement.h },
         target: previewTarget,
