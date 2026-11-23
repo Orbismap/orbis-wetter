@@ -118,20 +118,21 @@ export function SunCurve({ sunrise, sunset, clock }: { sunrise: string; sunset: 
   const set = minutes(sunset) / 1440;
   const polar = set <= rise; // no usable sunrise/sunset pair – draw a flat day
   const day = polar ? 1 : set - rise;
-  const night = Math.max(1 / 1440, 1 - day);
+  // One continuous cosine over 24 h that crosses the horizon at sunrise and
+  // sunset – day and night share the same slope there, so there is no kink.
+  const noon = (rise + set) / 2;
+  const cross = Math.cos(Math.PI * day);
+  const scale = amplitude / (1 + Math.abs(cross));
   const xAt = (t: number) => t * 160;
-  const isDay = (t: number) => !polar && t >= rise && t <= set;
   const yAt = (t: number) => {
     if (polar) return horizon - amplitude * 0.5;
-    if (isDay(t)) return horizon - amplitude * Math.sin(Math.PI * (t - rise) / day);
-    const q = ((((t - set) % 1) + 1) % 1) / night;
-    return horizon + 0.8 * amplitude * Math.sin(Math.PI * q);
+    return horizon - scale * (Math.cos(2 * Math.PI * (t - noon)) - cross);
   };
   const trace = (from: number, to: number, steps: number) => Array.from({ length: steps + 1 }, (_, i) => {
     const t = from + ((to - from) * i) / steps;
     return `${i === 0 ? 'M' : 'L'}${xAt(t).toFixed(1)} ${yAt(t).toFixed(1)}`;
   }).join(' ');
-  const nightPaths = polar ? [] : [trace(0, rise, 16), trace(set, 1, 32)];
+  const nightPaths = polar ? [] : [trace(0, rise, 48), trace(set, 1, 48)];
   const sunClock = ((clock % 1) + 1) % 1;
   const sx = xAt(sunClock);
   const sy = yAt(sunClock);
