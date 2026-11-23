@@ -1,3 +1,21 @@
+# Orbis Wetter (umgezogen)
+
+**Dieses Repo ist nicht mehr der Ort der Wetter-App.** Der Code liegt jetzt im Karten-Repo unter `src/wetter/`
+([Orbismap/orbis](https://github.com/Orbismap/orbis)). Ein Build liefert beide Apps aus:
+
+- Wetter: **https://wetter.maltee.dev/** (eigene PWA)
+- Karte: https://maps.maltee.dev/
+
+Die Wetterkarte wächst im selben Dokument zur Karten-App, ohne Seitenwechsel. Siehe `docs/WETTER-HANDOFF.md`,
+`docs/WETTER-HOSTING.md` und `docs/WETTER-PLAN.md` im Karten-Repo.
+
+Hier bleibt nur `src/worker.ts`: Er leitet die alte Adresse `maps.maltee.dev/wetter*` per 301 auf `wetter.maltee.dev` um,
+damit Lesezeichen und alte Installationen weiter funktionieren. Der restliche Code ist Archiv (Historie bis zum Umzug).
+
+---
+
+Alte Beschreibung:
+
 # Orbis Wetter
 
 Die Wetter-App von Orbis. Liegt unter **https://maps.maltee.dev/wetter/** – auf derselben Origin wie
