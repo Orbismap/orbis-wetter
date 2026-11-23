@@ -1,7 +1,6 @@
 import type { CSSProperties } from 'preact';
 import { useLayoutEffect } from 'preact/hooks';
 import { useDragPreview } from './dragPreview';
-import { defaultLayouts } from './defaultLayout';
 import { editStore, useEditing } from './editStore';
 import { playFlip } from './flip';
 import { cellMetrics, placementRect, usedRows } from './geometry';
@@ -69,7 +68,7 @@ export function Dashboard() {
             <button
               type="button"
               class="reset-toggle"
-              onClick={() => layoutStore.setLayout(defaultLayouts[layout.preset] ?? defaultLayouts.desktop!)}
+              onClick={() => layoutStore.reset()}
             >
               Zurücksetzen
             </button>

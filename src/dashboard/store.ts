@@ -1,6 +1,7 @@
 import { useSyncExternalStore } from 'preact/compat';
 import { defaultLayouts } from './defaultLayout';
 import { clampToGrid, collisions, firstFreeSlot, fits, nearestFreeSlot, overlaps, packIntoCells, rectCells, rowLimit } from './geometry';
+import { captureFlip } from './flip';
 import { familyOf, loadLayout, saveLayout } from './persistence';
 import { getPreset } from './presets';
 import type { LayoutState, Placement, Rect } from './types';
@@ -33,6 +34,7 @@ export class LayoutStore {
   };
 
   private commit(next: LayoutState): void {
+    captureFlip(); // remember where everything visually is, so the render can animate from there
     this.state = next;
     saveLayout(next);
     this.listeners.forEach((listener) => listener());
@@ -62,6 +64,13 @@ export class LayoutStore {
 
   setLayout = (next: LayoutState): void => {
     this.commit(next);
+  };
+
+  /** Restore the default arrangement of the active preset and persist it right away. */
+  reset = (): void => {
+    this.gestureOrigin = null;
+    const fallback = defaultLayouts[this.state.preset] ?? defaultLayouts.desktop!;
+    this.commit({ preset: fallback.preset, placements: fallback.placements.map((p) => ({ ...p })) });
   };
 
   /** Switch between the desktop and phone arrangement (each keeps its own saved layout). */

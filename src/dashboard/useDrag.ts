@@ -127,14 +127,11 @@ export function useDrag(placement: Placement, metrics: CellMetrics, enabled: boo
     origin.element.style.transform = '';
     origin.element.classList.remove('outside');
 
-    if (origin.outside) {
-      layoutStore.restoreOrigin();
-    } else {
-      playFlip();
-    }
+    if (origin.outside) layoutStore.restoreOrigin();
     layoutStore.endGesture();
     syncPosition(origin.element);
     dragPreview.clear();
+    requestAnimationFrame(playFlip); // after Preact has rendered the final layout
 
     start.current = null;
     setDragging(false);
@@ -155,6 +152,7 @@ export function useDrag(placement: Placement, metrics: CellMetrics, enabled: boo
     layoutStore.endGesture();
     syncPosition(origin.element);
     dragPreview.clear();
+    requestAnimationFrame(playFlip);
 
     start.current = null;
     setDragging(false);
