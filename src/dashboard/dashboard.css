@@ -9,15 +9,9 @@
   position: absolute;
   z-index: 30;
   top: -40px;
-  right: 0;
+  left: 0;
   display: flex;
   gap: var(--s-2);
-}
-
-.edit-hint {
-  align-self: center;
-  font-size: var(--fs-axis);
-  color: var(--text-2);
 }
 
 .edit-toggle,
@@ -232,9 +226,6 @@
   flex-direction: column;
 }
 
-/* The buttons sit above the grid instead of floating over the hero. */
-.dashboard-wrap[data-preset='mobile'] .edit-hint { display: none; }
-
 /* The row is reserved even outside edit mode, so entering it does not push the grid down. */
 .dashboard-wrap[data-preset='mobile'] .dashboard-shell {
   position: relative;
@@ -243,7 +234,7 @@
 
 .dashboard-wrap[data-preset='mobile'] .edit-controls {
   top: 0;
-  justify-content: flex-end;
+  justify-content: flex-start;
 }
 
 .dashboard-wrap[data-preset='mobile'] .edit-toggle,

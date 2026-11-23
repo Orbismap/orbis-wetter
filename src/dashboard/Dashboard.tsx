@@ -74,8 +74,7 @@ export function Dashboard() {
         </div>
         {editing && (
           <div class="edit-controls">
-            <button type="button" class="edit-toggle active" onClick={editStore.toggle}>Fertig</button>
-            <span class="edit-hint">Ziehen zum Verschieben · Ränder und Ecken ändern die Größe</span>
+            <button type="button" class="edit-toggle active" onClick={editStore.toggle}>Speichern</button>
             <button type="button" class="reset-toggle" onClick={() => layoutStore.reset()}>Zurücksetzen</button>
           </div>
         )}
