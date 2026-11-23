@@ -272,3 +272,10 @@
 }
 
 .dashboard .widget-frame { -webkit-touch-callout: none; }
+
+/* Edit mode: widget content is greyed out so the arrangement, not the data, is in focus. */
+.dashboard.editing .widget-frame > :not(.resize-handle) {
+  opacity: 0.5;
+  filter: grayscale(0.7);
+  transition: opacity 200ms var(--ease), filter 200ms var(--ease);
+}
