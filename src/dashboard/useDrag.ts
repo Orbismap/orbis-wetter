@@ -26,13 +26,19 @@ interface DragStart {
 const clamp = (value: number, max: number) => Math.max(0, Math.min(max, value));
 
 /**
- * Hysteresis (in cells): a widget keeps its current cell until the pointer is clearly closer to another
- * one. Without it, an exchange is undone at exactly the point where it was triggered, which feels like
- * the layout jumping back too early.
+ * Hysteresis: once a widget has moved away from its start cell, the exchange is only undone when the
+ * pointer is back in the first quarter of the way. Forward swaps still trigger at the halfway point, so
+ * the layout does not jump back at the very spot where it just changed.
  */
-const STICKY = 0.25;
-const pick = (position: number, applied: number, max: number) =>
-  (Math.abs(position - applied) <= 0.5 + STICKY ? applied : clamp(Math.round(position), max));
+const RETURN_AT = 0.25;
+function pick(position: number, applied: number, origin: number, max: number): number {
+  const distance = applied - origin;
+  if (distance !== 0) {
+    const progress = (position - origin) / distance;
+    if (progress > RETURN_AT && progress <= 1) return applied;
+  }
+  return clamp(Math.round(position), max);
+}
 
 /**
  * Pointer-driven snapping with live, direct swaps. Every preview is derived from the gesture origin,
@@ -57,8 +63,8 @@ export function useDrag(placement: Placement, metrics: CellMetrics, enabled: boo
     // Top-left of the widget relative to the grid canvas, anchored at the drag start.
     const visualX = origin.cellX * metrics.stepX + (event.clientX - origin.px);
     const visualY = origin.cellY * metrics.stepY + (event.clientY - origin.py);
-    const targetX = pick(visualX / metrics.stepX, origin.appliedX, metrics.cols - placement.w);
-    const targetY = pick(visualY / metrics.stepY, origin.appliedY, metrics.rows - placement.h);
+    const targetX = pick(visualX / metrics.stepX, origin.appliedX, origin.cellX, metrics.cols - placement.w);
+    const targetY = pick(visualY / metrics.stepY, origin.appliedY, origin.cellY, metrics.rows - placement.h);
 
     // Highlight the origin cell (where a swapped group lands) and the hovered destination.
     const previewTarget = outside ? null : { x: targetX, y: targetY, w: placement.w, h: placement.h };
