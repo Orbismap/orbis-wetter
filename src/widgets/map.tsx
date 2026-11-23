@@ -23,7 +23,9 @@ export const mapWidget: WidgetDefinition = {
   title: 'Wetterkarte',
   variants: [
     { name: '2x2', w: 2, h: 2 },
+    { name: '3x2', w: 3, h: 2 },
     { name: '3x3', w: 3, h: 3 },
+    { name: '4x3', w: 4, h: 3 },
   ],
   Component: MapWidget,
 };

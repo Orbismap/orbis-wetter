@@ -1,13 +1,14 @@
 import type { ComponentChildren } from 'preact';
 import { moonImageUrl } from '../../data/moon';
 import type { WeatherNow } from './model';
-import { Compass, GradientScale, PressureGauge, SunCurve, tempScale, TempRange } from './visuals';
+import { SunIcon } from './SunIcon';
+import { Compass, GradientScale, Meter, PressureGauge, SunCurve, tempScale } from './visuals';
 
 /** All detail cards are buttons already: clicking them will open more detail in a later step. */
-function DetailCard({ title, className = '', children }: { title: string; className?: string; children: ComponentChildren }) {
+function DetailCard({ title, icon, className = '', children }: { title: string; icon?: ComponentChildren; className?: string; children: ComponentChildren }) {
   return (
     <button type="button" class={`detail ${className}`} title="Details folgen in einer späteren Stufe">
-      <div class="card-title"><span class="title-text">{title}</span></div>
+      <div class="card-title">{icon}<span class="title-text">{title}</span></div>
       {children}
     </button>
   );
@@ -16,7 +17,10 @@ function DetailCard({ title, className = '', children }: { title: string; classN
 export function AirQualityCard({ air }: { air: WeatherNow['current']['air'] }) {
   return (
     <DetailCard title="Luftqualität" className="air">
-      <div class="big">{air.label}</div>
+      <div class="air-head">
+        <div class="big">{air.label}</div>
+        <div class="sub">AQI {air.value}</div>
+      </div>
       <GradientScale value={air.value} min={0} max={100} colors={['#50c878', '#a3d65c', '#f2c94c', '#f2994a', '#eb5757']} />
       <p class="note">{air.note}</p>
     </DetailCard>
@@ -34,6 +38,7 @@ export function WindCard({ windSpeed, windGust, windDirection, windLabel }: Pick
         </div>
         <Compass speed={windSpeed} direction={windDirection} />
       </div>
+      <div class="wind-caption">{windSpeed} km/h {windLabel}</div>
     </DetailCard>
   );
 }
@@ -68,30 +73,38 @@ export function UvCard({ uvIndex, uvLabel, uvNote }: Pick<WeatherNow['current'],
   );
 }
 
+function dayLength(sunrise: string, sunset: string): string {
+  const toMinutes = (value: string) => { const [h = 0, m = 0] = value.split(':').map(Number); return h * 60 + m; };
+  const total = ((toMinutes(sunset) - toMinutes(sunrise)) % 1440 + 1440) % 1440;
+  return `${Math.floor(total / 60)} h ${String(total % 60).padStart(2, '0')} min`;
+}
+
 export function SunCard({ sunrise, sunset, sunUp, sunClock }: Pick<WeatherNow['current'], 'sunrise' | 'sunset' | 'sunUp' | 'sunClock'>) {
   const rising = !sunUp;
   return (
-    <DetailCard title={rising ? 'Sonnenaufgang' : 'Sonnenuntergang'} className="sun">
+    <DetailCard title={rising ? 'Sonnenaufgang' : 'Sonnenuntergang'} icon={<SunIcon kind={rising ? 'sunrise' : 'sunset'} size={20} />} className="sun">
       <div class="big">{rising ? sunrise : sunset}</div>
       <SunCurve sunrise={sunrise} sunset={sunset} clock={sunClock} />
-      <div class="source">{rising ? `Sonnenuntergang: ${sunset}` : `Sonnenaufgang: ${sunrise}`}</div>
+      <div class="source sun-times">
+        <span>{rising ? `Sonnenuntergang: ${sunset}` : `Sonnenaufgang: ${sunrise}`}</span>
+        <span class="only-large">Tageslänge: {dayLength(sunrise, sunset)}</span>
+      </div>
     </DetailCard>
   );
 }
 
 export function FeelsLikeCard({ feelsLike, temp, feelsLikeNote: note }: Pick<WeatherNow['current'], 'feelsLike' | 'temp' | 'feelsLikeNote'>) {
   const scale = tempScale([{ min: Math.min(feelsLike, temp), max: Math.max(feelsLike, temp) }]);
+  const pct = (v: number) => Math.max(0, Math.min(100, ((v - scale.min) / (scale.max - scale.min)) * 100));
   return (
-    <DetailCard title="Gefühlte Temperatur" className="feels">
+    <DetailCard title="Gefühlt" className="feels">
       <div class="big">{feelsLike}°</div>
       <div class="sub">Tatsächlich: {temp}°</div>
-      <TempRange
-        min={Math.min(feelsLike, temp)}
-        max={Math.max(feelsLike, temp)}
-        marker={feelsLike}
-        scaleMin={scale.min}
-        scaleMax={scale.max}
-      />
+      <span class="feels-scale" aria-hidden="true">
+        <span class="feels-track" />
+        <span class="feels-actual" style={{ left: `${pct(temp)}%` }} />
+        <span class="feels-dot" style={{ left: `${pct(feelsLike)}%` }} />
+      </span>
       <div class="range-label range-ends"><span>{scale.min}°</span><span>{scale.max}°</span></div>
       <p class="note">{note}</p>
     </DetailCard>
@@ -103,6 +116,7 @@ export function PrecipCard({ precipitation, precipitationPeriod, precipitationNo
     <DetailCard title="Niederschlag" className="precip">
       <div class="big">{precipitation}</div>
       <div class="sub">{precipitationPeriod}</div>
+      <span class="only-large"><Meter value={Number.parseFloat(precipitation) || 0} max={20} /></span>
       <p class="note">{precipitationNote}</p>
     </DetailCard>
   );
@@ -141,6 +155,7 @@ export function HumidityCard({ humidity, dewPoint }: Pick<WeatherNow['current'],
   return (
     <DetailCard title="Feuchtigkeit" className="humidity">
       <div class="big">{humidity} %</div>
+      <span class="only-large"><Meter value={humidity} max={100} /></span>
       <p class="note">Der Taupunkt liegt derzeit bei {dewPoint}°.</p>
     </DetailCard>
   );
@@ -150,25 +165,26 @@ export function VisibilityCard({ visibility, visibilityNote }: Pick<WeatherNow['
   return (
     <DetailCard title="Sichtweite" className="visibility">
       <div class="big">{visibility} km</div>
+      <span class="only-large"><Meter value={visibility} max={30} /></span>
       <p class="note">{visibilityNote}</p>
     </DetailCard>
   );
 }
 
 export function PressureCard({ pressure, pressureTrend }: Pick<WeatherNow['current'], 'pressure' | 'pressureTrend'>) {
-  const arrow = pressureTrend === 'falling' ? '↓' : pressureTrend === 'rising' ? '↑' : '↔';
+  const arrow = pressureTrend === 'falling' ? '↓' : pressureTrend === 'rising' ? '↑' : '→';
+  const label = pressureTrend === 'falling' ? 'Fallend' : pressureTrend === 'rising' ? 'Steigend' : 'Stabil';
   return (
     <DetailCard title="Luftdruck" className="pressure">
       <PressureGauge value={pressure} />
-      <div class="pressure-value">{pressure.toLocaleString('de-DE')}<small>hPa</small></div>
-      <div class="pressure-trend">{arrow}</div>
+      <div class="pressure-trend"><span aria-hidden="true">{arrow}</span> {label}</div>
     </DetailCard>
   );
 }
 
 export function AveragesCard({ averages }: { averages: WeatherNow['current']['averages'] }) {
   return (
-    <DetailCard title="Durchschnittswerte" className="averages">
+    <DetailCard title="Durchschnitt" className="averages">
       <div class="big">{averages.delta}°</div>
       <p class="note">vs. Ø-Tageshöchstwert</p>
       <div class="kv"><span>Heute</span><b>H: {averages.todayHigh}°</b></div>

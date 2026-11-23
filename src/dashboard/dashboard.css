@@ -83,6 +83,68 @@
   pointer-events: none; /* widget buttons must not swallow the drag */
 }
 
+/* Size picker: covers the widget while arranging, so it works even in a single cell. */
+.dashboard .size-overlay {
+  position: absolute;
+  inset: 0;
+  z-index: 5;
+  display: flex;
+  flex: none;
+  flex-direction: column;
+  align-items: center;
+  justify-content: center;
+  gap: 8px;
+  padding: 10px;
+  background: rgba(10, 15, 24, 0.58);
+  -webkit-backdrop-filter: blur(6px);
+  backdrop-filter: blur(6px);
+  color: var(--text-1);
+  text-align: center;
+}
+
+.size-title {
+  max-width: 100%;
+  font-size: 0.6875rem;
+  font-weight: 600;
+  letter-spacing: 0.1em;
+  text-transform: uppercase;
+  color: var(--text-2);
+  overflow: hidden;
+  text-overflow: ellipsis;
+  white-space: nowrap;
+}
+
+.size-chips {
+  display: flex;
+  flex-wrap: wrap;
+  justify-content: center;
+  gap: 6px;
+}
+
+.dashboard.editing .size-chip {
+  pointer-events: auto;
+  min-width: 44px;
+  padding: 5px 8px;
+  font: inherit;
+  font-size: var(--fs-axis);
+  font-variant-numeric: tabular-nums;
+  color: var(--text-1);
+  background: rgba(255, 255, 255, 0.14);
+  border: 1px solid rgba(255, 255, 255, 0.22);
+  border-radius: var(--r-input);
+  cursor: pointer;
+}
+
+.dashboard.editing .size-chip:hover { background: rgba(255, 255, 255, 0.24); }
+
+.dashboard.editing .size-chip.active {
+  color: var(--ink-0);
+  background: var(--limb);
+  border-color: var(--limb);
+}
+
+.dashboard.editing .size-chip:focus-visible { outline: var(--focus); outline-offset: var(--focus-offset); }
+
 .dashboard.editing .widget-frame.dragging {
   cursor: grabbing;
   z-index: 10;
@@ -166,3 +228,35 @@
   font-size: var(--fs-axis);
   color: var(--limb);
 }
+
+/* ---------- phone layout ---------- */
+.dashboard-wrap[data-preset='mobile'] {
+  padding: 0 12px calc(var(--s-6) + env(safe-area-inset-bottom));
+}
+
+.dashboard-wrap[data-preset='mobile'] .dashboard-shell {
+  width: 100%;
+  display: flex;
+  flex-direction: column;
+}
+
+/* The buttons sit above the grid instead of floating over the hero. */
+.dashboard-wrap[data-preset='mobile'] .edit-controls {
+  position: static;
+  order: -1;
+  justify-content: flex-end;
+  margin-bottom: var(--s-3);
+}
+
+.dashboard-wrap[data-preset='mobile'] .edit-toggle,
+.dashboard-wrap[data-preset='mobile'] .reset-toggle {
+  min-height: var(--hit-touch);
+  padding: 0 var(--s-4);
+}
+
+.dashboard-wrap[data-preset='mobile'] .dashboard {
+  margin: 0;
+}
+
+/* Dragging a widget must not scroll the page on touch screens. */
+.dashboard.editing .widget-frame { touch-action: none; }

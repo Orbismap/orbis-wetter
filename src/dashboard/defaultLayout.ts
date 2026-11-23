@@ -49,4 +49,25 @@ export const defaultLayouts: Record<string, LayoutState> = {
   },
 };
 
+defaultLayouts.mobile = {
+  preset: 'mobile',
+  placements: [
+    p('hourly', 'hourly', 0, 0, 2, 1),
+    p('wind-map', 'windmap', 0, 1, 2, 2),
+    p('daily', 'daily', 0, 3, 2, 3),
+    p('air', 'air', 0, 6, 2, 1),
+    p('wind', 'wind', 0, 7, 2, 1),
+    p('warning', 'warning', 0, 8, 2, 1),
+    p('uv', 'uv', 0, 9, 1, 1),
+    p('sun', 'sun', 1, 9, 1, 1),
+    p('feels', 'feels', 0, 10, 1, 1),
+    p('precip', 'precip', 1, 10, 1, 1),
+    p('moon', 'moon', 0, 11, 1, 1),
+    p('humidity', 'humidity', 1, 11, 1, 1),
+    p('visibility', 'visibility', 0, 12, 1, 1),
+    p('pressure', 'pressure', 1, 12, 1, 1),
+    p('averages', 'averages', 0, 13, 2, 1),
+  ],
+};
+
 export const defaultLayout = defaultLayouts.desktop!;

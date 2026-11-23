@@ -159,6 +159,20 @@ describe('LayoutStore', () => {
     expect(s.getState().placements[0]).toMatchObject({ x: 0, y: 0 });
   });
 
+  it('resizeTo pushes widgets out of the way to the nearest free slot', () => {
+    const s = store([placement('a', 0, 0), placement('b', 1, 0)]);
+    expect(s.resizeTo('a', 2, 1)).toBe(true);
+    expect(s.getState().placements.find((p) => p.id === 'a')).toMatchObject({ w: 2, h: 1 });
+    const b = s.getState().placements.find((p) => p.id === 'b')!;
+    expect([b.x, b.y]).toEqual([2, 0]);
+  });
+
+  it('resizeTo refuses when the displaced widget has nowhere to go', () => {
+    const full = store([placement('a', 0, 0, 3, 2), placement('b', 0, 2, 3, 1)]);
+    expect(full.resizeTo('a', 3, 3)).toBe(false);
+    expect(full.getState().placements[0]).toMatchObject({ w: 3, h: 2 });
+  });
+
   it('resizes a widget with clamping and collision checks', () => {
     const s = store([placement('a', 2, 2)]);
     expect(s.resize('a', 5, 5)).toBe(true);

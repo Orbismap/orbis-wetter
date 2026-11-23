@@ -1,6 +1,6 @@
 /** Live APIs: Open-Meteo point forecast (same ICON model as the R2 mirror), air quality and DWD warnings. */
 import { API } from './endpoints';
-import { cached, fetchJson, type FetchOptions } from './http';
+import { cached, fetchJson, withSignal, type FetchOptions } from './http';
 import type { DailyInfo, PointSeries, SunInfo, WarningInfo, WeatherSupplements } from './types';
 
 interface ForecastResponse {
@@ -15,8 +15,9 @@ const forecastFields = {
 };
 
 const num = (value: unknown): number | undefined => typeof value === 'number' && Number.isFinite(value) ? value : undefined;
-const arr = (response: ForecastResponse, key: string): (number | null)[] =>
-  (response.hourly[key] ?? response.daily[key] ?? []) as (number | null)[];
+/** Hourly and daily blocks share some keys (e.g. weather_code) – always say which one is meant. */
+const arr = (response: ForecastResponse, block: 'hourly' | 'daily', key: string): (number | null)[] =>
+  (response[block]?.[key] ?? []) as (number | null)[];
 
 /** Local time string from Open-Meteo -> UTC ms (the API returns local wall time plus an offset in seconds). */
 function toUtc(local: string | number | null, offsetSeconds: number): number | undefined {
@@ -31,15 +32,15 @@ export function loadForecast(lat: number, lng: number, options: FetchOptions = {
     latitude: String(lat), longitude: String(lng), timezone: 'auto', forecast_days: '10', models: 'icon_global',
     ...forecastFields,
   }).toString();
-  return cached(`om:forecast:${lat.toFixed(3)}:${lng.toFixed(3)}`, 10 * 60_000,
-    () => fetchJson<ForecastResponse>(url.toString(), { ...options, timeout: 20_000 }));
+  return withSignal(cached(`om:forecast:${lat.toFixed(3)}:${lng.toFixed(3)}`, 10 * 60_000,
+    () => fetchJson<ForecastResponse>(url.toString(), { timeout: 20_000 })), options.signal);
 }
 
 export async function loadOpenMeteoSeries(lat: number, lng: number, options: FetchOptions = {}): Promise<PointSeries> {
   const response = await loadForecast(lat, lng, options);
   const offset = response.utc_offset_seconds || 0;
   const times = (response.hourly.time ?? []).map((t) => toUtc(t, offset)).filter((t): t is number => t !== undefined);
-  const values = (key: string) => arr(response, key).map(num);
+  const values = (key: string) => arr(response, 'hourly', key).map(num);
   const series: PointSeries = {
     label: 'Open-Meteo',
     detail: 'ICON · Live',
@@ -70,17 +71,17 @@ export function loadSupplements(lat: number, lng: number, options: FetchOptions 
     const dates = response.daily.time ?? [];
     const daily: DailyInfo[] = dates.map((date, i) => ({
       date: toUtc(`${date}T12:00`, offset) ?? Date.parse(`${date}T12:00Z`),
-      min: num(arr(response, 'temperature_2m_min')[i]) ?? 0,
-      max: num(arr(response, 'temperature_2m_max')[i]) ?? 0,
-      code: num(arr(response, 'weather_code')[i]),
-      precipitation: num(arr(response, 'precipitation_sum')[i]),
+      min: num(arr(response, 'daily', 'temperature_2m_min')[i]) ?? 0,
+      max: num(arr(response, 'daily', 'temperature_2m_max')[i]) ?? 0,
+      code: num(arr(response, 'daily', 'weather_code')[i]),
+      precipitation: num(arr(response, 'daily', 'precipitation_sum')[i]),
     }));
     const sun: SunInfo[] = dates.map((_, i) => ({
-      sunrise: String(arr(response, 'sunrise')[i] ?? '').slice(-5),
-      sunset: String(arr(response, 'sunset')[i] ?? '').slice(-5),
-      uv: num(arr(response, 'uv_index_max')[i]) ?? 0,
+      sunrise: String(arr(response, 'daily', 'sunrise')[i] ?? '').slice(-5),
+      sunset: String(arr(response, 'daily', 'sunset')[i] ?? '').slice(-5),
+      uv: num(arr(response, 'daily', 'uv_index_max')[i]) ?? 0,
     }));
-    const visibility = arr(response, 'visibility').map(num);
+    const visibility = arr(response, 'hourly', 'visibility').map(num);
     const aqi = await loadAirQuality(lat, lng, options).catch(() => undefined);
     return { daily, sun, visibility, aqi };
   })();
@@ -93,10 +94,10 @@ export function loadAirQuality(lat: number, lng: number, options: FetchOptions =
   url.search = new URLSearchParams({
     latitude: String(lat), longitude: String(lng), current: 'european_aqi', timezone: 'auto',
   }).toString();
-  return cached(`om:air:${lat.toFixed(3)}:${lng.toFixed(3)}`, 30 * 60_000, async () => {
-    const data = await fetchJson<AirResponse>(url.toString(), { ...options, timeout: 15_000 });
+  return withSignal(cached(`om:air:${lat.toFixed(3)}:${lng.toFixed(3)}`, 30 * 60_000, async () => {
+    const data = await fetchJson<AirResponse>(url.toString(), { timeout: 15_000 });
     return num(data.current?.european_aqi ?? null);
-  });
+  }), options.signal);
 }
 
 // ---- DWD warnings -----------------------------------------------------------------------------
@@ -143,8 +144,8 @@ const SEVERITY: Record<string, { level: number; badge: string }> = {
 export function loadWarning(lat: number, lng: number, options: FetchOptions = {}): Promise<WarningInfo | undefined> {
   const url = new URL(API.warnings);
   url.searchParams.set('bbox', `${lng - 0.8},${lat - 0.6},${lng + 0.8},${lat + 0.6}`);
-  return cached(`dwd:warning:${lat.toFixed(2)}:${lng.toFixed(2)}`, 5 * 60_000, async () => {
-    const data = await fetchJson<{ features?: DwdFeature[] }>(url.toString(), { ...options, timeout: 20_000 });
+  return withSignal(cached(`dwd:warning:${lat.toFixed(2)}:${lng.toFixed(2)}`, 5 * 60_000, async () => {
+    const data = await fetchJson<{ features?: DwdFeature[] }>(url.toString(), { timeout: 20_000 });
     const now = Date.now();
     const candidates = (data.features ?? []).filter((feature) => {
       const p = feature.properties;
@@ -164,5 +165,5 @@ export function loadWarning(lat: number, lng: number, options: FetchOptions = {}
       text: String(p.DESCRIPTION ?? '').replace(/\s+/g, ' ').trim().slice(0, 240),
       source: 'Deutscher Wetterdienst',
     };
-  });
+  }), options.signal);
 }

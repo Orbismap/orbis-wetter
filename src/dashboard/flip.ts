@@ -14,14 +14,19 @@ const FRAME_SELECTOR = '[data-placement-id]';
 type Rects = Map<string, DOMRect>;
 
 let previous: Rects = new Map();
+let previousWidth = 0;
 
 const hostElement = () => document.querySelector<HTMLElement>('.dashboard');
 
 function measure(host: HTMLElement): Rects {
   const rects: Rects = new Map();
+  const origin = host.getBoundingClientRect();
   host.querySelectorAll<HTMLElement>(FRAME_SELECTOR).forEach((element) => {
     const id = element.dataset.placementId;
-    if (id) rects.set(id, element.getBoundingClientRect());
+    if (!id) return;
+    const r = element.getBoundingClientRect();
+    // Relative to the canvas: scrolling or re-centering on window resize is not a layout change.
+    rects.set(id, new DOMRect(r.left - origin.left, r.top - origin.top, r.width, r.height));
   });
   return rects;
 }
@@ -46,6 +51,11 @@ export function playFlip(): void {
   const first = previous;
   const last = measure(host);
   previous = last;
+  // The canvas itself was resized (phone grid follows the window): re-snap instead of animating every widget.
+  const width = host.offsetWidth;
+  const resized = previousWidth !== 0 && width !== previousWidth;
+  previousWidth = width;
+  if (resized) return;
 
   if (first.size === 0 || typeof Element.prototype.animate !== 'function') return;
   if (window.matchMedia('(prefers-reduced-motion: reduce)').matches) return;

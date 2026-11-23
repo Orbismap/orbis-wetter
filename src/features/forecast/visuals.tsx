@@ -36,102 +36,124 @@ export function GradientScale({ value, min, max, colors }: { value: number; min:
   );
 }
 
-/** Wind compass: graduated dial, cardinal points and a tapered needle speed-tinted from calm to strong. */
+/** Wind compass: dial with outside cardinals and a two-tone needle whose coloured tip points to where the wind comes from. */
 export function Compass({ speed, direction }: { speed: number; direction: number }) {
   const accent = speed >= 40 ? '#ff6b5e' : speed >= 20 ? '#f2b45a' : '#6fd19a';
-  const ticks = Array.from({ length: 24 }, (_, i) => {
-    const a = (i * 15 * Math.PI) / 180;
-    const major = i % 6 === 0;
-    const medium = i % 3 === 0;
-    const inner = major ? 35 : medium ? 39 : 42;
+  const ticks = Array.from({ length: 36 }, (_, i) => {
+    const a = (i * 10 * Math.PI) / 180;
+    const major = i % 9 === 0;
+    const inner = major ? 34 : 37.5;
     return (
       <line
         key={i}
-        class={`compass-tick${major ? ' major' : medium ? ' medium' : ''}`}
+        class={`compass-tick${major ? ' major' : ''}`}
         x1={60 + Math.sin(a) * inner}
         y1={60 - Math.cos(a) * inner}
-        x2={60 + Math.sin(a) * 46}
-        y2={60 - Math.cos(a) * 46}
+        x2={60 + Math.sin(a) * 42}
+        y2={60 - Math.cos(a) * 42}
       />
     );
   });
   return (
     <svg class="gauge wind-gauge" viewBox="0 0 120 120" role="img" aria-label={`${speed} km/h aus ${direction} Grad`}>
+      <circle cx="60" cy="60" r="42" class="compass-face" />
+      {ticks}
+      <text x="60" y="12" text-anchor="middle" class="cardinal north">N</text>
+      <text x="111" y="63.5" text-anchor="middle" class="cardinal">O</text>
+      <text x="60" y="114" text-anchor="middle" class="cardinal">S</text>
+      <text x="9" y="63.5" text-anchor="middle" class="cardinal">W</text>
+      <g transform={`rotate(${direction} 60 60)`}>
+        <g class="compass-needle" style={{ filter: 'drop-shadow(0 2px 3px rgba(0,0,0,0.35))' }}>
+          {/* tail: where the wind blows to */}
+          <path d="M54.5 60 L65.5 60 L60 84 Z" class="needle-tail" />
+          {/* head: where the wind comes from */}
+          <path d="M54.5 60 L65.5 60 L60 16 Z" fill={accent} />
+          <path d="M60 16 L60 60 L54.5 60 Z" fill="#fff" opacity="0.28" />
+        </g>
+      </g>
+      <circle cx="60" cy="60" r="5.5" class="compass-hub" />
+      <circle cx="60" cy="60" r="1.8" class="compass-hub-dot" />
+    </svg>
+  );
+}
+
+/** Barometer: a 180° dial from 970 to 1050 hPa with the value in the middle. */
+export function PressureGauge({ value }: { value: number }) {
+  const min = 970;
+  const max = 1050;
+  const t = Math.max(0, Math.min(1, (value - min) / (max - min)));
+  const angle = Math.PI * (1 - t); // π = left end, 0 = right end
+  const cx = 60;
+  const cy = 62;
+  const r = 48;
+  const point = (a: number, radius = r) => `${(cx + Math.cos(a) * radius).toFixed(2)} ${(cy - Math.sin(a) * radius).toFixed(2)}`;
+  const marker = point(angle);
+  return (
+    <svg class="gauge pressure-gauge" viewBox="0 0 120 78" role="img" aria-label={`${value} Hektopascal`}>
       <defs>
-        <linearGradient id="wx-needle-gradient" gradientUnits="userSpaceOnUse" x1="60" y1="12" x2="60" y2="94">
-          <stop offset="0" stop-color={accent} />
-          <stop offset="0.55" stop-color={accent} stop-opacity="0.92" />
-          <stop offset="1" stop-color={accent} stop-opacity="0.35" />
+        <linearGradient id="wx-pressure-arc" gradientUnits="userSpaceOnUse" x1="12" y1="0" x2="108" y2="0">
+          <stop offset="0" stop-color="#63b8ff" />
+          <stop offset="0.5" stop-color="#a8e6cf" />
+          <stop offset="1" stop-color="#f2c94c" />
         </linearGradient>
       </defs>
-      <circle cx="60" cy="60" r="49" class="compass-face" />
-      {ticks}
-      <g transform={`rotate(${direction} 60 60)`} style={{ filter: `drop-shadow(0 0 3px ${accent}80)` }}>
-        <path d="M60 70 L56 88 L60 94 L64 88 Z" class="compass-tail" fill="url(#wx-needle-gradient)" />
-        <path d="M60 10 L67 45 L60 54 L53 45 Z" class="compass-needle" fill="url(#wx-needle-gradient)" />
-        <path d="M60 10 L60 54 L53 45 Z" class="compass-sheen" />
-      </g>
-      <circle cx="60" cy="60" r="5" class="compass-hub" />
-      <circle cx="60" cy="60" r="1.6" class="compass-hub-dot" />
-      <text x="60" y="29" text-anchor="middle" class="cardinal north">N</text>
-      <text x="92" y="64" text-anchor="middle" class="cardinal">O</text>
-      <text x="60" y="96" text-anchor="middle" class="cardinal">S</text>
-      <text x="28" y="64" text-anchor="middle" class="cardinal">W</text>
+      <path d={`M${point(Math.PI)} A${r} ${r} 0 0 1 ${point(0)}`} class="pressure-track" />
+      <path d={`M${point(Math.PI)} A${r} ${r} 0 0 1 ${marker}`} class="pressure-fill" stroke="url(#wx-pressure-arc)" />
+      <circle cx={marker.split(' ')[0]} cy={marker.split(' ')[1]} r="5.5" class="pressure-knob" />
+      <text x="60" y="58" text-anchor="middle" class="pressure-num">{value.toLocaleString('de-DE')}</text>
+      <text x="60" y="71" text-anchor="middle" class="pressure-unit">hPa</text>
     </svg>
   );
 }
 
-/** Barometer-style semicircle with a needle. */
-export function PressureGauge({ value }: { value: number }) {
-  const ticks = Array.from({ length: 21 }, (_, i) => {
-    const a = Math.PI - (i * Math.PI) / 20;
-    return <line key={i} x1={60 + Math.cos(a) * 40} y1={70 - Math.sin(a) * 40} x2={60 + Math.cos(a) * 47} y2={70 - Math.sin(a) * 47} opacity={i % 5 === 0 ? 0.9 : 0.35} />;
-  });
-  const a = Math.PI - (Math.max(980, Math.min(1040, value)) - 980) / 60 * Math.PI;
-  return (
-    <svg class="gauge pressure-gauge" viewBox="0 0 120 80" aria-label={`${value} Hektopascal`}>
-      {ticks}
-      <line x1="60" y1="70" x2={60 + Math.cos(a) * 38} y2={70 - Math.sin(a) * 38} class="needle" />
-      <circle cx="60" cy="70" r="3" class="needle-pivot" />
-    </svg>
-  );
-}
-
-/** Sun path on a 0–24 h axis: night on both sides, a smooth arc peaking at noon. */
+/** Sun path on a 0–24 h axis: one continuous wave across the full width, bright by day, dim by night. */
 export function SunCurve({ sunrise, sunset, clock }: { sunrise: string; sunset: string; clock: number }) {
-  const horizon = 38;
-  const amplitude = 17;
+  const horizon = 32;
+  const amplitude = 25;
   const minutes = (value: string) => {
     const [hours = 0, mins = 0] = value.split(':').map(Number);
     return hours * 60 + mins;
   };
   const rise = minutes(sunrise) / 1440;
   const set = minutes(sunset) / 1440;
-  const day = Math.max(1 / 1440, set - rise);
+  const polar = set <= rise; // no usable sunrise/sunset pair – draw a flat day
+  const day = polar ? 1 : set - rise;
   const night = Math.max(1 / 1440, 1 - day);
-  const xAt = (t: number) => 8 + t * 144;
+  const xAt = (t: number) => t * 160;
+  const isDay = (t: number) => !polar && t >= rise && t <= set;
   const yAt = (t: number) => {
-    if (t >= rise && t <= set) return horizon - amplitude * Math.sin(Math.PI * (t - rise) / day);
+    if (polar) return horizon - amplitude * 0.5;
+    if (isDay(t)) return horizon - amplitude * Math.sin(Math.PI * (t - rise) / day);
     const q = ((((t - set) % 1) + 1) % 1) / night;
-    return horizon + amplitude * Math.sin(Math.PI * q);
+    return horizon + 0.8 * amplitude * Math.sin(Math.PI * q);
   };
-  const path = Array.from({ length: 97 }, (_, i) => {
-    const t = i / 96;
+  const trace = (from: number, to: number, steps: number) => Array.from({ length: steps + 1 }, (_, i) => {
+    const t = from + ((to - from) * i) / steps;
     return `${i === 0 ? 'M' : 'L'}${xAt(t).toFixed(1)} ${yAt(t).toFixed(1)}`;
   }).join(' ');
+  const nightPaths = polar ? [] : [trace(0, rise, 16), trace(set, 1, 32)];
+  const sunClock = ((clock % 1) + 1) % 1;
+  const sx = xAt(sunClock);
+  const sy = yAt(sunClock);
   return (
-    <svg class="sun-curve" viewBox="0 0 160 64" aria-label={`Sonnenaufgang ${sunrise}, Sonnenuntergang ${sunset}`}>
-      <defs>
-        <linearGradient id="wx-sun-path" gradientUnits="userSpaceOnUse" x1="0" y1="21" x2="0" y2="55">
-          <stop offset="0" stop-color="rgba(255,255,255,0.8)" />
-          <stop offset="0.49" stop-color="rgba(255,255,255,0.8)" />
-          <stop offset="0.51" stop-color="rgba(255,255,255,0.28)" />
-          <stop offset="1" stop-color="rgba(255,255,255,0.28)" />
-        </linearGradient>
-      </defs>
-      <path d={path} class="sun-path" />
-      <line x1="4" y1={horizon} x2="156" y2={horizon} class="horizon" />
-      <circle cx={xAt(clock)} cy={yAt(clock)} r="4.5" class="sun-dot" />
-    </svg>
+    <div class="sun-curve" role="img" aria-label={`Sonnenaufgang ${sunrise}, Sonnenuntergang ${sunset}`}>
+      {/* Stretched to whatever the card allows; the dot is HTML so it stays round. */}
+      <svg viewBox="0 0 160 64" preserveAspectRatio="none" aria-hidden="true">
+        <line x1="0" y1={horizon} x2="160" y2={horizon} class="horizon" />
+        {nightPaths.map((d, i) => <path key={i} d={d} class="sun-night" />)}
+        <path d={polar ? trace(0, 1, 2) : trace(rise, set, 64)} class="sun-path" />
+      </svg>
+      <span class="sun-dot" style={{ left: `${(sx / 160) * 100}%`, top: `${(sy / 64) * 100}%` }} />
+    </div>
+  );
+}
+
+/** Thin horizontal meter (0..max) for humidity, visibility and precipitation. */
+export function Meter({ value, max, tone = 'cold' }: { value: number; max: number; tone?: 'cold' | 'warm' }) {
+  const pct = Math.max(0, Math.min(100, (value / max) * 100));
+  return (
+    <span class={`meter meter-${tone}`} aria-hidden="true">
+      <span class="meter-fill" style={{ width: `${pct}%` }} />
+    </span>
   );
 }

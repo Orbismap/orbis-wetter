@@ -273,6 +273,6 @@ export async function loadWeather(location: WeatherLocation, signal?: AbortSigna
 
   const weather = series
     ? buildWeather(series, supplements, location)
-    : { ...sample, place: { name: location.name, eyebrow: location.eyebrow } };
+    : { ...sample, place: { name: location.name, eyebrow: location.eyebrow, lat: location.lat, lng: location.lng } };
   return { weather, source };
 }

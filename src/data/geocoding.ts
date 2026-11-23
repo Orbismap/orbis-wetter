@@ -1,6 +1,6 @@
 /** Real place search via Open-Meteo Geocoding (keyless, CORS enabled). */
 import { API } from './endpoints';
-import { cached, fetchJson, type FetchOptions } from './http';
+import { cached, fetchJson, withSignal, type FetchOptions } from './http';
 
 export interface Place {
   name: string;
@@ -33,8 +33,8 @@ export function searchPlaces(query: string, options: FetchOptions = {}): Promise
   if (name.length < 2) return Promise.resolve([]);
   const url = new URL(API.geocoding);
   url.search = new URLSearchParams({ name, count: '8', language: 'de', format: 'json' }).toString();
-  return cached(`geo:${name.toLowerCase()}`, 24 * 3_600_000, async () => {
-    const data = await fetchJson<GeoResponse>(url.toString(), { ...options, timeout: 10_000 });
+  return withSignal(cached(`geo:${name.toLowerCase()}`, 24 * 3_600_000, async () => {
+    const data = await fetchJson<GeoResponse>(url.toString(), { timeout: 10_000 });
     return (data.results ?? []).map((result) => ({
       name: result.name,
       region: [result.admin1, result.country].filter(Boolean).join(', '),
@@ -42,5 +42,5 @@ export function searchPlaces(query: string, options: FetchOptions = {}): Promise
       lng: result.longitude,
       country: result.country ?? '',
     }));
-  });
+  }), options.signal);
 }

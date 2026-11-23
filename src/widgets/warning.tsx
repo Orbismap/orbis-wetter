@@ -14,6 +14,7 @@ export const warningWidget: WidgetDefinition = {
     { name: '2x1', w: 2, h: 1 },
     { name: '3x1', w: 3, h: 1 },
     { name: '2x2', w: 2, h: 2 },
+    { name: '3x2', w: 3, h: 2 },
   ],
   Component: WarningWidget,
 };

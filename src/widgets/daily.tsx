@@ -12,6 +12,9 @@ export const dailyWidget: WidgetDefinition = {
   title: '10-Tage-Vorhersage',
   variants: [
     { name: '2x3', w: 2, h: 3 },
+    { name: '2x2', w: 2, h: 2 },
+    { name: '2x4', w: 2, h: 4 },
+    { name: '3x3', w: 3, h: 3 },
     { name: '3x4', w: 3, h: 4 },
   ],
   Component: DailyWidget,

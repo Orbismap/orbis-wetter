@@ -4,10 +4,11 @@ import { useDragPreview } from './dragPreview';
 import { defaultLayouts } from './defaultLayout';
 import { editStore, useEditing } from './editStore';
 import { playFlip } from './flip';
-import { cellMetrics, placementRect } from './geometry';
+import { cellMetrics, placementRect, usedRows } from './geometry';
 import { getPreset } from './presets';
 import { layoutStore, useLayout } from './store';
 import { WidgetFrame } from './WidgetFrame';
+import { useMobileCanvasWidth } from './viewport';
 import './dashboard.css';
 
 const outlineStyle = (
@@ -29,7 +30,12 @@ export function Dashboard() {
   const editing = useEditing();
   const preview = useDragPreview();
   useLayoutEffect(playFlip);
-  const preset = getPreset(layout.preset);
+  const mobileWidth = useMobileCanvasWidth();
+  const basePreset = getPreset(layout.preset);
+  // The phone grid always spans the screen; desktop presets keep their fixed canvas.
+  // The canvas is only as tall as its content; while arranging there is always one spare row to drop widgets into.
+  const rows = Math.min(basePreset.maxRows ?? basePreset.rows, Math.max(1, usedRows(layout.placements) + (editing ? 1 : 0)));
+  const preset = { ...basePreset, rows, ...(basePreset.id === 'mobile' ? { width: mobileWidth } : {}) };
   const metrics = cellMetrics(preset);
   const style = {
     width: `${metrics.width}px`,
@@ -41,7 +47,7 @@ export function Dashboard() {
   } as CSSProperties;
 
   return (
-    <div class="dashboard-wrap">
+    <div class="dashboard-wrap" data-preset={preset.id}>
       <div class="dashboard-shell">
         <div class={`dashboard${editing ? ' editing' : ''}`} style={style}>
           {layout.placements.map((placement) => (

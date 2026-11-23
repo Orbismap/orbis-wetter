@@ -4,6 +4,7 @@ vi.mock('./http', () => ({
   fetchJson: vi.fn(),
   // Real cache semantics aren't relevant here; each call should reach the mocked fetch.
   cached: (_key: string, _ttl: number, load: () => Promise<unknown>) => load(),
+  withSignal: (promise: Promise<unknown>) => promise,
 }));
 
 import { fetchJson } from './http';

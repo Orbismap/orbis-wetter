@@ -7,6 +7,7 @@ import { WeatherProvider } from '../features/forecast/context';
 import { Hero } from '../features/forecast/Hero';
 import { sample } from '../features/forecast/sample';
 import { DEFAULT_PLACE, type Place } from '../data/geocoding';
+import { isMobileViewport } from '../dashboard/viewport';
 import { PlaceList } from '../features/search/PlaceList';
 import './app.css';
 import './hud.css';
@@ -18,9 +19,15 @@ const INITIAL: WeatherResult = {
 export function App() {
   const [city, setCity] = useState<Place>(DEFAULT_PLACE);
   const [data, setData] = useState<WeatherResult>(INITIAL);
-  const [listOpen, setListOpen] = useState(true);
+  const [listOpen, setListOpen] = useState(false);
   const searchInput = useRef<HTMLInputElement>(null);
   const [focusSearch, setFocusSearch] = useState(false);
+
+  // On phones the menu covers the screen – close it once a place was picked so the forecast is visible.
+  const selectCity = (place: Place) => {
+    setCity(place);
+    if (isMobileViewport()) setListOpen(false);
+  };
 
   // ⌘F / Strg+F opens the side menu and focuses its search field instead of the browser find.
   useEffect(() => {
@@ -88,7 +95,7 @@ export function App() {
     <WeatherProvider value={data.weather}>
       <div class="app">
         <div class="wx-hud" data-main={listOpen ? 'open' : 'closed'}>
-          <div class="wx-hud-main" {...(listOpen ? {} : ({ inert: '' } as object))}>
+          <div class="wx-hud-main" inert={!listOpen}>
             <aside class="wx-hudm" aria-label="Orbis Wetter">
               <header class="wx-hudm-head">
                 <h1>
@@ -101,7 +108,7 @@ export function App() {
                   </svg>
                 </button>
               </header>
-              <PlaceList onSelect={setCity} inputRef={searchInput} />
+              <PlaceList onSelect={selectCity} inputRef={searchInput} />
             </aside>
           </div>
           <div class="wx-hud-mini" aria-label="Orbis Wetter">

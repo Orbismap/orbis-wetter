@@ -68,3 +68,17 @@ export function cached<T>(key: string, ttl: number, load: () => Promise<T>): Pro
 
 const cache = new Map<string, CacheEntry<unknown>>();
 const inflight = new Map<string, Promise<unknown>>();
+
+/**
+ * Let one caller give up on a shared (cached/in-flight) request without cancelling it for everyone else.
+ * Aborting the underlying fetch would make a later caller for the same key inherit the AbortError.
+ */
+export function withSignal<T>(promise: Promise<T>, signal?: AbortSignal): Promise<T> {
+  if (!signal) return promise;
+  return new Promise<T>((resolve, reject) => {
+    const abort = () => reject(signal.reason ?? new DOMException('Aborted', 'AbortError'));
+    if (signal.aborted) return abort();
+    signal.addEventListener('abort', abort, { once: true });
+    promise.then(resolve, reject).finally(() => signal.removeEventListener('abort', abort));
+  });
+}
