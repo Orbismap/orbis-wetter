@@ -1,7 +1,6 @@
 import type { CSSProperties } from 'preact';
 import { getWidget } from '../widgets/registry';
 import { useEditing } from './editStore';
-import { captureFlip } from './flip';
 import { placementRect, sizeLabel } from './geometry';
 import { getPreset } from './presets';
 import { layoutStore, useLayout } from './store';
@@ -34,7 +33,6 @@ export function WidgetFrame({ placement, metrics }: { placement: Placement; metr
     .sort((a, b) => a.w * a.h - b.w * b.h || a.w - b.w);
 
   const resizeTo = (w: number, h: number) => {
-    captureFlip(); // animate the neighbours that make room
     layoutStore.resizeTo(placement.id, w, h);
   };
 
