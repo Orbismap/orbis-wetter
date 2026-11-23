@@ -26,6 +26,15 @@ interface DragStart {
 const clamp = (value: number, max: number) => Math.max(0, Math.min(max, value));
 
 /**
+ * Hysteresis (in cells): a widget keeps its current cell until the pointer is clearly closer to another
+ * one. Without it, an exchange is undone at exactly the point where it was triggered, which feels like
+ * the layout jumping back too early.
+ */
+const STICKY = 0.25;
+const pick = (position: number, applied: number, max: number) =>
+  (Math.abs(position - applied) <= 0.5 + STICKY ? applied : clamp(Math.round(position), max));
+
+/**
  * Pointer-driven snapping with live, direct swaps. Every preview is derived from the gesture origin,
  * so only the widget under the current cell is displaced – the previously hovered one goes home.
  */
@@ -48,8 +57,8 @@ export function useDrag(placement: Placement, metrics: CellMetrics, enabled: boo
     // Top-left of the widget relative to the grid canvas, anchored at the drag start.
     const visualX = origin.cellX * metrics.stepX + (event.clientX - origin.px);
     const visualY = origin.cellY * metrics.stepY + (event.clientY - origin.py);
-    const targetX = clamp(Math.round(visualX / metrics.stepX), metrics.cols - placement.w);
-    const targetY = clamp(Math.round(visualY / metrics.stepY), metrics.rows - placement.h);
+    const targetX = pick(visualX / metrics.stepX, origin.appliedX, metrics.cols - placement.w);
+    const targetY = pick(visualY / metrics.stepY, origin.appliedY, metrics.rows - placement.h);
 
     // Highlight the origin cell (where a swapped group lands) and the hovered destination.
     const previewTarget = outside ? null : { x: targetX, y: targetY, w: placement.w, h: placement.h };
