@@ -1,4 +1,5 @@
 import { describe, expect, it, vi } from 'vitest';
+import { registerWidget } from '../widgets/registry';
 import { registerPreset } from './presets';
 import { LayoutStore } from './store';
 import type { LayoutState, Placement } from './types';
@@ -6,6 +7,11 @@ import type { LayoutState, Placement } from './types';
 registerPreset({ id: 'testgrid', label: 'Test', cols: 3, rows: 3, width: 300, gap: 0, aspect: 1 });
 registerPreset({ id: 'testgrid4', label: 'Test 4', cols: 4, rows: 3, width: 400, gap: 0, aspect: 1 });
 registerPreset({ id: 'testgrid44', label: 'Test 4x4', cols: 4, rows: 4, width: 400, gap: 0, aspect: 1 });
+
+registerWidget({
+  id: 'flex', title: 'Flex', Component: () => null,
+  variants: [{ name: '2x2', w: 2, h: 2 }, { name: '2x1', w: 2, h: 1 }, { name: '1x1', w: 1, h: 1 }],
+});
 
 const placement = (id: string, x: number, y: number, w = 1, h = 1): Placement => ({ id, widget: 'w', x, y, w, h });
 const state = (placements: Placement[]): LayoutState => ({ preset: 'testgrid', placements });
@@ -165,6 +171,20 @@ describe('LayoutStore', () => {
     expect(s.getState().placements.find((p) => p.id === 'a')).toMatchObject({ w: 2, h: 1 });
     const b = s.getState().placements.find((p) => p.id === 'b')!;
     expect([b.x, b.y]).toEqual([2, 0]);
+  });
+
+  it('resizeTo shrinks a neighbour that supports a smaller size instead of moving it', () => {
+    const s = store([placement('a', 0, 0), { ...placement('n', 1, 0, 2, 2), widget: 'flex' }]);
+    expect(s.resizeTo('a', 2, 1)).toBe(true);
+    const n = s.getState().placements.find((p) => p.id === 'n')!;
+    expect(n).toMatchObject({ x: 1, y: 1, w: 2, h: 1 }); // shrunk 2x2 → 2x1 inside its old area, not moved away
+    expect(s.getState().placements.find((p) => p.id === 'a')).toMatchObject({ x: 0, y: 0, w: 2, h: 1 });
+  });
+
+  it('resizeTo falls back to moving when the neighbour cannot shrink', () => {
+    const s = store([placement('a', 0, 0), placement('n', 1, 0)]);
+    s.resizeTo('a', 2, 1);
+    expect(s.getState().placements.find((p) => p.id === 'n')).toMatchObject({ x: 2, w: 1, h: 1 });
   });
 
   it('resizeTo refuses when the displaced widget has nowhere to go', () => {

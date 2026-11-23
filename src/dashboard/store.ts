@@ -4,7 +4,8 @@ import { clampToGrid, collisions, firstFreeSlot, fits, nearestFreeSlot, overlaps
 import { captureFlip } from './flip';
 import { familyOf, loadLayout, saveLayout } from './persistence';
 import { getPreset } from './presets';
-import type { LayoutState, Placement, Rect } from './types';
+import { getWidget } from '../widgets/registry';
+import type { GridPreset, LayoutState, Placement, Rect } from './types';
 import { onBreakpointChange, viewportPresetId } from './viewport';
 
 type Listener = () => void;
@@ -228,6 +229,43 @@ export class LayoutStore {
     return true;
   };
 
+  /** Sizes the widget supports that are smaller than its current one, largest first. */
+  private smallerSizes(p: Placement): Array<{ w: number; h: number }> {
+    return (getWidget(p.widget)?.variants ?? [])
+      .filter((v) => v.w <= p.w && v.h <= p.h && v.w * v.h < p.w * p.h)
+      .map(({ w, h }) => ({ w, h }))
+      .sort((a, b) => b.w * b.h - a.w * a.h);
+  }
+
+  /** The largest smaller variant that fits inside the widget's own old area without touching `kept`. */
+  private shrinkInPlace(preset: GridPreset, kept: Placement[], p: Placement): Placement | null {
+    for (const size of this.smallerSizes(p)) {
+      let best: Placement | null = null;
+      let bestDistance = Infinity;
+      for (let y = p.y; y <= p.y + p.h - size.h; y++) {
+        for (let x = p.x; x <= p.x + p.w - size.w; x++) {
+          const candidate: Placement = { ...p, ...size, x, y };
+          if (!fits(preset, candidate) || kept.some((other) => overlaps(candidate, other))) continue;
+          const distance = Math.abs(x - p.x) + Math.abs(y - p.y);
+          if (distance < bestDistance) { best = candidate; bestDistance = distance; }
+        }
+      }
+      if (best) return best;
+    }
+    return null;
+  }
+
+  /** Move the widget to the nearest free slot, trying the given sizes in order. */
+  private moveNear(
+    preset: GridPreset, kept: Placement[], p: Placement, sizes: Array<{ w: number; h: number }>,
+  ): Placement | null {
+    for (const size of sizes) {
+      const spot = nearestFreeSlot(preset, kept, size.w, size.h, p);
+      if (spot) return { ...p, ...size, ...spot };
+    }
+    return null;
+  }
+
   /** New arrangement for a widget of size w×h at `at` (default: its current corner); overlapped widgets are displaced. */
   private resolveResize(
     placements: Placement[], id: string, w: number, h: number, at?: { x: number; y: number },
@@ -254,9 +292,12 @@ export class LayoutStore {
     others.forEach((p) => (overlaps(target, p) ? displaced : kept).push(p));
     const moved = new Map<string, Placement>();
     for (const p of displaced) {
-      const spot = nearestFreeSlot(preset, kept, p.w, p.h, p);
-      if (!spot) return null;
-      const next = { ...p, ...spot };
+      // 1st choice: shrink the neighbour in place to a smaller size it supports. 2nd: move it.
+      // 3rd: move it and shrink it as well.
+      const next = this.shrinkInPlace(preset, kept, p)
+        ?? this.moveNear(preset, kept, p, [{ w: p.w, h: p.h }])
+        ?? this.moveNear(preset, kept, p, this.smallerSizes(p));
+      if (!next) return null;
       kept.push(next);
       moved.set(p.id, next);
     }
