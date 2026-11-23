@@ -28,7 +28,10 @@ function measure(host: HTMLElement): Rects {
     if (!id) return;
     const r = element.getBoundingClientRect();
     // Relative to the canvas: scrolling or re-centering on window resize is not a layout change.
-    rects.set(id, new DOMRect(r.left - origin.left, r.top - origin.top, r.width, r.height));
+    // The centre is used with the untransformed size, so the edit-mode wiggle (a rotation) never counts as movement.
+    const w = element.offsetWidth;
+    const h = element.offsetHeight;
+    rects.set(id, new DOMRect(r.left + r.width / 2 - w / 2 - origin.left, r.top + r.height / 2 - h / 2 - origin.top, w, h));
   });
   return rects;
 }

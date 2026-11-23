@@ -1,11 +1,12 @@
 import type { CSSProperties } from 'preact';
 import { getWidget } from '../widgets/registry';
-import { useEditing } from './editStore';
+import { editStore, useEditing } from './editStore';
 import { placementRect, sizeLabel } from './geometry';
 import { getPreset } from './presets';
 import { useLayout } from './store';
 import type { CellMetrics, Placement } from './types';
 import { useDrag } from './useDrag';
+import { useLongPress } from './useLongPress';
 import { HANDLES, useResize } from './useResize';
 
 /** Renders one placed widget at its computed pixel position inside the grid. */
@@ -34,6 +35,7 @@ export function WidgetFrame({ placement, metrics }: { placement: Placement; metr
     .sort((a, b) => a.w * a.h - b.w * b.h || a.w - b.w);
 
   const sizes = variants.length > 0 ? variants.map(({ w, h }) => ({ w, h })) : [{ w: placement.w, h: placement.h }];
+  const longPressProps = useLongPress(() => editStore.setEditing(true), !editing);
   const { resizing, handleProps } = useResize(placement, metrics, sizes, editing);
 
   return (
@@ -41,6 +43,7 @@ export function WidgetFrame({ placement, metrics }: { placement: Placement; metr
       class={`card widget-frame${editing ? ' editing' : ''}${dragging ? ' dragging' : ''}${resizing ? ' resizing' : ''}`}
       style={style}
       {...dragProps}
+      {...longPressProps}
       data-widget={placement.widget}
       data-placement-id={placement.id}
       data-size={sizeLabel(placement.w, placement.h)}

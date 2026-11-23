@@ -235,11 +235,15 @@
 /* The buttons sit above the grid instead of floating over the hero. */
 .dashboard-wrap[data-preset='mobile'] .edit-hint { display: none; }
 
+/* The row is reserved even outside edit mode, so entering it does not push the grid down. */
+.dashboard-wrap[data-preset='mobile'] .dashboard-shell {
+  position: relative;
+  padding-top: calc(var(--hit-touch) + var(--s-3));
+}
+
 .dashboard-wrap[data-preset='mobile'] .edit-controls {
-  position: static;
-  order: -1;
+  top: 0;
   justify-content: flex-end;
-  margin-bottom: var(--s-3);
 }
 
 .dashboard-wrap[data-preset='mobile'] .edit-toggle,
@@ -254,3 +258,26 @@
 
 /* Dragging a widget must not scroll the page on touch screens. */
 .dashboard.editing .widget-frame { touch-action: none; }
+
+/* ---------- edit mode: cards wiggle like app icons ---------- */
+/* `rotate` is a separate property, so it combines with the drag/FLIP transforms instead of replacing them. */
+@keyframes wx-wiggle {
+  0% { rotate: -0.55deg; }
+  100% { rotate: 0.55deg; }
+}
+
+.dashboard.editing .widget-frame:not(.dragging):not(.resizing) {
+  animation: wx-wiggle 0.17s ease-in-out infinite alternate;
+  animation-delay: calc(var(--cell-x) * -43ms - var(--cell-y) * 71ms);
+}
+
+.dashboard.editing .widget-frame:nth-child(2n):not(.dragging):not(.resizing) {
+  animation-duration: 0.2s;
+  animation-direction: alternate-reverse;
+}
+
+@media (prefers-reduced-motion: reduce) {
+  .dashboard.editing .widget-frame { animation: none !important; }
+}
+
+.dashboard .widget-frame { -webkit-touch-callout: none; }

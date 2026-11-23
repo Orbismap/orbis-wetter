@@ -59,21 +59,13 @@ export function Dashboard() {
             <div class="swap-outline swap-target" style={outlineStyle(preview.target, metrics)} aria-hidden="true" />
           )}
         </div>
-        <div class="edit-controls">
-          <button type="button" class={`edit-toggle${editing ? ' active' : ''}`} onClick={editStore.toggle}>
-            {editing ? 'Fertig' : 'Bearbeiten'}
-          </button>
-          {editing && <span class="edit-hint">Ziehen zum Verschieben · Ränder und Ecken ändern die Größe</span>}
-          {editing && (
-            <button
-              type="button"
-              class="reset-toggle"
-              onClick={() => layoutStore.reset()}
-            >
-              Zurücksetzen
-            </button>
-          )}
-        </div>
+        {editing && (
+          <div class="edit-controls">
+            <button type="button" class="edit-toggle active" onClick={editStore.toggle}>Fertig</button>
+            <span class="edit-hint">Ziehen zum Verschieben · Ränder und Ecken ändern die Größe</span>
+            <button type="button" class="reset-toggle" onClick={() => layoutStore.reset()}>Zurücksetzen</button>
+          </div>
+        )}
       </div>
     </div>
   );
