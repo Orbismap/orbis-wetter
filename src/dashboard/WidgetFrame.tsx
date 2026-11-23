@@ -13,7 +13,7 @@ import { HANDLES, useResize } from './useResize';
 export function WidgetFrame({ placement, metrics }: { placement: Placement; metrics: CellMetrics }) {
   const editing = useEditing();
   const layout = useLayout();
-  const { dragging, dragProps } = useDrag(placement, metrics, editing);
+  const { dragging, dragProps, beginDrag } = useDrag(placement, metrics, editing);
   const definition = getWidget(placement.widget);
   const rect = placementRect(placement, metrics);
   const style = {
@@ -35,7 +35,11 @@ export function WidgetFrame({ placement, metrics }: { placement: Placement; metr
     .sort((a, b) => a.w * a.h - b.w * b.h || a.w - b.w);
 
   const sizes = variants.length > 0 ? variants.map(({ w, h }) => ({ w, h })) : [{ w: placement.w, h: placement.h }];
-  const longPressProps = useLongPress(() => editStore.setEditing(true), !editing);
+  const longPressProps = useLongPress((press) => {
+    editStore.setEditing(true);
+    // The pressed card sticks to the pointer right away, like picking up an icon on a home screen.
+    beginDrag(press.element, press.pointerId, press.x, press.y, press.touch);
+  }, !editing);
   const { resizing, handleProps } = useResize(placement, metrics, sizes, editing);
 
   return (

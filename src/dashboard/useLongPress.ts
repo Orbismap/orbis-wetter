@@ -8,10 +8,15 @@ const TOLERANCE = 8;
  * Long press like on a phone home screen. Moving too far (a scroll or a map pan) or lifting the pointer
  * early cancels it. After it fired, the click that follows the release is swallowed.
  */
-export function useLongPress(onLongPress: () => void, enabled: boolean) {
+export function useLongPress(
+  onLongPress: (press: { element: HTMLElement; pointerId: number; x: number; y: number; touch: boolean }) => void,
+  enabled: boolean,
+) {
   const timer = useRef<number | null>(null);
   const origin = useRef({ x: 0, y: 0 });
   const swallow = useRef(false);
+  const last = useRef({ x: 0, y: 0, pointerId: 0, touch: false });
+  const element = useRef<HTMLElement | null>(null);
 
   const cancel = () => {
     if (timer.current !== null) window.clearTimeout(timer.current);
@@ -25,18 +30,21 @@ export function useLongPress(onLongPress: () => void, enabled: boolean) {
       if (event.button !== 0) return;
       swallow.current = false;
       origin.current = { x: event.clientX, y: event.clientY };
+      last.current = { x: event.clientX, y: event.clientY, pointerId: event.pointerId, touch: event.pointerType !== 'mouse' };
+      element.current = event.currentTarget;
       cancel();
       timer.current = window.setTimeout(() => {
         timer.current = null;
         swallow.current = true;
         navigator.vibrate?.(12);
-        onLongPress();
+        if (element.current) onLongPress({ element: element.current, ...last.current, pointerId: last.current.pointerId });
         // The release belongs to the long press, not to a button inside the card.
         window.setTimeout(() => { swallow.current = false; }, 600);
       }, DELAY);
     },
     onPointerMove: (event: TargetedPointerEvent<HTMLElement>) => {
       if (timer.current === null) return;
+      last.current = { ...last.current, x: event.clientX, y: event.clientY };
       if (Math.hypot(event.clientX - origin.current.x, event.clientY - origin.current.y) > TOLERANCE) cancel();
     },
     onPointerUp: cancel,

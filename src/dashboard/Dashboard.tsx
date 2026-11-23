@@ -1,5 +1,5 @@
 import type { CSSProperties } from 'preact';
-import { useLayoutEffect } from 'preact/hooks';
+import { useEffect, useLayoutEffect, useState } from 'preact/hooks';
 import { useDragPreview } from './dragPreview';
 import { editStore, useEditing } from './editStore';
 import { playFlip } from './flip';
@@ -28,6 +28,19 @@ export function Dashboard() {
   const layout = useLayout();
   const editing = useEditing();
   const preview = useDragPreview();
+  // Cards wiggle only until the pointer has moved a little after edit mode started.
+  const [wiggle, setWiggle] = useState(true);
+  useEffect(() => {
+    if (!editing) return undefined;
+    setWiggle(true);
+    let base: { x: number; y: number } | null = null;
+    const onMove = (event: PointerEvent) => {
+      if (!base) { base = { x: event.clientX, y: event.clientY }; return; }
+      if (Math.hypot(event.clientX - base.x, event.clientY - base.y) > 16) setWiggle(false);
+    };
+    window.addEventListener('pointermove', onMove);
+    return () => window.removeEventListener('pointermove', onMove);
+  }, [editing]);
   useLayoutEffect(playFlip);
   const mobileWidth = useMobileCanvasWidth();
   const basePreset = getPreset(layout.preset);
@@ -48,7 +61,7 @@ export function Dashboard() {
   return (
     <div class="dashboard-wrap" data-preset={preset.id}>
       <div class="dashboard-shell">
-        <div class={`dashboard${editing ? ' editing' : ''}`} style={style}>
+        <div class={`dashboard${editing ? ' editing' : ''}${editing && wiggle ? ' wiggle' : ''}`} style={style}>
           {layout.placements.map((placement) => (
             <WidgetFrame key={placement.id} placement={placement} metrics={metrics} />
           ))}

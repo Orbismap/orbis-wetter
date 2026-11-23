@@ -266,12 +266,12 @@
   100% { rotate: 0.55deg; }
 }
 
-.dashboard.editing .widget-frame:not(.dragging):not(.resizing) {
+.dashboard.editing.wiggle .widget-frame:not(.dragging):not(.resizing) {
   animation: wx-wiggle 0.17s ease-in-out infinite alternate;
   animation-delay: calc(var(--cell-x) * -43ms - var(--cell-y) * 71ms);
 }
 
-.dashboard.editing .widget-frame:nth-child(2n):not(.dragging):not(.resizing) {
+.dashboard.editing.wiggle .widget-frame:nth-child(2n):not(.dragging):not(.resizing) {
   animation-duration: 0.2s;
   animation-direction: alternate-reverse;
 }

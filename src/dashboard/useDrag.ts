@@ -21,6 +21,8 @@ interface DragStart {
   /** Canvas bounds at drag start – leaving them cancels the whole gesture. */
   bounds: DOMRect | null;
   outside: boolean;
+  /** Removes the touch-scroll blocker of a gesture that continues a long press. */
+  release?: () => void;
 }
 
 const clamp = (value: number, max: number) => Math.max(0, Math.min(max, value));
@@ -109,16 +111,22 @@ export function useDrag(placement: Placement, metrics: CellMetrics, enabled: boo
     element.style.top = `${rect.top}px`;
   };
 
-  const onPointerDown: PointerHandler = (event) => {
-    if (!enabled || event.button !== 0) return;
-    const element = event.currentTarget;
+  /** Start a drag of `element` that is already under the pointer (also used to continue a long press). */
+  const begin = (element: HTMLElement, pointerId: number, clientX: number, clientY: number, touch = false) => {
     cancelFlip(element); // a running layout animation must not override the drag transform
     layoutStore.beginGesture();
     const startCell = { x: placement.x, y: placement.y, w: placement.w, h: placement.h };
     dragPreview.set({ origin: startCell, target: startCell });
+    let release: (() => void) | undefined;
+    if (touch) {
+      // The touch began before edit mode switched `touch-action` off, so keep the page from panning ourselves.
+      const block = (event: TouchEvent) => { if (event.cancelable) event.preventDefault(); };
+      window.addEventListener('touchmove', block, { passive: false });
+      release = () => window.removeEventListener('touchmove', block);
+    }
     start.current = {
-      px: event.clientX,
-      py: event.clientY,
+      px: clientX,
+      py: clientY,
       cellX: placement.x,
       cellY: placement.y,
       appliedX: placement.x,
@@ -126,11 +134,17 @@ export function useDrag(placement: Placement, metrics: CellMetrics, enabled: boo
       element,
       bounds: document.querySelector<HTMLElement>('.dashboard')?.getBoundingClientRect() ?? null,
       outside: false,
+      release,
     };
     // Pointer capture is unavailable for synthetic events and some embedded browsers.
-    try { element.setPointerCapture(event.pointerId); } catch { /* optional enhancement */ }
-    event.preventDefault();
+    try { element.setPointerCapture(pointerId); } catch { /* optional enhancement */ }
     setDragging(true);
+  };
+
+  const onPointerDown: PointerHandler = (event) => {
+    if (!enabled || event.button !== 0) return;
+    event.preventDefault();
+    begin(event.currentTarget, event.pointerId, event.clientX, event.clientY);
   };
 
   const onPointerMove: PointerHandler = (event) => update(event);
@@ -151,6 +165,7 @@ export function useDrag(placement: Placement, metrics: CellMetrics, enabled: boo
     dragPreview.clear();
     requestAnimationFrame(playFlip); // after Preact has rendered the final layout
 
+    origin.release?.();
     start.current = null;
     setDragging(false);
     try {
@@ -172,6 +187,7 @@ export function useDrag(placement: Placement, metrics: CellMetrics, enabled: boo
     dragPreview.clear();
     requestAnimationFrame(playFlip);
 
+    origin.release?.();
     start.current = null;
     setDragging(false);
     try {
@@ -185,5 +201,5 @@ export function useDrag(placement: Placement, metrics: CellMetrics, enabled: boo
     ? { onPointerDown, onPointerMove, onPointerUp, onPointerCancel }
     : {};
 
-  return { dragging, dragProps };
+  return { dragging, dragProps, beginDrag: begin };
 }
