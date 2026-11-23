@@ -1,5 +1,8 @@
 import type { CellMetrics, GridPreset, Rect } from './types';
 
+/** Rows the grid may grow to. */
+export const rowLimit = (preset: GridPreset): number => preset.maxRows ?? preset.rows;
+
 const clamp = (v: number, min: number, max: number) => Math.max(min, Math.min(max, v));
 
 /** Compute pixel metrics from a preset. Cells fill the canvas width exactly. */
@@ -31,7 +34,7 @@ export function placementRect(p: Rect, m: CellMetrics) {
 
 /** A placement must have a positive size and stay inside the grid. */
 export function fits(preset: GridPreset, p: Rect): boolean {
-  return p.w > 0 && p.h > 0 && p.x >= 0 && p.y >= 0 && p.x + p.w <= preset.cols && p.y + p.h <= preset.rows;
+  return p.w > 0 && p.h > 0 && p.x >= 0 && p.y >= 0 && p.x + p.w <= preset.cols && p.y + p.h <= rowLimit(preset);
 }
 
 /** Do two cell rectangles overlap? */
@@ -52,7 +55,7 @@ export function collisions(placements: Array<Rect & { id: string }>): Array<[str
 
 /** First free slot that fits a w × h widget, scanning left-to-right, top-to-bottom. */
 export function firstFreeSlot(preset: GridPreset, placements: Rect[], w: number, h: number): { x: number; y: number } | null {
-  for (let y = 0; y <= preset.rows - h; y++) {
+  for (let y = 0; y <= rowLimit(preset) - h; y++) {
     for (let x = 0; x <= preset.cols - w; x++) {
       const candidate = { x, y, w, h };
       if (!placements.some((p) => overlaps(candidate, p))) return { x, y };
@@ -64,12 +67,12 @@ export function firstFreeSlot(preset: GridPreset, placements: Rect[], w: number,
 /** Keep a rectangle inside the grid, shrinking it if necessary. */
 export function clampToGrid(preset: GridPreset, p: Rect): Rect {
   const w = clamp(Math.round(p.w), 1, preset.cols);
-  const h = clamp(Math.round(p.h), 1, preset.rows);
+  const h = clamp(Math.round(p.h), 1, rowLimit(preset));
   return {
     w,
     h,
     x: clamp(Math.round(p.x), 0, preset.cols - w),
-    y: clamp(Math.round(p.y), 0, preset.rows - h),
+    y: clamp(Math.round(p.y), 0, rowLimit(preset) - h),
   };
 }
 
@@ -122,4 +125,28 @@ export function packIntoCells<T extends Rect & { id: string }>(
 /** Human-readable size label used in the placeholder widgets and later in the editor. */
 export function sizeLabel(w: number, h: number): string {
   return `${w}×${h}`;
+}
+
+/** Number of grid rows covered by a layout (bottom edge of the lowest widget). */
+export function usedRows(placements: Rect[]): number {
+  return placements.reduce((max, p) => Math.max(max, p.y + p.h), 0);
+}
+
+/** The free slot closest to `from` (Manhattan distance), so displaced widgets stay near where they were. */
+export function nearestFreeSlot(
+  preset: GridPreset, occupied: Rect[], w: number, h: number, from: { x: number; y: number },
+): { x: number; y: number } | null {
+  let best: { x: number; y: number } | null = null;
+  let bestDistance = Infinity;
+  for (let y = 0; y <= rowLimit(preset) - h; y++) {
+    for (let x = 0; x <= preset.cols - w; x++) {
+      const distance = Math.abs(x - from.x) + Math.abs(y - from.y);
+      if (distance >= bestDistance) continue;
+      const candidate = { x, y, w, h };
+      if (occupied.some((p) => overlaps(candidate, p))) continue;
+      best = { x, y };
+      bestDistance = distance;
+    }
+  }
+  return best;
 }

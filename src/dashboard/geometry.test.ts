@@ -6,7 +6,8 @@ import {
 } from './geometry';
 import { getPreset } from './presets';
 
-const desktop = getPreset('desktop');
+// The fixed 6 × 5 board; the real preset may additionally grow below (maxRows).
+const { maxRows: _grow, ...desktop } = getPreset('desktop');
 
 describe('cellMetrics', () => {
   it('fills the fixed canvas width and derives square cells', () => {
@@ -84,4 +85,27 @@ it('packs a group of small widgets into a large widget footprint', () => {
 
 it('formats a size label', () => {
   expect(sizeLabel(3, 2)).toBe('3×2');
+});
+
+describe('default layouts', () => {
+  it('every default arrangement fits its preset without overlaps', async () => {
+    const { defaultLayouts } = await import('./defaultLayout');
+    const { getPreset } = await import('./presets');
+    for (const layout of Object.values(defaultLayouts)) {
+      const preset = getPreset(layout.preset);
+      expect(layout.placements.every((p) => fits(preset, p)), layout.preset).toBe(true);
+      expect(collisions(layout.placements), layout.preset).toEqual([]);
+    }
+  });
+});
+
+describe('growing grid', () => {
+  it('finds the nearest free slot and counts used rows', async () => {
+    const { nearestFreeSlot, usedRows } = await import('./geometry');
+    const grid = { ...desktop, rows: 2, maxRows: 6 };
+    const placed = [{ x: 0, y: 0, w: 2, h: 2 }];
+    expect(usedRows(placed)).toBe(2);
+    expect(nearestFreeSlot(grid, placed, 2, 2, { x: 0, y: 0 })).toEqual({ x: 2, y: 0 });
+    expect(nearestFreeSlot({ ...grid, maxRows: 2, cols: 2 }, placed, 1, 1, { x: 0, y: 0 })).toBeNull();
+  });
 });

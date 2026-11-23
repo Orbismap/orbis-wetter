@@ -1,9 +1,10 @@
 import { useSyncExternalStore } from 'preact/compat';
-import { defaultLayout } from './defaultLayout';
-import { clampToGrid, collisions, firstFreeSlot, fits, overlaps, packIntoCells, rectCells } from './geometry';
-import { loadLayout, saveLayout } from './persistence';
+import { defaultLayouts } from './defaultLayout';
+import { clampToGrid, collisions, firstFreeSlot, fits, nearestFreeSlot, overlaps, packIntoCells, rectCells, rowLimit } from './geometry';
+import { familyOf, loadLayout, saveLayout } from './persistence';
 import { getPreset } from './presets';
 import type { LayoutState, Placement, Rect } from './types';
+import { onBreakpointChange, viewportPresetId } from './viewport';
 
 type Listener = () => void;
 
@@ -21,7 +22,7 @@ export class LayoutStore {
   private gestureOrigin: Map<string, Placement> | null = null;
 
   constructor(initial: LayoutState) {
-    this.state = loadLayout() ?? initial;
+    this.state = loadLayout(familyOf(initial.preset)) ?? initial;
   }
 
   getState = (): LayoutState => this.state;
@@ -61,6 +62,14 @@ export class LayoutStore {
 
   setLayout = (next: LayoutState): void => {
     this.commit(next);
+  };
+
+  /** Switch between the desktop and phone arrangement (each keeps its own saved layout). */
+  switchFamily = (presetId: string): void => {
+    if (familyOf(presetId) === familyOf(this.state.preset)) return;
+    this.gestureOrigin = null;
+    const fallback = defaultLayouts[presetId] ?? defaultLayouts.desktop!;
+    this.commit(loadLayout(familyOf(presetId)) ?? fallback);
   };
 
   setPreset = (id: string): void => {
@@ -177,6 +186,40 @@ export class LayoutStore {
     return true;
   };
 
+  /**
+   * Resize a widget to a new size. Widgets in the way are pushed to the nearest free slot instead of
+   * blocking the change. Returns false if the grid has no room for them.
+   */
+  resizeTo = (id: string, w: number, h: number): boolean => {
+    const preset = getPreset(this.state.preset);
+    const current = this.state.placements.find((p) => p.id === id);
+    if (!current || w < 1 || h < 1) return false;
+    const width = Math.min(Math.round(w), preset.cols);
+    const height = Math.min(Math.round(h), rowLimit(preset));
+    const target: Placement = { ...current, w: width, h: height, x: Math.min(current.x, preset.cols - width) };
+    if (!fits(preset, target)) return false;
+
+    const others = this.state.placements
+      .filter((p) => p.id !== id)
+      .sort((a, b) => a.y - b.y || a.x - b.x);
+    const kept: Placement[] = [target];
+    const displaced: Placement[] = [];
+    others.forEach((p) => (overlaps(target, p) ? displaced : kept).push(p));
+    const moved = new Map<string, Placement>();
+    for (const p of displaced) {
+      const spot = nearestFreeSlot(preset, kept, p.w, p.h, p);
+      if (!spot) return false;
+      const next = { ...p, ...spot };
+      kept.push(next);
+      moved.set(p.id, next);
+    }
+    this.commit({
+      ...this.state,
+      placements: this.state.placements.map((p) => (p.id === id ? target : moved.get(p.id) ?? p)),
+    });
+    return true;
+  };
+
   /** Add a widget. If no position is given (or it is taken), the first free slot is used. */
   add = (widget: string, w: number, h: number, at?: { x: number; y: number }): Placement | null => {
     const preset = getPreset(this.state.preset);
@@ -196,7 +239,8 @@ export class LayoutStore {
   };
 }
 
-export const layoutStore = new LayoutStore(defaultLayout);
+export const layoutStore = new LayoutStore(defaultLayouts[viewportPresetId()]!);
+onBreakpointChange(() => layoutStore.switchFamily(viewportPresetId()));
 
 /** Subscribe a component to the arrangement. */
 export function useLayout(): LayoutState {

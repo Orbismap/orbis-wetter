@@ -12,6 +12,8 @@ export const moonWidget: WidgetDefinition = {
   variants: [
     { name: '1x1', w: 1, h: 1 },
     { name: '2x1', w: 2, h: 1 },
+    { name: '1x2', w: 1, h: 2 },
+    { name: '2x2', w: 2, h: 2 },
   ],
   Component: MoonWidget,
 };

@@ -11,6 +11,7 @@ export const airQualityWidget: WidgetDefinition = {
   title: 'Luftqualität',
   variants: [
     { name: '2x1', w: 2, h: 1 },
+    { name: '1x1', w: 1, h: 1 },
     { name: '3x1', w: 3, h: 1 },
     { name: '2x2', w: 2, h: 2 },
   ],

@@ -5,8 +5,10 @@ export interface GridPreset {
   label: string;
   /** Number of columns. */
   cols: number;
-  /** Number of rows. */
+  /** Number of rows shown by default. */
   rows: number;
+  /** Upper bound the grid may grow to (editing adds rows below). Defaults to `rows`. */
+  maxRows?: number;
   /** Fixed canvas width in px (the canvas never resizes with the window). */
   width: number;
   /** Gap between cells in px. */

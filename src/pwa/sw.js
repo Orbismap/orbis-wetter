@@ -143,7 +143,8 @@ self.addEventListener('fetch', (event) => {
     event.respondWith(activeCaches().then(({ shell }) => networkFirst(request, shell, `${BASE}index.html`)));
     return;
   }
-  if (url.origin === self.location.origin) {
+  // Only the app's own files are cache-first; other same-origin paths (e.g. /wx-render/) must stay fresh.
+  if (url.origin === self.location.origin && url.pathname.startsWith(BASE)) {
     event.respondWith(activeCaches().then(({ shell }) => cacheFirst(request, shell)));
     return;
   }

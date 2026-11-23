@@ -35,6 +35,17 @@ describe('saved layout validation', () => {
     expect(loadLayout()).toBeNull();
   });
 
+  it('keeps desktop and phone arrangements apart', () => {
+    saveLayout({ preset: 'mobile', placements: [{ id: 'a', widget: 'uv', x: 1, y: 0, w: 1, h: 1 }] });
+    expect(loadLayout('mobile')?.placements[0]).toMatchObject({ x: 1 });
+    expect(loadLayout('desktop')).toBeNull();
+    set([{ id: 'a', widget: 'uv', x: 0, y: 0, w: 1, h: 1 }]);
+    expect(loadLayout('mobile')?.placements[0]).toMatchObject({ x: 1 });
+    // A phone layout stored under the desktop key (or vice versa) is never restored.
+    storage.set(KEY, JSON.stringify({ preset: 'mobile', placements: [] }));
+    expect(loadLayout('desktop')).toBeNull();
+  });
+
   it('does not crash when storage is unavailable', () => {
     saveLayout({ preset: 'desktop', placements: [] });
     expect(storage.has(KEY)).toBe(true);
