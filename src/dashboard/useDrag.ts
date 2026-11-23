@@ -2,6 +2,7 @@ import { useRef, useState } from 'preact/hooks';
 import type { TargetedPointerEvent } from 'preact';
 import { dragPreview } from './dragPreview';
 import { cancelFlip, captureFlip, playFlip } from './flip';
+import { placementRect } from './geometry';
 import { layoutStore } from './store';
 import type { CellMetrics, Placement } from './types';
 
@@ -77,6 +78,19 @@ export function useDrag(placement: Placement, metrics: CellMetrics, enabled: boo
     origin.element.style.transform = `translate3d(${dx}px, ${dy}px, 0)`;
   };
 
+  /**
+   * The drag writes left/top straight to the element. Preact only touches the DOM when the rendered value
+   * changes, so a leftover inline value would pin the widget to a stale cell (and overlap its neighbour).
+   * Re-sync it with the final stored placement once the gesture is over.
+   */
+  const syncPosition = (element: HTMLElement) => {
+    const final = layoutStore.getState().placements.find((p) => p.id === placement.id);
+    if (!final) return;
+    const rect = placementRect(final, metrics);
+    element.style.left = `${rect.left}px`;
+    element.style.top = `${rect.top}px`;
+  };
+
   const onPointerDown: PointerHandler = (event) => {
     if (!enabled || event.button !== 0) return;
     const element = event.currentTarget;
@@ -119,6 +133,7 @@ export function useDrag(placement: Placement, metrics: CellMetrics, enabled: boo
       playFlip();
     }
     layoutStore.endGesture();
+    syncPosition(origin.element);
     dragPreview.clear();
 
     start.current = null;
@@ -138,6 +153,7 @@ export function useDrag(placement: Placement, metrics: CellMetrics, enabled: boo
     origin.element.classList.remove('outside');
     layoutStore.restoreOrigin();
     layoutStore.endGesture();
+    syncPosition(origin.element);
     dragPreview.clear();
 
     start.current = null;

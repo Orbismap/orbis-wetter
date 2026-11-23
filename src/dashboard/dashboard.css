@@ -14,6 +14,12 @@
   gap: var(--s-2);
 }
 
+.edit-hint {
+  align-self: center;
+  font-size: var(--fs-axis);
+  color: var(--text-2);
+}
+
 .edit-toggle,
 .reset-toggle {
   font: inherit;
@@ -241,6 +247,8 @@
 }
 
 /* The buttons sit above the grid instead of floating over the hero. */
+.dashboard-wrap[data-preset='mobile'] .edit-hint { display: none; }
+
 .dashboard-wrap[data-preset='mobile'] .edit-controls {
   position: static;
   order: -1;
