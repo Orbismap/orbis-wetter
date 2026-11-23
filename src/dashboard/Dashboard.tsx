@@ -63,7 +63,7 @@ export function Dashboard() {
           <button type="button" class={`edit-toggle${editing ? ' active' : ''}`} onClick={editStore.toggle}>
             {editing ? 'Fertig' : 'Bearbeiten'}
           </button>
-          {editing && <span class="edit-hint">Ziehen zum Verschieben · Größe wählen</span>}
+          {editing && <span class="edit-hint">Ziehen zum Verschieben · Ränder und Ecken ändern die Größe</span>}
           {editing && (
             <button
               type="button"

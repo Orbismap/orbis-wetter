@@ -208,16 +208,45 @@ export class LayoutStore {
    * Resize a widget to a new size. Widgets in the way are pushed to the nearest free slot instead of
    * blocking the change. Returns false if the grid has no room for them.
    */
-  resizeTo = (id: string, w: number, h: number): boolean => {
+  resizeTo = (id: string, w: number, h: number, at?: { x: number; y: number }): boolean => {
+    const next = this.resolveResize(this.state.placements, id, w, h, at);
+    if (!next) return false;
+    this.commit({ ...this.state, placements: next });
+    return true;
+  };
+
+  /**
+   * Resize preview for a drag-handle gesture: always derived from the gesture origin, so shrinking again
+   * gives every displaced widget its old place back. An impossible size reverts to the origin.
+   */
+  hoverResize = (id: string, x: number, y: number, w: number, h: number): boolean => {
+    const origin = this.gestureOrigin;
+    if (!origin) return false;
+    const next = this.resolveResize([...origin.values()], id, w, h, { x, y });
+    if (!next) return this.revertPreview();
+    this.commit({ ...this.state, placements: next });
+    return true;
+  };
+
+  /** New arrangement for a widget of size w×h at `at` (default: its current corner); overlapped widgets are displaced. */
+  private resolveResize(
+    placements: Placement[], id: string, w: number, h: number, at?: { x: number; y: number },
+  ): Placement[] | null {
     const preset = getPreset(this.state.preset);
-    const current = this.state.placements.find((p) => p.id === id);
-    if (!current || w < 1 || h < 1) return false;
+    const current = placements.find((p) => p.id === id);
+    if (!current || w < 1 || h < 1) return null;
     const width = Math.min(Math.round(w), preset.cols);
     const height = Math.min(Math.round(h), rowLimit(preset));
-    const target: Placement = { ...current, w: width, h: height, x: Math.min(current.x, preset.cols - width) };
-    if (!fits(preset, target)) return false;
+    const target: Placement = {
+      ...current,
+      w: width,
+      h: height,
+      x: Math.min(at?.x ?? current.x, preset.cols - width),
+      y: at?.y ?? current.y,
+    };
+    if (!fits(preset, target)) return null;
 
-    const others = this.state.placements
+    const others = placements
       .filter((p) => p.id !== id)
       .sort((a, b) => a.y - b.y || a.x - b.x);
     const kept: Placement[] = [target];
@@ -226,17 +255,13 @@ export class LayoutStore {
     const moved = new Map<string, Placement>();
     for (const p of displaced) {
       const spot = nearestFreeSlot(preset, kept, p.w, p.h, p);
-      if (!spot) return false;
+      if (!spot) return null;
       const next = { ...p, ...spot };
       kept.push(next);
       moved.set(p.id, next);
     }
-    this.commit({
-      ...this.state,
-      placements: this.state.placements.map((p) => (p.id === id ? target : moved.get(p.id) ?? p)),
-    });
-    return true;
-  };
+    return placements.map((p) => (p.id === id ? target : moved.get(p.id) ?? p));
+  }
 
   /** Add a widget. If no position is given (or it is taken), the first free slot is used. */
   add = (widget: string, w: number, h: number, at?: { x: number; y: number }): Placement | null => {

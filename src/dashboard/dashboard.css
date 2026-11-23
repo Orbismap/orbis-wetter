@@ -89,67 +89,67 @@
   pointer-events: none; /* widget buttons must not swallow the drag */
 }
 
-/* Size picker: covers the widget while arranging, so it works even in a single cell. */
-.dashboard .size-overlay {
+/* Resize handles: every edge and corner of a widget in edit mode. */
+.dashboard .size-badge {
   position: absolute;
-  inset: 0;
-  z-index: 5;
-  display: flex;
-  flex: none;
-  flex-direction: column;
-  align-items: center;
-  justify-content: center;
-  gap: 8px;
-  padding: 10px;
-  background: rgba(10, 15, 24, 0.58);
-  -webkit-backdrop-filter: blur(6px);
-  backdrop-filter: blur(6px);
-  color: var(--text-1);
-  text-align: center;
+  top: 8px;
+  left: 50%;
+  transform: translateX(-50%);
+  z-index: 4;
+  padding: 2px 8px;
+  border-radius: 999px;
+  background: rgba(10, 16, 28, 0.55);
+  color: rgba(255, 255, 255, 0.85);
+  font-size: 0.7rem;
+  letter-spacing: 0.04em;
+  pointer-events: none;
 }
 
-.size-title {
-  max-width: 100%;
-  font-size: 0.6875rem;
-  font-weight: 600;
-  letter-spacing: 0.1em;
-  text-transform: uppercase;
-  color: var(--text-2);
-  overflow: hidden;
-  text-overflow: ellipsis;
-  white-space: nowrap;
-}
-
-.size-chips {
-  display: flex;
-  flex-wrap: wrap;
-  justify-content: center;
-  gap: 6px;
-}
-
-.dashboard.editing .size-chip {
+.dashboard .resize-handle {
+  position: absolute;
+  z-index: 6;
+  touch-action: none;
   pointer-events: auto;
-  min-width: 44px;
-  padding: 5px 8px;
-  font: inherit;
-  font-size: var(--fs-axis);
-  font-variant-numeric: tabular-nums;
-  color: var(--text-1);
-  background: rgba(255, 255, 255, 0.14);
-  border: 1px solid rgba(255, 255, 255, 0.22);
-  border-radius: var(--r-input);
-  cursor: pointer;
 }
 
-.dashboard.editing .size-chip:hover { background: rgba(255, 255, 255, 0.24); }
+.dashboard .resize-n, .dashboard .resize-s { left: 14px; right: 14px; height: 14px; cursor: ns-resize; }
+.dashboard .resize-e, .dashboard .resize-w { top: 14px; bottom: 14px; width: 14px; cursor: ew-resize; }
+.dashboard .resize-n { top: 0; }
+.dashboard .resize-s { bottom: 0; }
+.dashboard .resize-e { right: 0; }
+.dashboard .resize-w { left: 0; }
+.dashboard .resize-ne, .dashboard .resize-nw, .dashboard .resize-se, .dashboard .resize-sw { width: 26px; height: 26px; }
+.dashboard .resize-ne { top: 0; right: 0; cursor: nesw-resize; }
+.dashboard .resize-sw { bottom: 0; left: 0; cursor: nesw-resize; }
+.dashboard .resize-nw { top: 0; left: 0; cursor: nwse-resize; }
+.dashboard .resize-se { bottom: 0; right: 0; cursor: nwse-resize; }
 
-.dashboard.editing .size-chip.active {
-  color: var(--ink-0);
-  background: var(--limb);
-  border-color: var(--limb);
+/* Visible grips: a bar in the middle of each edge, an L-shaped corner. */
+.dashboard .resize-handle::after {
+  content: '';
+  position: absolute;
+  background: rgba(255, 255, 255, 0.55);
+  border-radius: 3px;
+  transition: background 120ms var(--ease);
 }
+.dashboard .resize-n::after, .dashboard .resize-s::after { left: 50%; width: 32px; height: 4px; margin-left: -16px; top: 4px; }
+.dashboard .resize-s::after { top: auto; bottom: 4px; }
+.dashboard .resize-e::after, .dashboard .resize-w::after { top: 50%; height: 32px; width: 4px; margin-top: -16px; right: 4px; }
+.dashboard .resize-w::after { right: auto; left: 4px; }
+.dashboard .resize-ne::after, .dashboard .resize-nw::after, .dashboard .resize-se::after, .dashboard .resize-sw::after {
+  width: 12px; height: 12px; background: none; border: 0 solid rgba(255, 255, 255, 0.7); border-radius: 4px;
+}
+.dashboard .resize-ne::after { top: 5px; right: 5px; border-width: 3px 3px 0 0; }
+.dashboard .resize-nw::after { top: 5px; left: 5px; border-width: 3px 0 0 3px; }
+.dashboard .resize-se::after { bottom: 5px; right: 5px; border-width: 0 3px 3px 0; }
+.dashboard .resize-sw::after { bottom: 5px; left: 5px; border-width: 0 0 3px 3px; }
+.dashboard .resize-handle:hover::after, .dashboard .resize-handle.active::after { background: var(--limb, #72c8f0); }
+.dashboard .resize-ne:hover::after, .dashboard .resize-nw:hover::after, .dashboard .resize-se:hover::after, .dashboard .resize-sw:hover::after,
+.dashboard .resize-ne.active::after, .dashboard .resize-nw.active::after, .dashboard .resize-se.active::after, .dashboard .resize-sw.active::after {
+  background: none; border-color: var(--limb, #72c8f0);
+}
+.dashboard.editing .widget-frame.resizing { z-index: 10; outline: 2px solid var(--limb, #72c8f0); outline-offset: -2px; }
 
-.dashboard.editing .size-chip:focus-visible { outline: var(--focus); outline-offset: var(--focus-offset); }
 
 .dashboard.editing .widget-frame.dragging {
   cursor: grabbing;
